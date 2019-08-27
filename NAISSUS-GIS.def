@@ -552,6 +552,7 @@
 	declare sub STAMPA
 	Declare Sub Printers
 	Declare Sub MapperPriprema
+	Declare Sub Izvestaj_1
 	Declare Sub DLG_printFormati
 	Declare Sub DLG_printPolozaj
 '	Declare Sub DLG_printMargine

@@ -16,7 +16,8 @@ Sub STAMPA
 	
 	Create Menu "Stampa" as
 		"Podesavanja" Calling MapperPriprema,
-		"(-"
+		"(-",
+		"Izveštaj o položaju cevovoda" Calling Izvestaj_1
 		
 '	Create ButtonPad "Stampa" As
 '	PushButton
@@ -653,3 +654,6 @@ Layout
 	
 End Sub	
 
+Sub Izvestaj_1
+	Print "hey! ho! lets go!"
+End Sub
