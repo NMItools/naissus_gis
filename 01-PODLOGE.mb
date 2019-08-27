@@ -1,10 +1,10 @@
 include "mapbasic.def"
 include "menu.def"
 include "icons.def"
-include "..\Library\ERRORLib.def"
-include "..\nmiWin.def"
-include "..\nmiFunkcije.def"
-include "..\nmiDotNet.def"
+include "Library\ERRORLib.def"
+include "nmiWin.def"
+include "nmiFunkcije.def"
+include "nmiDotNet.def"
 include "NAISSUS-GIS.def"
                                                                                                 
 '===================================================================================================================== 

@@ -1,7 +1,7 @@
 'include "mapbasic.def"
 'include "menu.def"
 'include "icons.def"
-include "..\..\Library\ERRORLib.def"
+include "..\Library\ERRORLib.def"
 include "..\NAISSUS-GIS.def"
 
 Sub DLG_ReonKnjigaRbr

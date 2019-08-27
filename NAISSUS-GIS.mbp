@@ -30,4 +30,4 @@ Module=dialogs\99-Dialog2.MBO
 Module=100-FUNKCIJE.MBO
 Module=EXPORT_KML_ZoneScan.MBO
 Module=TAB2MIF.MBO
-Module=..\Library\ERRORLib.mbo
+Module=Library\ERRORLib.mbo

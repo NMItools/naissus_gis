@@ -1,10 +1,10 @@
 Include "MAPBASIC.DEF"
 Include "ICONS.DEF"
 Include "MENU.DEF"
-include "..\..\Library\ERRORLib.def"
-include "..\..\nmiFunkcije.def"
-include "..\..\nmiDotNet.def"
-include "..\..\nmiWin.def"
+include "..\Library\ERRORLib.def"
+include "..\nmiFunkcije.def"
+include "..\nmiDotNet.def"
+include "..\nmiWin.def"
 include "..\NAISSUS-GIS.def"
 
 Sub DLG_print
