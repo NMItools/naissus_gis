@@ -1,0 +1,87 @@
+  <Object type="System.Windows.Forms.Form, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" name="Form1" children="Controls">
+    <Object type="DialogDesigner.ToolboxLib.MapBasicControls.MapBasicOKButton, DialogDesigner, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" name="MapBasicOKButton1" children="Controls">
+      <Property name="Title">OK</Property>
+      <Property name="ControlCode" />
+      <Property name="Id">4</Property>
+      <Property name="Name">MapBasicOKButton1</Property>
+      <Property name="Position">197, 41</Property>
+      <Property name="Size">75, 23</Property>
+      <Property name="Calling">DLG_Izohipse_1_OK</Property>
+      <Property name="Disable">False</Property>
+      <Property name="Hide">False</Property>
+      <Property name="Text">OK</Property>
+      <Property name="UseVisualStyleBackColor">True</Property>
+      <Property name="DataBindings">
+        <Property name="DefaultDataSourceUpdateMode">OnValidation</Property>
+      </Property>
+      <Property name="Location">197, 41</Property>
+      <Property name="TabIndex">2</Property>
+      <Property name="Tag">Inited</Property>
+    </Object>
+    <Object type="DialogDesigner.ToolboxLib.MapBasicControls.MapBasicCancelButton, DialogDesigner, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" name="MapBasicCancelButton1" children="Controls">
+      <Property name="Title">Cancel</Property>
+      <Property name="ControlCode" />
+      <Property name="Id">3</Property>
+      <Property name="Name">MapBasicCancelButton1</Property>
+      <Property name="Position">197, 12</Property>
+      <Property name="Size">75, 23</Property>
+      <Property name="Calling">DLG_Izohipse_1_CANCEL</Property>
+      <Property name="Disable">False</Property>
+      <Property name="Hide">False</Property>
+      <Property name="Text">Cancel</Property>
+      <Property name="UseVisualStyleBackColor">True</Property>
+      <Property name="DataBindings">
+        <Property name="DefaultDataSourceUpdateMode">OnValidation</Property>
+      </Property>
+      <Property name="Location">197, 12</Property>
+      <Property name="TabIndex">1</Property>
+      <Property name="Tag">Inited</Property>
+    </Object>
+    <Object type="DialogDesigner.ToolboxLib.MapBasicControls.MapBasicGroupBox, DialogDesigner, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" name="MapBasicGroupBox1" children="Controls">
+      <Object type="DialogDesigner.ToolboxLib.MapBasicControls.MapBasicEditText, DialogDesigner, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" name="MapBasicEditText1" children="Controls">
+        <Property name="ControlCode" />
+        <Property name="Id">2</Property>
+        <Property name="Name">MapBasicEditText1</Property>
+        <Property name="Position">6, 19</Property>
+        <Property name="Size">166, 20</Property>
+        <Property name="Disable">False</Property>
+        <Property name="Hide">False</Property>
+        <Property name="Value">185,230,280,330,380</Property>
+        <Property name="Into">s_Kote</Property>
+        <Property name="Password">False</Property>
+        <Property name="Text">
+        </Property>
+        <Property name="DataBindings">
+          <Property name="DefaultDataSourceUpdateMode">OnValidation</Property>
+        </Property>
+        <Property name="Location">6, 19</Property>
+        <Property name="TabIndex">0</Property>
+        <Property name="Tag">Inited</Property>
+      </Object>
+      <Property name="ControlCode" />
+      <Property name="Id">1</Property>
+      <Property name="Name">MapBasicGroupBox1</Property>
+      <Property name="Position">12, 12</Property>
+      <Property name="Size">178, 52</Property>
+      <Property name="Title">Kota izohipse (ili vise njih)</Property>
+      <Property name="Hide">False</Property>
+      <Property name="TabStop">False</Property>
+      <Property name="Text">Kota izohipse (ili vise njih)</Property>
+      <Property name="DataBindings">
+        <Property name="DefaultDataSourceUpdateMode">OnValidation</Property>
+      </Property>
+      <Property name="Location">12, 12</Property>
+      <Property name="TabIndex">0</Property>
+      <Property name="Tag">Inited</Property>
+    </Object>
+    <Property name="ClientSize">282, 73</Property>
+    <Property name="MaximizeBox">False</Property>
+    <Property name="MinimizeBox">False</Property>
+    <Property name="ShowIcon">False</Property>
+    <Property name="Text">Prikaz pojedinih izohipsi<Reference name="Form1" /></Property>
+    <Property name="DataBindings">
+      <Property name="DefaultDataSourceUpdateMode">OnValidation</Property>
+    </Property>
+    <Property name="Name">Form1</Property>
+    <Property name="Tag">Inited</Property>
+  </Object>

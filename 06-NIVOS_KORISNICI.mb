@@ -1,0 +1,962 @@
+include "mapbasic.def"
+include "menu.def"
+include "icons.def"
+include "..\Library\ERRORLib.def"
+include "..\nmiWin.def"
+include "..\nmiFunkcije.def"
+include "..\nmiDotNet.def"
+include "NAISSUS-GIS.def"
+
+' ======================================================================
+' Rad sa potrosacima NIVOS 
+
+Sub NIVOS_KORISNICI
+
+	OnError goto Greska
+
+	Create Menu "Zone" as
+			"Merne Zone (DMA)" calling Zone,
+			"(-"
+'			,
+'			"Visinske Zone" calling VisinskeZone,
+'			"Sistemi" calling HidSistemi
+			
+	Create Menu "Korisnici" as
+			"Pregled knjige" calling DLG_ReonKnjigaRbr,
+			"Pregled knjige za vodomer..." calling Map_ReonKnjigaRbr
+	
+	Create Menu "NIVOS Potrosaci" as
+			"Zone" As "Zone",
+			"Korisnici" As "Korisnici"
+
+	Alter Menu "JKP Naissus" Add
+			"NIVOS Potrosaci" As "NIVOS Potrosaci"
+
+' ---
+
+	Create ButtonPad "NIVOS Potrosaci" As
+		
+		ToggleButton
+			Icon 14
+			Calling Zone
+			HelpMsg "Merne,Visinske i ostale zone.\nMerne,Visinske i ostale zone"
+			ID 601
+			Uncheck
+			Enable
+		
+		SEPARATOR
+		
+		PushButton 
+			Calling DLG_ReonKnjigaRbr
+			ID 602
+			Icon 187
+			HelpMsg "Kretanje kroz knjigu. Odaberi knjigu, reon, redni broj vodomera za start\nPrikaz vodomera po inkaso knjigama"
+			Uncheck
+			Enable 	  
+		ToolButton 
+			Calling Map_ReonKnjigaRbr
+			ID 603
+			Icon 8147 File "nmiIcons.dll"
+			Cursor MI_CURSOR_ARROW
+			DrawMode DM_CUSTOM_POINT
+			HelpMsg "Kretanje kroz knjigu. Izaberi vodomer na mapi za start\nPokazi na vodomer"		                
+		PushButton 
+			Calling PrethodniVodomer
+			ID 604
+			Icon 48		
+			HelpMsg "Prethodni vodomer"
+			Uncheck
+			Disable
+		PushButton 
+			Calling SledeciVodomer
+			ID 605
+			Icon 47		
+			HelpMsg "Sledeci vodomer"
+			Uncheck
+			Disable
+
+' - TOOLBAR ZA AŽURIRANJE NOVIH VODOMERA
+
+	Create ButtonPad "Novi vodomeri" As
+		
+		ToggleButton
+			Icon 8299 File "nmiIcons.dll"
+			Calling UparivanjeNAV_Priprema
+			HelpMsg "Uparivanje novih vodomera sa NAV bazom.\nUparivanje novih vodomera"
+			ID 606
+			Uncheck
+			Enable	
+
+		SEPARATOR	
+		
+		PushButton
+			Calling PrethodniNoviVodomer
+			ID 607
+			Icon 48		
+			HelpMsg "Prethodni novi vodomer"
+			disable
+		PushButton 
+			Calling SledeciNoviVodomer
+			ID 608
+			Icon 47		
+			HelpMsg "Sledeci novi vodomer"
+			disable
+		
+		SEPARATOR
+		
+		PushButton
+			Calling VODOMER_OK
+			ID 609
+			Icon MI_ICON_NUMBERS_21			
+			HelpMsg "Markiraj za unos"
+			disable
+		PushButton 
+			Calling Odlozi_unos
+			ID 610
+			Icon 8193  File "nmiIcons.dll"		
+	'		Icon 8339  File "nmiIcons.dll"
+			HelpMsg "Proveri pre unosa"
+			disable
+			
+		SEPARATOR
+
+		PushButton 
+			Calling Unesi_NV_u_GIS
+			ID 611
+			Icon 8129  File "nmiIcons.dll"		
+			HelpMsg "Unesi u VODOMERI"
+			disable
+
+	Alter ButtonPad "Novi vodomeri" 
+'		Position(23,4) Units "cm"
+		ToolbarPosition (2,3)
+		Fixed          
+		Title "Novi vodomeri"
+		Width 21
+		Hide    
+
+	If s_USER = "milan" 
+	or s_USER = "svetlana" 
+	or s_USER = "tanja"
+	or s_USER = "nebojsa"
+	then
+		Alter ButtonPad "Novi vodomeri" Show
+	End If
+		
+		
+	Exit Sub
+'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "NIVOS_KORISNICI")
+	Call ERRShow()
+			
+End Sub
+
+Sub Zone
+ 	
+	OnError goto Greska 	
+ 	
+ 	namLejer=setTabSQL("Zone",601)
+			
+	Exit Sub
+'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "Zone")
+	Call ERRShow() 	
+ 	
+ End Sub
+ 
+Sub arrZone		
+
+	dim n as smallint
+	
+	OnError goto Greska
+
+' - Spisak Mernih Zona u niz
+	s_kom = "SELECT [Zona] FROM [data].[Kupci_potrosaci_vode_ZONE] ORDER BY Zona"
+	
+' - Izvršavanje SQL StoredProc/query 
+	i_hstmt = Server_Execute(i_hdbc,s_kom) 
+		Server i_hstmt Bind Column 1 To s_Reon, am_stat
+		Server i_hstmt Fetch First
+
+' - Kreiraj niz od svih ZONA = arrZone() 
+		n=1
+		While Not Server_EOT(i_hstmt)
+			ReDim arr_Zone(n)
+			arr_Zone(n) = s_Reon
+			Server i_hstmt Fetch Next
+			n=n+1
+		Wend
+		
+	Print "---------------------------------------------------"
+	Print "Pronaðeno je "+n+" Inkaso Reona"
+	
+	Server i_hstmt Close		
+	
+	Exit Sub
+'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "arrZone")
+	Call ERRShow()
+	
+End Sub
+	
+Sub arrKnjige1		
+
+	OnError goto Greska
+
+	Call arrKnjige2(ReadControlValue(2))	
+		Alter Control 3 Title from Variable arr_Knjige() 
+		Alter Control 3 Value 1
+	
+	Call arrRedniBrojevi2(ReadControlValue(3))
+		Alter Control 4 Title from Variable arr_RedniBrojevi() 
+		Alter Control 4 Value 1	
+	
+	Exit Sub
+'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "arrKnjige1")
+	Call ERRShow()
+	
+End Sub
+
+Sub arrRedniBrojevi1		
+
+	OnError goto Greska
+	
+	Call arrRedniBrojevi2(ReadControlValue(3))
+	Alter Control 4 Title from Variable arr_RedniBrojevi()
+
+	Exit Sub
+'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "arrRedniBrojevi1")
+	Call ERRShow()
+	
+End Sub
+
+Sub arrKnjige2(byVal s as string)	
+
+	OnError goto Greska
+
+	dim n, nk as smallint
+	dim s_knjg as smallint
+	
+	sn_ZONA = arr_Zone(s)
+
+' - Spisak svih knjiga u Mernoj Zoni 's' u niz
+	s_kom = "SELECT DISTINCT Knjiga FROM [data].[Kupci-potrosaci_vode] WHERE (Zona = "+sn_ZONA+") ORDER BY Knjiga"
+	
+' - Izvršavanje SQL StoredProc/query 
+	i_hstmt = Server_Execute(i_hdbc,s_kom) 
+	Server i_hstmt Bind Column 1 To s_knjg, am_stat
+	Server i_hstmt Fetch First
+
+' - Kreiraj niz od svih Knjiga = arr_Knjige() 
+		n=1
+		nk=1
+		While Not Server_EOT(i_hstmt)
+			ReDim arr_Knjige(n)
+			arr_Knjige(n) = str$(s_knjg)
+				If s_knjg = 0 
+					Then nk=nk-1 
+				End If
+			Server i_hstmt Fetch Next
+			n=n+1
+			nk=nk+1
+		Wend
+	
+	Print "Pronaðeno je "+(nk-1)+" knjiga za Zonu " + sn_ZONA
+	
+ 	Server i_hstmt Close	
+	
+	Exit Sub
+'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "arrKnjige2")
+	Call ERRShow()
+	
+End Sub	
+
+Sub arrRedniBrojevi2(byVal s as string)	
+
+	OnError goto Greska
+
+	dim n as smallint
+	dim s_redbr as smallint
+	
+	sn_KNJIGA = arr_Knjige(s)
+	
+' - Spisak svih rednih brojeva u Knjizi 's' u Zoni 's' u niz
+	s_kom = "SELECT RedBroj FROM [data].[Kupci-potrosaci_vode] WHERE (Zona = "+sn_ZONA+") and (Knjiga = "+sn_KNJIGA+") ORDER BY RedBroj"
+	
+' - Izvršavanje SQL StoredProc/query 
+	i_hstmt = Server_Execute(i_hdbc,s_kom) 
+	Server i_hstmt Bind Column 1 To s_redbr, am_stat
+	Server i_hstmt Fetch First
+
+' - Kreiraj niz od svih rednih brojeva u knjizi = arr_RedniBrojevi() 
+		n=1
+		While Not Server_EOT(i_hstmt)
+			ReDim arr_RedniBrojevi(n)
+			arr_RedniBrojevi(n) = str$(s_redbr)
+			n=n+1
+			Server i_hstmt Fetch Next
+		Wend
+	
+	Print "Pronaðeno je "+(n-1)+" potrošaèa u knjizi " + sn_ZONA+"/"+sn_KNJIGA
+	Print "---------------------------------------------------"
+	
+ 	Server i_hstmt Close
+		
+	Exit Sub
+'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "arrRedniBrojevi2")
+	Call ERRShow()
+	
+End Sub			
+		
+'===================================================================================================================== 		
+' .....
+Sub DLG_ReonKnjigaRbr_OK
+
+	onerror goto Greska  
+	
+	Mod_ReonKnjigaRbr = 1
+		
+	RID = ReadControlValue(4)
+	sn_REDBROJ = arr_RedniBrojevi(ReadControlValue(4))
+
+	Call ReonKnjigaRbr
+
+	Exit Sub
+	'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "DLG_ReonKnjigaRbr_OK")
+	Call ERRShow()
+
+End Sub
+
+Sub DLG_ReonKnjigaRbr_CANCEL
+
+	onerror goto Greska  
+	
+	Exit Sub
+	'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "DLG_ReonKnjigaRbr_CANCEL")
+	Call ERRShow()
+
+End Sub
+
+SUB Map_ReonKnjigaRbr 
+
+	OnError Goto Greska
+	
+	Dim x, y, x2, y2 As Float,
+	i, i_found As Integer,
+	s_table As Alias
+
+	i_BrReda = 0
+	Mod_ReonKnjigaRbr = 2
+	
+	iMapWindowID = WindowID(FrontWindow())
+
+' - Odredjivanje koordinata gde je kliknuo korisnik.
+
+	x = CommandInfo(CMD_INFO_X)
+	y = CommandInfo(CMD_INFO_Y)
+	i_found = SearchPoint(FrontWindow( ), x, y)
+
+	If i_found = 0 Then
+			Note "Nema objekata gde je korisnik kliknuo."
+		Else
+	' - Procesiranje rezultata
+		For i = 1 to i_found
+		'	ime tabele koja je "pogodjena" ispod klika.
+			s_table = SearchInfo(i, SEARCH_INFO_TABLE)
+		'	pronadji row ID objekta koji je kliknut.
+			i_BrReda = SearchInfo(i, SEARCH_INFO_ROW)
+			If s_table = "VODOMERI" Then
+			'	Fetch-uj redove za sve atribute
+				Fetch rec i_BrReda From s_table
+				as_sifraRow = s_table + ".col1"
+				as_edit_reon = s_table + ".col13"
+				as_edit_knjiga = s_table + ".col14"
+				as_edit_rbr = s_table + ".col15"
+				Print "Selektovani vodomer pripada knjizi "+as_edit_reon+"/"+as_edit_knjiga+" ("+as_edit_rbr+")"
+				Exit For
+			Else  
+				Print "Nema podataka o vodomeru ?"
+				Exit Sub
+			End If
+		Next		
+		
+	End If
+	
+	sn_ZONA=as_edit_reon
+	sn_KNJIGA=as_edit_knjiga
+	sn_REDBROJ=as_edit_rbr
+	
+	Call ReonKnjigaRbr
+
+	Exit Sub
+	'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "Map_ReonKnjigaRbr")
+	Call ERRShow()
+
+End Sub
+
+' ======================================================================
+' .....
+Sub ReonKnjigaRbr
+
+	Onerror goto Greska  
+
+	iMapWindowID = WindowID(FrontWindow())
+
+	Print "========================================" 
+	Print "Kretanje po Inkaso knjigama"
+	Print "----------------------------------------" 
+	Print "[Zona]\Knjiga\RedBroj: ["+ sn_ZONA+"]\"+sn_KNJIGA+"\"+sn_REDBROJ
+
+	s_ImeTabele = "KupciGeoref_"+sn_ZONA+"_"+sn_KNJIGA
+	as_ImeTabele = s_ImeTabele
+	s_ImeTabeleFull = s_FOLDER_RAD+"KupciGeoref_"+sn_ZONA+"_"+sn_KNJIGA+".tab"
+
+	If FileExists(s_ImeTabeleFull) 
+		Then
+			If OtvorenTAB(s_ImeTabele) = False
+			Then
+				Open Table s_ImeTabeleFull Interactive			
+			End If		
+			Server Refresh s_ImeTabele	
+		Else
+			Print "Preuzimanje "+s_ImeTabele
+			Server i_hdbc Link Table "Select * From ""GIS"".""data"".""Kupci_potrosaci_vode_GEOREF""  Where (""Zona"" = "+sn_ZONA+") and (""Knjiga"" = "+sn_KNJIGA+") Order By ""Zona"",""Knjiga"",""RedBroj"""
+				Toolkit "ODBC" Symbol (59,16711935,12)
+				Into ""+s_ImeTabele+"" File s_ImeTabeleFull			
+	End If
+
+	If 	Mod_ReonKnjigaRbr = 2 
+	Then
+		s_kom = "Select * From "+s_ImeTabele+" Where sifra = """+as_sifraRow+""""
+		Run Command s_kom
+		as_RID = as_ImeTabele+".ROWID"
+		RID = as_RID
+	End If
+	
+	Set Event Processing Off
+	
+	Add Map Auto Layer s_ImeTabele			
+	Set Map Zoom Entire Layer LayerID(s_ImeTabele)
+	Set Map Layer LayerID(s_ImeTabele) 
+		Display Global Global Symbol (59,16711935,10)
+		Label Line Arrow Position Right Auto Retry On Font ("Tahoma",257,9,16776960,0) Pen (1,2,0)
+	      With RedBroj
+	      Auto Off Overlap On Duplicates On Offset 7 AutoPosition On
+	      Visibility On
+	
+	Set Window FrontWindow() Position (0,0) Units "in" Width 8 Units "in" Height 5 Units "in"
+	Set Window Statistics Position (12,1.33) Units "in" Width 3	Units "in" Height 2 Units "in" Font ("Tahoma",0,8,0)
+	Open Window Statistics
+	Set Window Info	Position (12,3.7) Units "in" Width 3 Units "in" Height 2.60 Units "in" Font ("Tahoma",0,8,0)
+	Open Window Info
+
+	Browse * From s_ImeTabele 	Position (0,5.5) 	Units "in" Width 13 Units "in" Height 3 Units "in" 
+
+	Alter Button ID 604 Enable
+	Alter Button ID 605 Enable
+	
+	Set Event Processing On
+	
+	Call InfoVodomer
+
+	Exit Sub
+	'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "ReonKnjigaRbr")
+	Call ERRShow()
+	
+End Sub
+
+'===================================================================================================================== 		
+' .....
+Sub InfoVodomer
+
+	Set Map Layer 0 Editable
+
+	s_kom = "Select * from "+s_ImeTabele+" Where RowID = "+RID
+	Run Command s_kom
+	
+	Fetch Rec RID From s_ImeTabele
+	as_RB = as_ImeTabele+".col18"
+	as_MiPrinx = as_ImeTabele+".col20"
+	MIPrinx = as_MiPrinx
+	as_pos = as_ImeTabele+".obj"
+	
+	If MiPrinx = 0
+		Then 
+		Print "Nepoznata koordinata za Rbr:"+as_RB+" !"
+		Note  "Nepoznata koordinata za Rbr:"+as_RB+" !"
+	Else
+		pos = Centroid(as_pos)
+		Create Point
+			Into Window iMapWindowID
+			(CentroidX(pos), CentroidY(pos))
+			Symbol smbl_Marker 
+		Print "Rbr: "+as_RB
+	End If
+	
+	AutoLabel Window iMapWindowID Selection	
+	Run Menu Command M_QUERY_FIND_SELECTION
+
+	Exit Sub
+	'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "InfoVodomer")
+	Call ERRShow()	
+	
+End Sub		
+
+Sub PrethodniVodomer
+
+	OnError Goto Greska  
+	
+	Set Window iMapWindowID
+	
+	RID = RID-1 
+
+	If RID = 0 
+	Then 
+		Note "Poèetak knjige!"
+		RID=1
+		Exit Sub
+	End If
+	
+	Call InfoVodomer
+
+	Exit Sub
+	'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "PrethodniVodomer")
+	Call ERRShow()
+	
+end sub
+
+Sub SledeciVodomer
+
+	OnError Goto Greska  
+	
+	Set Window iMapWindowID
+	
+	RID = RID+1 
+
+	If RID > TableInfo(s_ImeTabele, TAB_INFO_NROWS)
+	Then 
+		Note "Kraj knjige!"
+		RID = TableInfo(s_ImeTabele, TAB_INFO_NROWS)
+		Exit Sub
+	End If
+	
+	Call InfoVodomer
+
+	Exit Sub
+	'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "SledeciVodomer")
+	Call ERRShow()	
+	
+End Sub
+
+'===================================================================================================================== 		
+' .....
+Sub UparivanjeNAV_Priprema
+
+	OnError Goto Greska 	
+	
+	iMapWindowID = WindowID(FrontWindow())
+	
+	l_Pitanje = Ask("Ažuriranje novih vodomera - Da li želite da nastavite ?", "DA", "Odustani")
+	     
+	If l_Pitanje = false 
+	Then 
+		Print "Ažuriranje odloženo!"
+		Exit Sub
+	else
+		Print ""
+		Print "Priprema potrebnih tabela..."
+
+	' - Otvaranje Novi_Vodomeri
+		If OtvorenTAB("NOVI_VODOMERI") = False
+		Then
+			Open Table s_FOLDER_TAB+"NOVI_VODOMERI.TAB" Interactive
+		End If
+		
+	' - Preuzimanje [data].[Kupci_potrosaci_vode_GEOREF]
+		If FileExists(s_FOLDER_RAD+"Kupci_potrosaci_vode_GEOREF.TAB") 
+		Then
+			If OtvorenTAB("Kupci_potrosaci_vode_GEOREF") = False
+			Then
+				Open Table s_FOLDER_RAD+"Kupci_potrosaci_vode_GEOREF.TAB" Interactive			
+			Else
+			End If		
+			Server Refresh Kupci_potrosaci_vode_GEOREF	
+		Else
+			Print "Preuzimanje [data].[Kupci_potrosaci_vode_GEOREF]..."
+			Server i_hdbc Link Table "Select * From ""GIS"".""data"".""Kupci_potrosaci_vode_GEOREF"""
+				Toolkit "ODBC" Symbol (59,16711935,12)
+				Into "Kupci_potrosaci_vode_GEOREF" File s_FOLDER_RAD+"Kupci_potrosaci_vode_GEOREF.tab"		
+			Print "Preuzimanje [Kupci_potrosaci_vode_GEOREF] gotovo!"		
+		End If
+	
+	' - Azuriraj zone
+		If OtvorenTAB("Zone") = False
+		Then
+			Call Zone
+		Else
+		End If
+
+		Print "Ažuriranje Mernih Zona za nove vodomere..."
+		Server Refresh NOVI_VODOMERI		
+		Add Column "NOVI_VODOMERI" (MERNA_ZONA) From Zone Set To MERNA_ZONA Where contains
+		Commit Table NOVI_VODOMERI
+		Print "Ažuriranje Mernih Zona za nove vodomere gotovo!"
+
+	' - Podesi NOVI_VODOMERI
+		Browse * From NOVI_VODOMERI Position (6.20833,0.0208333) Units "in" Width 6 Units "in" Height 4 Units "in" 
+		Fetch Last From NOVI_VODOMERI		
+	
+	' - Podesi Kupci_potrosaci_vode_GEOREF
+		Browse * From Kupci_potrosaci_vode_GEOREF Position (0,4.4) Units "in" Width 12 Units "in" Height 4 Units "in" 
+		' i možda samo one koje nemaju koordinate ?
+
+		Set Window iMapWindowID Front
+		Set Window iMapWindowID Position (0,0) Units "in" Width 6 Units "in" Height 4 Units "in" 
+
+		Set Window Info Position (0,5) Units "in" Width 3.4 Units "in" Height 4.5 Units "in" 'Font ("Tahoma",0,8,0)
+		Open Window Info		
+	
+	
+	End If
+
+	Call UparivanjeNAV_SQL
+	
+	Exit Sub
+	
+	'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "UparivanjeNAV_Priprema")
+	Call ERRShow()	
+		
+End Sub
+
+Sub UparivanjeNAV_SQL
+	
+	OnError Goto Greska 
+	
+	If OtvorenTAB("UPARIVANJE_sa_NAV")
+	Then 
+		Close Table UPARIVANJE_sa_NAV
+	Else
+	End If
+		
+' - Spajanje na osnovu serijskih brojeva, i MI_PRINX = 0 (koji nisu georeferencirani)
+	Print "Uparivanje novih vodomera sa potrošaèima iz NAV za pregled"
+
+	SELECT 
+		Kupci_potrosaci_vode_GEOREF.provera "Provera",
+		NOVI_VODOMERI.SERIJSKI_BROJ "GPS_SerBrVod", 
+		Kupci_potrosaci_vode_GEOREF.serijski_br "NAV_SerBrVod", 
+		NOVI_VODOMERI.SIFRA "GPS_SIFRA", 
+		Kupci_potrosaci_vode_GEOREF.sifra "NAV_sifra", 
+		NOVI_VODOMERI.NAZIV "GPS_Naziv", 
+		Kupci_potrosaci_vode_GEOREF.naziv "NAV_Naziv", 
+		NOVI_VODOMERI.ULICA "GPS_Ulica", 
+		Kupci_potrosaci_vode_GEOREF.ulica "NAV_Ulica", 
+		NOVI_VODOMERI.KUCNI_BROJ "GPS_KBr", 
+		Kupci_potrosaci_vode_GEOREF.broj "NAV_KBr", 
+		Kupci_potrosaci_vode_GEOREF.mesto, 
+		NOVI_VODOMERI.MERNA_ZONA "MZ",
+		Kupci_potrosaci_vode_GEOREF.Zona, 
+		Kupci_potrosaci_vode_GEOREF.Knjiga, 
+		Kupci_potrosaci_vode_GEOREF.RedBroj, 
+		Kupci_potrosaci_vode_GEOREF.datum_aktiv, 
+'		Kupci_potrosaci_vode_GEOREF.marka, 
+		NOVI_VODOMERI.PRECNIK "GPS_Precnik", 
+'		Kupci_potrosaci_vode_GEOREF.profil "NAV_Precnik", 		
+		NOVI_VODOMERI.MI_PRINX 
+	FROM Kupci_potrosaci_vode_GEOREF, NOVI_VODOMERI
+	WHERE (Kupci_potrosaci_vode_GEOREF.serijski_br = NOVI_VODOMERI.SERIJSKI_BROJ) 
+	and Kupci_potrosaci_vode_GEOREF.provera <> "OK" 
+	AND NOVI_VODOMERI.SERIJSKI_BROJ <> "" 
+	INTO UPARIVANJE_sa_NAV
+	
+	Run Menu Command M_QUERY_UNSELECT
+
+
+	Add Map Window iMapWindowID Auto Layer UPARIVANJE_sa_NAV
+	Set Map Window iMapWindowID Layer LayerID(UPARIVANJE_sa_NAV) Display Global Global Symbol (47,255,18,"MapInfo Cartographic",0,0) 
+
+	Browse * From UPARIVANJE_sa_NAV	Position (0,4.8) Units "in" Width 12 Units "in" Height 4 Units "in" 
+	Fetch First From UPARIVANJE_sa_NAV
+' - RowID prvog reda
+	as_RID = UPARIVANJE_sa_NAV+".ROWID"
+	RID = as_RID
+
+	Call CentSelVodomer
+	
+	Alter Button ID 607 Enable	
+	Alter Button ID 608 Enable
+	Alter Button ID 611 Enable
+	
+	Exit Sub
+	
+	'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "UparivanjeNAV_SQL")
+	Call ERRShow()		
+	
+End Sub
+
+Sub SledeciNoviVodomer
+	
+	OnError Goto Greska  
+
+	Set Window iMapWindowID 
+	
+	RID = RID+1
+
+	If RID > TableInfo(UPARIVANJE_sa_NAV, TAB_INFO_NROWS)
+	Then 
+		Note "Kraj tabele!"
+		RID = TableInfo(UPARIVANJE_sa_NAV, TAB_INFO_NROWS)
+		Exit Sub
+	Else
+	End If
+
+	Fetch Next From UPARIVANJE_sa_NAV
+	
+'	Close Table 
+	Call CentSelVodomer
+
+	Exit Sub
+	'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "SledeciNoviVodomer")
+	Call ERRShow()	
+		
+End Sub
+
+Sub PrethodniNoviVodomer
+	
+	OnError Goto Greska  
+
+	Set Window iMapWindowID 
+	
+	RID = RID-1 
+
+	If RID = 0 
+	Then 
+		Note "Poèetak tabele!"
+		RID=1
+		Exit Sub
+	End If
+
+	Fetch Prev From UPARIVANJE_sa_NAV
+	
+	Call CentSelVodomer
+	
+	Exit Sub
+	'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "PrethodniNoviVodomer")
+	Call ERRShow()	
+	
+End Sub
+
+Sub CentSelVodomer
+	
+	OnError Goto Greska 
+	
+	s_postoji = 0
+	
+' - MI_PRINX selektovanog reda	
+	as_MiPrinx = UPARIVANJE_sa_NAV+".MI_PRINX"		
+	MIPrinx = as_MiPrinx
+
+' - Provera da li je vodomer sa tom sifrom veæ unešen u bazu
+	as_sifraRow = UPARIVANJE_sa_NAV+".NAV_sifra"
+	s_sifra = as_sifraRow
+	s_kom= "select * from Vodomeri where SIFRA ="""+s_sifra+""" into Postoji"
+	Run Command s_kom
+	
+		If SelectionInfo(SEL_INFO_NROWS) > 0
+			Then s_postoji = 1
+		End If
+	
+' - Centriraj mapu na vodomer sa selektovanim MI_PRINX
+	s_kom = "Select * from NOVI_VODOMERI Where MI_PRINX = "+MIPrinx+" Into NV_miprinx"
+	Run Command s_kom
+		Fetch First From NV_miprinx		
+		as_pos = NOVI_VODOMERI.obj
+		pos = Centroid(as_pos)
+		Set Map Window iMapWindowID Center (CentroidX(as_pos),CentroidY(as_pos)) Zoom 250 Units "m"
+
+' - Selektuj vodomer
+	s_kom = "Select * from UPARIVANJE_sa_NAV Where RowID = "+RID+" Into UsN_rowID"
+	Run Command s_kom	
+		Fetch First From UsN_rowID
+		Run Menu Command M_QUERY_FIND_SELECTION
+
+	If s_postoji > 0 
+	Then
+		Update Selection Set provera = "Postoji"
+		Note "Šifra "+s_sifra+" je veæ uneta u GIS !"
+		Alter Button ID 609 Disable
+		Alter Button ID 610 Disable
+		
+	Else
+		Alter Button ID 609 Enable
+		Alter Button ID 610 Enable
+	End If
+	
+	Exit Sub
+	
+	'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "CentSelVodomer")
+	Call ERRShow()		
+	
+End Sub
+	
+Sub VODOMER_OK
+	
+	OnError Goto Greska  
+	
+	Set Window iMapWindowID 
+	
+	If SelectionInfo(SEL_INFO_NROWS) > 1
+		Then Note "Selektovano je više od jednog vodomera!"
+		Exit Sub
+	End If
+	
+	If s_postoji = 0 
+	Then
+		Update Selection Set provera = "OK"
+		Update Selection Set GPS_SIFRA = NAV_sifra
+	End If
+
+	Call SledeciNoviVodomer
+	
+	Exit Sub
+	'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "VODOMER_OK")
+	Call ERRShow()	
+			
+End Sub	
+
+Sub Odlozi_unos
+
+	OnError Goto Greska  
+
+	Set Window iMapWindowID 
+	
+	Update Selection Set Provera = "?"
+	
+	Call SledeciNoviVodomer
+
+	Exit Sub
+	'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "Odlozi_unos")
+	Call ERRShow()	
+		
+End Sub
+	
+Sub Unesi_NV_u_GIS
+	
+	OnError Goto Greska  
+
+' - Provera da li je za nekog potrosaca upisan maticni broj i potvrda nastavka
+ 	
+	Select * from NOVI_VODOMERI where SIFRA <> "" Into NOVI_VODOMERI_provera
+	
+	l_Pitanje = Ask("Upisivanje " & TableInfo(NOVI_VODOMERI_provera, TAB_INFO_NROWS) & " novih vodomera za koje je pronaðen Mat.Broj potrošaèa. Da li želite da nastavite ?", "DA", "Odustani")
+	     
+	If l_Pitanje = false 
+	Then 
+		Print "Prebacivanje odloženo."
+		Exit Sub
+	End IF
+	
+	Select 
+	Kupci_potrosaci_vode_GEOREF.sifra, 
+	Kupci_potrosaci_vode_GEOREF.naziv, 
+	Kupci_potrosaci_vode_GEOREF.ulica, 
+	Kupci_potrosaci_vode_GEOREF.broj, 
+	Kupci_potrosaci_vode_GEOREF.mesto, 
+	Kupci_potrosaci_vode_GEOREF.Kategorija, 
+	Kupci_potrosaci_vode_GEOREF.status, 
+	Kupci_potrosaci_vode_GEOREF.gl_mer_mesto, 
+'	Kupci_potrosaci_vode_GEOREF.marka , 
+	Kupci_potrosaci_vode_GEOREF.serijski_br, 
+'	Kupci_potrosaci_vode_GEOREF.profil, 
+	Kupci_potrosaci_vode_GEOREF.datum_aktiv, 
+	Kupci_potrosaci_vode_GEOREF.Zona, 
+	Kupci_potrosaci_vode_GEOREF.Knjiga, 
+	Kupci_potrosaci_vode_GEOREF.RedBroj, 
+	NOVI_VODOMERI.KOMENTAR, 
+	NOVI_VODOMERI.IZVOR_INFORMACIJE, 
+	NOVI_VODOMERI.Broj_RN, 
+	NOVI_VODOMERI.DATUM_UNOSA,
+	NOVI_VODOMERI.UNEO_PODATKE,
+	NOVI_VODOMERI.MERNA_ZONA, 
+	NOVI_VODOMERI.CVOR, 
+	NOVI_VODOMERI.stari_precnik,
+	NOVI_VODOMERI.SISTEMATSKO,
+	NOVI_VODOMERI.FAKTURISANJE,
+	NOVI_VODOMERI.GPS_Date,
+	NOVI_VODOMERI.MI_PRINX
+	from NOVI_VODOMERI,Kupci_potrosaci_vode_GEOREF
+	where (NOVI_VODOMERI.SIFRA=Kupci_potrosaci_vode_GEOREF.sifra) and NOVI_VODOMERI.SIFRA <> ""
+	into VODOMERI_OK
+	
+' - Provera da li ima uopšte vodomera markiranih za prebaèaj, ako ne kraj subrutine
+	If TableInfo(VODOMERI_OK, TAB_INFO_NROWS) > 0
+	Then
+		Insert Into VODOMERI (SIFRA, NAZIV, ULICA, KUCNI_BROJ, MESTO, KATEGORIJA, STATUS, GL_MERNO_MESTO, SERIJSKI_BROJ, DATUM_BAZDARENJA, INKASO_REON, INKASO_KNJIGA, REDNI_BROJ, KOMENTAR, IZVOR_INFORMACIJE, Broj_RN, DATUM_UNOSA, UNEO_PODATKE, MERNA_ZONA, CVOR, stari_precnik) Select sifra, naziv, ulica, broj, mesto, Kategorija, status, gl_mer_mesto, serijski_br, datum_aktiv, Zona, Knjiga, RedBroj, KOMENTAR, IZVOR_INFORMACIJE, Broj_RN, DATUM_UNOSA, UNEO_PODATKE, MERNA_ZONA, CVOR, stari_precnik From VODOMERI_OK
+'		Commit Table VODOMERI
+'		s_kom="EXEC mbx.sp_VodomeriNavSync"
+'		i_hstmt = Server_Execute(i_hdbc,s_kom) 
+'		Server Refresh VODOMERI	
+		Note "Prebaèeno je "+TableInfo(VODOMERI_OK, TAB_INFO_NROWS)+" novih vodomera u VODOMERI."		
+	Else
+		Note "Nema novih vodomera markiranih za unos!"
+		Exit Sub
+	End If
+' =============================================================================	
+' - Alternativni(BOLJI ?) pristup	
+
+'	Server i_hstmt Begin Transaction	
+'	' iz novi vodomeri u VODOMERI preko MSSQL
+'	s_kom="EXEC mbx.sp_NoviVodomeriUnos"
+'	i_hstmt = Server_Execute(i_hdbc,s_kom) 
+'
+'	Server i_hstmt Rollback	
+'	Server i_hstmt Commit
+'	Server i_hstmt Close
+' =============================================================================	
+
+	Exit Sub
+	'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "Unesi_NV_u_GIS")
+	Call ERRShow()	
+		
+End Sub

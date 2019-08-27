@@ -1,0 +1,670 @@
+
+  <Object type="System.Windows.Forms.Form, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" name="Form1" children="Controls">
+    <Object type="DialogDesigner.ToolboxLib.MapBasicControls.MapBasicCancelButton, DialogDesigner, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" name="MapBasicCancelButton1" children="Controls">
+      <Property name="Title">Cancel</Property>
+      <Property name="ControlCode" />
+      <Property name="Id">31</Property>
+      <Property name="Name">MapBasicCancelButton1</Property>
+      <Property name="Position">12, 335</Property>
+      <Property name="Size">75, 23</Property>
+      <Property name="Calling" />
+      <Property name="Disable">False</Property>
+      <Property name="Hide">False</Property>
+      <Property name="TabIndex">9</Property>
+      <Property name="TabIndexSet">False</Property>
+      <Property name="Text">Cancel</Property>
+      <Property name="UseVisualStyleBackColor">True</Property>
+      <Property name="DataBindings">
+        <Property name="DefaultDataSourceUpdateMode">OnValidation</Property>
+      </Property>
+      <Property name="Location">12, 335</Property>
+      <Property name="Tag">Inited</Property>
+    </Object>
+    <Object type="DialogDesigner.ToolboxLib.MapBasicControls.MapBasicGroupBox, DialogDesigner, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" name="MapBasicGroupBox3" children="Controls">
+      <Object type="DialogDesigner.ToolboxLib.MapBasicControls.MapBasicStaticText, DialogDesigner, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" name="MapBasicStaticText10" children="Controls">
+        <Property name="ControlCode" />
+        <Property name="Id">28</Property>
+        <Property name="Name">MapBasicStaticText10</Property>
+        <Property name="Position">345, 64</Property>
+        <Property name="Size">21, 13</Property>
+        <Property name="Disable">False</Property>
+        <Property name="AutoSize">True</Property>
+        <Property name="Title">dpi</Property>
+        <Property name="Hide">False</Property>
+        <Property name="TabIndex">19</Property>
+        <Property name="TabIndexSet">False</Property>
+        <Property name="Text">dpi</Property>
+        <Property name="DataBindings">
+          <Property name="DefaultDataSourceUpdateMode">OnValidation</Property>
+        </Property>
+        <Property name="Location">345, 64</Property>
+        <Property name="Tag">Inited</Property>
+      </Object>
+      <Object type="DialogDesigner.ToolboxLib.MapBasicControls.MapBasicEditText, DialogDesigner, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" name="MapBasicEditText7" children="Controls">
+        <Property name="ControlCode" />
+        <Property name="Id">27</Property>
+        <Property name="Name">MapBasicEditText7</Property>
+        <Property name="Position">304, 63</Property>
+        <Property name="Size">37, 20</Property>
+        <Property name="Disable">True</Property>
+        <Property name="Hide">False</Property>
+        <Property name="Value">i_Dpi</Property>
+        <Property name="Into">i_Dpi</Property>
+        <Property name="Password">False</Property>
+        <Property name="TabIndex">18</Property>
+        <Property name="TabIndexSet">False</Property>
+        <Property name="Text">
+        </Property>
+        <Property name="DataBindings">
+          <Property name="DefaultDataSourceUpdateMode">OnValidation</Property>
+        </Property>
+        <Property name="Location">304, 63</Property>
+        <Property name="Tag">Inited</Property>
+      </Object>
+      <Object type="DialogDesigner.ToolboxLib.MapBasicControls.MapBasicPopupMenu, DialogDesigner, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" name="MapBasicPopupMenu2" children="Controls">
+        <Property name="ControlCode" />
+        <Property name="Id">26</Property>
+        <Property name="Name">MapBasicPopupMenu2</Property>
+        <Property name="Position">174, 61</Property>
+        <Property name="Size">108, 21</Property>
+        <Property name="Title">
+        </Property>
+        <Property name="FromVariable">rs_TipLegende</Property>
+        <Property name="Calling" />
+        <Property name="Disable">True</Property>
+        <Property name="Value">s_TipLgd</Property>
+        <Property name="Into">s_TipLgd</Property>
+        <Property name="TabIndex">17</Property>
+        <Property name="TabIndexSet">False</Property>
+        <Property name="FormattingEnabled">True</Property>
+        <Property name="DataBindings">
+          <Property name="DefaultDataSourceUpdateMode">OnValidation</Property>
+        </Property>
+        <Property name="Location">174, 61</Property>
+        <Property name="Tag">Inited</Property>
+      </Object>
+      <Object type="DialogDesigner.ToolboxLib.MapBasicControls.MapBasicCheckBox, DialogDesigner, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" name="MapBasicCheckBox6" children="Controls">
+        <Property name="ControlCode" />
+        <Property name="Id">23</Property>
+        <Property name="Name">MapBasicCheckBox6</Property>
+        <Property name="Position">158, 41</Property>
+        <Property name="Size">68, 17</Property>
+        <Property name="AutoSize">True</Property>
+        <Property name="Title">Legenda</Property>
+        <Property name="Calling">Legenda_checkbox</Property>
+        <Property name="Disable">False</Property>
+        <Property name="Hide">False</Property>
+        <Property name="Value">False</Property>
+        <Property name="Into">l_Legenda</Property>
+        <Property name="TabIndex">16</Property>
+        <Property name="TabIndexSet">False</Property>
+        <Property name="Text">Legenda</Property>
+        <Property name="UseVisualStyleBackColor">True</Property>
+        <Property name="DataBindings">
+          <Property name="DefaultDataSourceUpdateMode">OnValidation</Property>
+        </Property>
+        <Property name="Location">158, 41</Property>
+        <Property name="Tag">Inited</Property>
+      </Object>
+      <Object type="DialogDesigner.ToolboxLib.MapBasicControls.MapBasicCheckBox, DialogDesigner, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" name="MapBasicCheckBox5" children="Controls">
+        <Property name="ControlCode" />
+        <Property name="Id">24</Property>
+        <Property name="Name">MapBasicCheckBox5</Property>
+        <Property name="Position">288, 42</Property>
+        <Property name="Size">53, 17</Property>
+        <Property name="AutoSize">True</Property>
+        <Property name="Title">JPEG</Property>
+        <Property name="Calling">JPEG_checkbox</Property>
+        <Property name="Disable">False</Property>
+        <Property name="Hide">False</Property>
+        <Property name="Value">False</Property>
+        <Property name="Into">l_PrintSlika</Property>
+        <Property name="TabIndex">15</Property>
+        <Property name="TabIndexSet">False</Property>
+        <Property name="Text">JPEG</Property>
+        <Property name="UseVisualStyleBackColor">True</Property>
+        <Property name="DataBindings">
+          <Property name="DefaultDataSourceUpdateMode">OnValidation</Property>
+        </Property>
+        <Property name="Location">288, 42</Property>
+        <Property name="Tag">Inited</Property>
+      </Object>
+      <Object type="DialogDesigner.ToolboxLib.MapBasicControls.MapBasicCheckBox, DialogDesigner, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" name="MapBasicCheckBox4" children="Controls">
+        <Property name="ControlCode" />
+        <Property name="Id">22</Property>
+        <Property name="Name">MapBasicCheckBox4</Property>
+        <Property name="Position">55, 41</Property>
+        <Property name="Size">97, 17</Property>
+        <Property name="AutoSize">True</Property>
+        <Property name="Title">Pravac Severa</Property>
+        <Property name="Calling" />
+        <Property name="Disable">False</Property>
+        <Property name="Hide">False</Property>
+        <Property name="Value">True</Property>
+        <Property name="Into">l_Sever</Property>
+        <Property name="TabIndex">14</Property>
+        <Property name="TabIndexSet">False</Property>
+        <Property name="Text">Pravac Severa</Property>
+        <Property name="UseVisualStyleBackColor">True</Property>
+        <Property name="DataBindings">
+          <Property name="DefaultDataSourceUpdateMode">OnValidation</Property>
+        </Property>
+        <Property name="Location">55, 41</Property>
+        <Property name="Tag">Inited</Property>
+      </Object>
+      <Object type="DialogDesigner.ToolboxLib.MapBasicControls.MapBasicCheckBox, DialogDesigner, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" name="MapBasicCheckBox3" children="Controls">
+        <Property name="ControlCode" />
+        <Property name="Id">21</Property>
+        <Property name="Name">MapBasicCheckBox3</Property>
+        <Property name="Position">288, 19</Property>
+        <Property name="Size">73, 17</Property>
+        <Property name="AutoSize">True</Property>
+        <Property name="Title">Print okvir</Property>
+        <Property name="Calling" />
+        <Property name="Disable">False</Property>
+        <Property name="Hide">False</Property>
+        <Property name="Value">False</Property>
+        <Property name="Into">l_Okvir</Property>
+        <Property name="TabIndex">13</Property>
+        <Property name="TabIndexSet">False</Property>
+        <Property name="Text">Print okvir</Property>
+        <Property name="UseVisualStyleBackColor">True</Property>
+        <Property name="DataBindings">
+          <Property name="DefaultDataSourceUpdateMode">OnValidation</Property>
+        </Property>
+        <Property name="Location">288, 19</Property>
+        <Property name="Tag">Inited</Property>
+      </Object>
+      <Object type="DialogDesigner.ToolboxLib.MapBasicControls.MapBasicCheckBox, DialogDesigner, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" name="MapBasicCheckBox2" children="Controls">
+        <Property name="ControlCode" />
+        <Property name="Id">20</Property>
+        <Property name="Name">MapBasicCheckBox2</Property>
+        <Property name="Position">158, 19</Property>
+        <Property name="Size">80, 17</Property>
+        <Property name="AutoSize">True</Property>
+        <Property name="Title">Upozorenje</Property>
+        <Property name="Calling" />
+        <Property name="Disable">False</Property>
+        <Property name="Hide">False</Property>
+        <Property name="Value">False</Property>
+        <Property name="Into">l_Upozorenje</Property>
+        <Property name="TabIndex">12</Property>
+        <Property name="TabIndexSet">False</Property>
+        <Property name="Text">Upozorenje</Property>
+        <Property name="UseVisualStyleBackColor">True</Property>
+        <Property name="DataBindings">
+          <Property name="DefaultDataSourceUpdateMode">OnValidation</Property>
+        </Property>
+        <Property name="Location">158, 19</Property>
+        <Property name="Tag">Inited</Property>
+      </Object>
+      <Object type="DialogDesigner.ToolboxLib.MapBasicControls.MapBasicStaticText, DialogDesigner, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" name="MapBasicStaticText5" children="Controls">
+        <Property name="ControlCode" />
+        <Property name="Id">29</Property>
+        <Property name="Name">MapBasicStaticText5</Property>
+        <Property name="Position">6, 96</Property>
+        <Property name="Size">43, 13</Property>
+        <Property name="Disable">False</Property>
+        <Property name="AutoSize">True</Property>
+        <Property name="Title">Naslov:</Property>
+        <Property name="Hide">False</Property>
+        <Property name="TabIndex">11</Property>
+        <Property name="TabIndexSet">False</Property>
+        <Property name="Text">Naslov:</Property>
+        <Property name="DataBindings">
+          <Property name="DefaultDataSourceUpdateMode">OnValidation</Property>
+        </Property>
+        <Property name="Location">6, 96</Property>
+        <Property name="Tag">Inited</Property>
+      </Object>
+      <Object type="DialogDesigner.ToolboxLib.MapBasicControls.MapBasicEditText, DialogDesigner, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" name="MapBasicEditText2" children="Controls">
+        <Property name="ControlCode" />
+        <Property name="Id">30</Property>
+        <Property name="Name">MapBasicEditText2</Property>
+        <Property name="Position">55, 93</Property>
+        <Property name="Size">309, 20</Property>
+        <Property name="Disable">False</Property>
+        <Property name="Hide">False</Property>
+        <Property name="Value">s_Naslov</Property>
+        <Property name="Into">s_Naslov</Property>
+        <Property name="Password">False</Property>
+        <Property name="TabIndex">10</Property>
+        <Property name="TabIndexSet">False</Property>
+        <Property name="Text">
+        </Property>
+        <Property name="DataBindings">
+          <Property name="DefaultDataSourceUpdateMode">OnValidation</Property>
+        </Property>
+        <Property name="Location">55, 93</Property>
+        <Property name="Tag">Inited</Property>
+      </Object>
+      <Object type="DialogDesigner.ToolboxLib.MapBasicControls.MapBasicCheckBox, DialogDesigner, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" name="MapBasicCheckBox1" children="Controls">
+        <Property name="ControlCode" />
+        <Property name="Id">25</Property>
+        <Property name="Name">MapBasicCheckBox1</Property>
+        <Property name="Position">55, 62</Property>
+        <Property name="Size">94, 17</Property>
+        <Property name="AutoSize">True</Property>
+        <Property name="Title">Koord. markeri</Property>
+        <Property name="Calling" />
+        <Property name="Disable">False</Property>
+        <Property name="Hide">False</Property>
+        <Property name="Value">True</Property>
+        <Property name="Into">l_Markeri</Property>
+        <Property name="TabIndex">9</Property>
+        <Property name="TabIndexSet">False</Property>
+        <Property name="Text">Koord. markeri</Property>
+        <Property name="UseVisualStyleBackColor">True</Property>
+        <Property name="DataBindings">
+          <Property name="DefaultDataSourceUpdateMode">OnValidation</Property>
+        </Property>
+        <Property name="Location">55, 62</Property>
+        <Property name="Tag">Inited</Property>
+      </Object>
+      <Object type="DialogDesigner.ToolboxLib.MapBasicControls.MapBasicStaticText, DialogDesigner, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" name="MapBasicStaticText4" children="Controls">
+        <Property name="ControlCode" />
+        <Property name="Id">18</Property>
+        <Property name="Name">MapBasicStaticText4</Property>
+        <Property name="Position">12, 18</Property>
+        <Property name="Size">42, 13</Property>
+        <Property name="Disable">False</Property>
+        <Property name="AutoSize">True</Property>
+        <Property name="Title">R = 1 : </Property>
+        <Property name="Hide">False</Property>
+        <Property name="TabIndex">8</Property>
+        <Property name="TabIndexSet">False</Property>
+        <Property name="Text">R = 1 : </Property>
+        <Property name="DataBindings">
+          <Property name="DefaultDataSourceUpdateMode">OnValidation</Property>
+        </Property>
+        <Property name="Location">12, 18</Property>
+        <Property name="Tag">Inited</Property>
+      </Object>
+      <Object type="DialogDesigner.ToolboxLib.MapBasicControls.MapBasicEditText, DialogDesigner, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" name="MapBasicEditText1" children="Controls">
+        <Property name="ControlCode" />
+        <Property name="Id">19</Property>
+        <Property name="Name">MapBasicEditText1</Property>
+        <Property name="Position">55, 15</Property>
+        <Property name="Size">83, 20</Property>
+        <Property name="Disable">False</Property>
+        <Property name="Hide">False</Property>
+        <Property name="Value">s_mapScale</Property>
+        <Property name="Into" />
+        <Property name="Password">False</Property>
+        <Property name="TabIndex">7</Property>
+        <Property name="TabIndexSet">False</Property>
+        <Property name="Text">
+        </Property>
+        <Property name="DataBindings">
+          <Property name="DefaultDataSourceUpdateMode">OnValidation</Property>
+        </Property>
+        <Property name="Location">55, 15</Property>
+        <Property name="Tag">Inited</Property>
+      </Object>
+      <Property name="ControlCode" />
+      <Property name="Id">17</Property>
+      <Property name="Name">MapBasicGroupBox3</Property>
+      <Property name="Position">12, 210</Property>
+      <Property name="Size">370, 119</Property>
+      <Property name="Title">Opcije</Property>
+      <Property name="Hide">False</Property>
+      <Property name="TabIndex">8</Property>
+      <Property name="TabIndexSet">False</Property>
+      <Property name="TabStop">False</Property>
+      <Property name="Text">Opcije</Property>
+      <Property name="DataBindings">
+        <Property name="DefaultDataSourceUpdateMode">OnValidation</Property>
+      </Property>
+      <Property name="Location">12, 210</Property>
+      <Property name="Tag">Inited</Property>
+    </Object>
+    <Object type="DialogDesigner.ToolboxLib.MapBasicControls.MapBasicOKButton, DialogDesigner, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" name="MapBasicOKButton1" children="Controls">
+      <Property name="Title">OK</Property>
+      <Property name="ControlCode" />
+      <Property name="Id">32</Property>
+      <Property name="Name">MapBasicOKButton1</Property>
+      <Property name="Position">307, 335</Property>
+      <Property name="Size">75, 23</Property>
+      <Property name="Calling">DLG_printOK</Property>
+      <Property name="Disable">False</Property>
+      <Property name="Hide">False</Property>
+      <Property name="TabIndex">1</Property>
+      <Property name="TabIndexSet">False</Property>
+      <Property name="Text">OK</Property>
+      <Property name="UseVisualStyleBackColor">True</Property>
+      <Property name="DataBindings">
+        <Property name="DefaultDataSourceUpdateMode">OnValidation</Property>
+      </Property>
+      <Property name="Location">307, 335</Property>
+      <Property name="Tag">Inited</Property>
+    </Object>
+    <Object type="DialogDesigner.ToolboxLib.MapBasicControls.MapBasicGroupBox, DialogDesigner, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" name="MapBasicGroupBox1" children="Controls">
+      <Object type="DialogDesigner.ToolboxLib.MapBasicControls.MapBasicGroupBox, DialogDesigner, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" name="MapBasicGroupBox2" children="Controls">
+        <Object type="DialogDesigner.ToolboxLib.MapBasicControls.MapBasicStaticText, DialogDesigner, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" name="MapBasicStaticText9" children="Controls">
+          <Property name="ControlCode" />
+          <Property name="Id">15</Property>
+          <Property name="Name">MapBasicStaticText9</Property>
+          <Property name="Position">119, 47</Property>
+          <Property name="Size">21, 13</Property>
+          <Property name="Disable">False</Property>
+          <Property name="AutoSize">True</Property>
+          <Property name="Title">xF:</Property>
+          <Property name="Hide">False</Property>
+          <Property name="TabIndex">7</Property>
+          <Property name="TabIndexSet">False</Property>
+          <Property name="Text">xF:</Property>
+          <Property name="DataBindings">
+            <Property name="DefaultDataSourceUpdateMode">OnValidation</Property>
+          </Property>
+          <Property name="Location">119, 47</Property>
+          <Property name="Tag">Inited</Property>
+        </Object>
+        <Object type="DialogDesigner.ToolboxLib.MapBasicControls.MapBasicEditText, DialogDesigner, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" name="MapBasicEditText6" children="Controls">
+          <Property name="ControlCode" />
+          <Property name="Id">16</Property>
+          <Property name="Name">MapBasicEditText6</Property>
+          <Property name="Position">146, 44</Property>
+          <Property name="Size">30, 20</Property>
+          <Property name="Disable">False</Property>
+          <Property name="Hide">False</Property>
+          <Property name="Value">mr</Property>
+          <Property name="Into">mr</Property>
+          <Property name="Password">False</Property>
+          <Property name="TabIndex">6</Property>
+          <Property name="TabIndexSet">False</Property>
+          <Property name="Text">
+          </Property>
+          <Property name="DataBindings">
+            <Property name="DefaultDataSourceUpdateMode">OnValidation</Property>
+          </Property>
+          <Property name="Location">146, 44</Property>
+          <Property name="Tag">Inited</Property>
+        </Object>
+        <Object type="DialogDesigner.ToolboxLib.MapBasicControls.MapBasicEditText, DialogDesigner, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" name="MapBasicEditText5" children="Controls">
+          <Property name="ControlCode" />
+          <Property name="Id">14</Property>
+          <Property name="Name">MapBasicEditText5</Property>
+          <Property name="Position">83, 43</Property>
+          <Property name="Size">30, 20</Property>
+          <Property name="Disable">False</Property>
+          <Property name="Hide">False</Property>
+          <Property name="Value">h_Tablica</Property>
+          <Property name="Into">h_Tablica</Property>
+          <Property name="Password">False</Property>
+          <Property name="TabIndex">5</Property>
+          <Property name="TabIndexSet">False</Property>
+          <Property name="Text">
+          </Property>
+          <Property name="DataBindings">
+            <Property name="DefaultDataSourceUpdateMode">OnValidation</Property>
+          </Property>
+          <Property name="Location">83, 43</Property>
+          <Property name="Tag">Inited</Property>
+        </Object>
+        <Object type="DialogDesigner.ToolboxLib.MapBasicControls.MapBasicStaticText, DialogDesigner, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" name="MapBasicStaticText8" children="Controls">
+          <Property name="ControlCode" />
+          <Property name="Id">13</Property>
+          <Property name="Name">MapBasicStaticText8</Property>
+          <Property name="Position">6, 47</Property>
+          <Property name="Size">71, 13</Property>
+          <Property name="Disable">False</Property>
+          <Property name="AutoSize">True</Property>
+          <Property name="Title">visina tablice:</Property>
+          <Property name="Hide">False</Property>
+          <Property name="TabIndex">4</Property>
+          <Property name="TabIndexSet">False</Property>
+          <Property name="Text">visina tablice:</Property>
+          <Property name="DataBindings">
+            <Property name="DefaultDataSourceUpdateMode">OnValidation</Property>
+          </Property>
+          <Property name="Location">6, 47</Property>
+          <Property name="Tag">Inited</Property>
+        </Object>
+        <Object type="DialogDesigner.ToolboxLib.MapBasicControls.MapBasicEditText, DialogDesigner, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" name="MapBasicEditText4" children="Controls">
+          <Property name="ControlCode" />
+          <Property name="Id">12</Property>
+          <Property name="Name">MapBasicEditText4</Property>
+          <Property name="Position">146, 19</Property>
+          <Property name="Size">30, 20</Property>
+          <Property name="Disable">False</Property>
+          <Property name="Hide">False</Property>
+          <Property name="Value">pT.y</Property>
+          <Property name="Into">pT.y</Property>
+          <Property name="Password">False</Property>
+          <Property name="TabIndex">3</Property>
+          <Property name="TabIndexSet">False</Property>
+          <Property name="Text">
+          </Property>
+          <Property name="DataBindings">
+            <Property name="DefaultDataSourceUpdateMode">OnValidation</Property>
+          </Property>
+          <Property name="Location">146, 19</Property>
+          <Property name="Tag">Inited</Property>
+        </Object>
+        <Object type="DialogDesigner.ToolboxLib.MapBasicControls.MapBasicStaticText, DialogDesigner, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" name="MapBasicStaticText7" children="Controls">
+          <Property name="ControlCode" />
+          <Property name="Id">11</Property>
+          <Property name="Name">MapBasicStaticText7</Property>
+          <Property name="Position">115, 22</Property>
+          <Property name="Size">25, 13</Property>
+          <Property name="Disable">False</Property>
+          <Property name="AutoSize">True</Property>
+          <Property name="Title">ver:</Property>
+          <Property name="Hide">False</Property>
+          <Property name="TabIndex">2</Property>
+          <Property name="TabIndexSet">False</Property>
+          <Property name="Text">ver:</Property>
+          <Property name="DataBindings">
+            <Property name="DefaultDataSourceUpdateMode">OnValidation</Property>
+          </Property>
+          <Property name="Location">115, 22</Property>
+          <Property name="Tag">Inited</Property>
+        </Object>
+        <Object type="DialogDesigner.ToolboxLib.MapBasicControls.MapBasicStaticText, DialogDesigner, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" name="MapBasicStaticText6" children="Controls">
+          <Property name="ControlCode" />
+          <Property name="Id">9</Property>
+          <Property name="Name">MapBasicStaticText6</Property>
+          <Property name="Position">6, 22</Property>
+          <Property name="Size">71, 13</Property>
+          <Property name="Disable">False</Property>
+          <Property name="AutoSize">True</Property>
+          <Property name="Title">margine - hor:</Property>
+          <Property name="Hide">False</Property>
+          <Property name="TabIndex">1</Property>
+          <Property name="TabIndexSet">False</Property>
+          <Property name="Text">margine - hor:</Property>
+          <Property name="DataBindings">
+            <Property name="DefaultDataSourceUpdateMode">OnValidation</Property>
+          </Property>
+          <Property name="Location">6, 22</Property>
+          <Property name="Tag">Inited</Property>
+        </Object>
+        <Object type="DialogDesigner.ToolboxLib.MapBasicControls.MapBasicEditText, DialogDesigner, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" name="MapBasicEditText3" children="Controls">
+          <Property name="ControlCode" />
+          <Property name="Id">10</Property>
+          <Property name="Name">MapBasicEditText3</Property>
+          <Property name="Position">83, 17</Property>
+          <Property name="Size">30, 20</Property>
+          <Property name="Disable">False</Property>
+          <Property name="Hide">False</Property>
+          <Property name="Value">pT.x</Property>
+          <Property name="Into">pT.x</Property>
+          <Property name="Password">False</Property>
+          <Property name="TabIndex">0</Property>
+          <Property name="TabIndexSet">False</Property>
+          <Property name="Text">
+          </Property>
+          <Property name="DataBindings">
+            <Property name="DefaultDataSourceUpdateMode">OnValidation</Property>
+          </Property>
+          <Property name="Location">83, 17</Property>
+          <Property name="Tag">Inited</Property>
+        </Object>
+        <Property name="ControlCode" />
+        <Property name="Id">8</Property>
+        <Property name="Name">MapBasicGroupBox2</Property>
+        <Property name="Position">174, 79</Property>
+        <Property name="Size">182, 70</Property>
+        <Property name="Title">Margine i tablica (cm) + Font</Property>
+        <Property name="Hide">False</Property>
+        <Property name="TabIndex">6</Property>
+        <Property name="TabIndexSet">False</Property>
+        <Property name="TabStop">False</Property>
+        <Property name="Text">Margine i tablica (cm) + Font</Property>
+        <Property name="DataBindings">
+          <Property name="DefaultDataSourceUpdateMode">OnValidation</Property>
+        </Property>
+        <Property name="Location">174, 79</Property>
+        <Property name="Tag">Inited</Property>
+      </Object>
+      <Object type="DialogDesigner.ToolboxLib.MapBasicControls.MapBasicStaticText, DialogDesigner, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" name="MapBasicStaticText3" children="Controls">
+        <Property name="ControlCode" />
+        <Property name="Id">4</Property>
+        <Property name="Name">MapBasicStaticText3</Property>
+        <Property name="Position">12, 28</Property>
+        <Property name="Size">42, 13</Property>
+        <Property name="Disable">False</Property>
+        <Property name="AutoSize">True</Property>
+        <Property name="Title">Format:</Property>
+        <Property name="Hide">False</Property>
+        <Property name="TabIndex">5</Property>
+        <Property name="TabIndexSet">False</Property>
+        <Property name="Text">Format:</Property>
+        <Property name="DataBindings">
+          <Property name="DefaultDataSourceUpdateMode">OnValidation</Property>
+        </Property>
+        <Property name="Location">12, 28</Property>
+        <Property name="Tag">Inited</Property>
+      </Object>
+      <Object type="DialogDesigner.ToolboxLib.MapBasicControls.MapBasicRadioGroup, DialogDesigner, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" name="MapBasicRadioGroup2" children="Controls">
+        <Property name="ControlCode" />
+        <Property name="Id">5</Property>
+        <Property name="Name">MapBasicRadioGroup2</Property>
+        <Property name="Position">60, 28</Property>
+        <Property name="Title">A4;A3;</Property>
+        <Property name="FromVariable" />
+        <Property name="Calling">DLG_printFormati</Property>
+        <Property name="Disable">False</Property>
+        <Property name="Hide">False</Property>
+        <Property name="Value">1</Property>
+        <Property name="Into">n_Papir</Property>
+        <Property name="TabIndex">4</Property>
+        <Property name="TabIndexSet">False</Property>
+        <Property name="AutoSize">True</Property>
+        <Property name="DataBindings">
+          <Property name="DefaultDataSourceUpdateMode">OnValidation</Property>
+        </Property>
+        <Property name="Location">60, 28</Property>
+        <Property name="Size">108, 114</Property>
+        <Property name="Tag">Inited</Property>
+      </Object>
+      <Object type="DialogDesigner.ToolboxLib.MapBasicControls.MapBasicStaticText, DialogDesigner, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" name="MapBasicStaticText2" children="Controls">
+        <Property name="ControlCode" />
+        <Property name="Id">6</Property>
+        <Property name="Name">MapBasicStaticText2</Property>
+        <Property name="Position">196, 28</Property>
+        <Property name="Size">44, 13</Property>
+        <Property name="Disable">False</Property>
+        <Property name="AutoSize">True</Property>
+        <Property name="Title">Položaj:</Property>
+        <Property name="Hide">False</Property>
+        <Property name="TabIndex">3</Property>
+        <Property name="TabIndexSet">False</Property>
+        <Property name="Text">Položaj:</Property>
+        <Property name="DataBindings">
+          <Property name="DefaultDataSourceUpdateMode">OnValidation</Property>
+        </Property>
+        <Property name="Location">196, 28</Property>
+        <Property name="Tag">Inited</Property>
+      </Object>
+      <Object type="DialogDesigner.ToolboxLib.MapBasicControls.MapBasicRadioGroup, DialogDesigner, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" name="MapBasicRadioGroup1" children="Controls">
+        <Property name="ControlCode" />
+        <Property name="Id">7</Property>
+        <Property name="Name">MapBasicRadioGroup1</Property>
+        <Property name="Position">248, 28</Property>
+        <Property name="Title">Landscape;Portrait</Property>
+        <Property name="FromVariable" />
+        <Property name="Calling">DLG_printPolozaj</Property>
+        <Property name="Disable">False</Property>
+        <Property name="Hide">False</Property>
+        <Property name="Value">n_Polozaj</Property>
+        <Property name="Into">n_Polozaj</Property>
+        <Property name="TabIndex">2</Property>
+        <Property name="TabIndexSet">False</Property>
+        <Property name="AutoSize">True</Property>
+        <Property name="DataBindings">
+          <Property name="DefaultDataSourceUpdateMode">OnValidation</Property>
+        </Property>
+        <Property name="Location">248, 28</Property>
+        <Property name="Size">108, 45</Property>
+        <Property name="Tag">Inited</Property>
+      </Object>
+      <Property name="ControlCode" />
+      <Property name="Id">3</Property>
+      <Property name="Name">MapBasicGroupBox1</Property>
+      <Property name="Position">12, 49</Property>
+      <Property name="Size">370, 155</Property>
+      <Property name="Title">Podešavanje papira i layout-a</Property>
+      <Property name="Hide">False</Property>
+      <Property name="TabIndex">0</Property>
+      <Property name="TabIndexSet">False</Property>
+      <Property name="TabStop">False</Property>
+      <Property name="Text">Podešavanje papira i layout-a</Property>
+      <Property name="DataBindings">
+        <Property name="DefaultDataSourceUpdateMode">OnValidation</Property>
+      </Property>
+      <Property name="Location">12, 49</Property>
+      <Property name="Tag">Inited</Property>
+    </Object>
+    <Object type="DialogDesigner.ToolboxLib.MapBasicControls.MapBasicPopupMenu, DialogDesigner, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" name="MapBasicPopupMenu1" children="Controls">
+      <Property name="ControlCode" />
+      <Property name="Id">2</Property>
+      <Property name="Name">MapBasicPopupMenu1</Property>
+      <Property name="Position">58, 22</Property>
+      <Property name="Size">324, 21</Property>
+      <Property name="Title">Stampac</Property>
+      <Property name="FromVariable">printerList</Property>
+      <Property name="Calling" />
+      <Property name="Disable">False</Property>
+      <Property name="Value">nPrinter</Property>
+      <Property name="Into">sPrinterName</Property>
+      <Property name="TabIndex">0</Property>
+      <Property name="TabIndexSet">False</Property>
+      <Property name="Text">Stampac</Property>
+      <Property name="FormattingEnabled">True</Property>
+      <Property name="DataBindings">
+        <Property name="DefaultDataSourceUpdateMode">OnValidation</Property>
+      </Property>
+      <Property name="Location">58, 22</Property>
+      <Property name="Tag">Inited</Property>
+    </Object>
+    <Object type="DialogDesigner.ToolboxLib.MapBasicControls.MapBasicStaticText, DialogDesigner, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" name="MapBasicStaticText1" children="Controls">
+      <Property name="ControlCode" />
+      <Property name="Id">1</Property>
+      <Property name="Name">MapBasicStaticText1</Property>
+      <Property name="Position">12, 25</Property>
+      <Property name="Size">40, 13</Property>
+      <Property name="Disable">False</Property>
+      <Property name="AutoSize">True</Property>
+      <Property name="Title">Printer:</Property>
+      <Property name="Hide">False</Property>
+      <Property name="TabIndex">1</Property>
+      <Property name="TabIndexSet">False</Property>
+      <Property name="Text">Printer:</Property>
+      <Property name="DataBindings">
+        <Property name="DefaultDataSourceUpdateMode">OnValidation</Property>
+      </Property>
+      <Property name="Location">12, 25</Property>
+      <Property name="Tag">Inited</Property>
+    </Object>
+    <Property name="ClientSize">395, 361</Property>
+    <Property name="MaximizeBox">False</Property>
+    <Property name="MinimizeBox">False</Property>
+    <Property name="ShowIcon">False</Property>
+    <Property name="Text">Priprema za štampu<Reference name="Form1" /></Property>
+    <Property name="DataBindings">
+      <Property name="DefaultDataSourceUpdateMode">OnValidation</Property>
+    </Property>
+    <Property name="Name">Form1</Property>
+    <Property name="Tag">Inited</Property>
+  </Object>

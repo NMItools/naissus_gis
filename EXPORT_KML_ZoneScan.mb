@@ -1,0 +1,211 @@
+include "menu.def"
+include "icons.def"
+Include "MapBasic.def"
+include "..\Library\ERRORLib.def"
+include "..\nmiWin.def"
+include "..\nmiFunkcije.def"
+include "..\nmiDotNet.def"
+include "NAISSUS-GIS.def"
+
+'=======================================================================================================================
+' -- priprema export podataka za ZoneScan NET
+'=======================================================================================================================
+
+Sub MZ_u_KML
+
+	onerror goto Greska  
+
+	Print CHR$(12)
+	Print "====================================="
+	Print "Priprema KML fajlova za ZoneScan NET"
+	Print "-------------------------------------"
+	
+	l_Pitanje = Ask("Sve otvorene tabele bice zatvorene. Da li zelite da nastavite ?", "DA", "Odustani")                         
+	     
+	If l_Pitanje = false 
+	Then 
+		Print "Priprema KML fajlova je odlozena!"
+		Exit Sub
+	else
+		Save Workspace As s_FOLDER_WOR+"_temp.wor"                        
+	End If
+
+	Close All Interactive
+	
+	Print "Otvaranje potrebnih TAB-ova..."
+	Open Table s_FOLDER_TAB+"ZONE.TAB"
+	Open Table s_FOLDER_TAB+"CEVOVOD.TAB"
+	Open Table s_FOLDER_TAB+"HIDRANT.TAB"
+	Open Table s_FOLDER_TAB+"PRIKLJUCCI.TAB"
+	
+' -- izbor zone
+
+	Print "Odaberite Mernu Zonu:"
+	
+	Call Dialog_MZ_u_KML
+
+	Exit Sub
+'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "MZ_u_KML")
+	Call ERRShow()
+	
+End Sub	
+	
+Sub Dialog_MZ_u_KML_OK	
+	
+' -- selekcija u okviru datog poligona tj. zone
+
+	sn_ZONA = arr_Zone(ReadControlValue(2))
+	s_ExpFolder = ReadControlValue(4)
+	
+	Print "Izabrana je Merna Zona "+sn_ZONA
+	Print "Priprema za izvoz ..."
+	Select MATERIJAL, DN_MM, DUZINA_M, IZVOR_INFORMACIJE,MI_PRINX from CEVOVOD where obj within any ( select obj from ZONE where MERNA_ZONA = sn_ZONA) into Q_cevovod_1 Noselect
+	Select MATERIJAL_PRIK_CEV, PRECNIK_PRIK_CEV, DUZINA_m, KUCNI_BROJ, IZVOR_INFORMACIJE, MI_PRINX from PRIKLJUCCI where obj within any ( select obj from ZONE where MERNA_ZONA = sn_ZONA) into Q_prikljc_1 Noselect
+	Select BROJ, PRECNIK_mm, ISPRAVNOST, TIP, IZVOR_INFORMACIJE, MI_PRINX from HIDRANT where obj within any ( select obj from ZONE where MERNA_ZONA = sn_ZONA) into Q_hidrant_1 Noselect
+	
+' -- save as TAB >> WGS84
+	
+	Commit Table Q_cevovod_1 As s_ExpFolder+"CEVOVOD_MZ_"+sn_ZONA+".TAB" TYPE NATIVE Charset "WindowsLatin2" CoordSys Earth Projection 1, 104  
+	Commit Table Q_prikljc_1 As s_ExpFolder+"PRIKLJUCCI_MZ_"+sn_ZONA+".TAB" TYPE NATIVE Charset "WindowsLatin2" CoordSys Earth Projection 1, 104
+	Commit Table Q_hidrant_1 As s_ExpFolder+"HIDRANTI_MZ_"+sn_ZONA+".TAB" TYPE NATIVE Charset "WindowsLatin2" CoordSys Earth Projection 1, 104
+
+	Print "Priprema gotova."	
+	'Close All Interactive
+	
+' --  konverzija u KML sa GDAL/OGR
+	
+	's_run = "C:\OSGeo4W64\bin\ogr2ogr.exe -overwrite -f LIBKML D:\GIS\_radni\EXPORT\ZoneScan\CEVOVOD_MZ_"+sn_ZONA+".kml D:\GIS\_radni\EXPORT\ZoneScan\Q_cevovod_1.TAB"
+	'Run Program s_run
+	's_run = "C:\OSGeo4W64\bin\ogr2ogr.exe -overwrite -f LIBKML D:\GIS\_radni\EXPORT\ZoneScan\PRIKLJUCCI_MZ"+sn_ZONA+".kml D:\GIS\_radni\EXPORT\ZoneScan\Q_prikljucci_1.TAB"
+	'Run Program s_run
+	's_run = "C:\OSGeo4W64\bin\ogr2ogr.exe -overwrite -f LIBKML D:\GIS\_radni\EXPORT\ZoneScan\HIDRANTI_MZ_"+sn_ZONA+".kml D:\GIS\_radni\EXPORT\ZoneScan\Q_hidranti_1.TAB"
+	'Run Program s_run
+	
+	'print s_run
+	
+' -- Pokretanje Global Mapper skripte
+	
+	Print "Konverzija u KML ..."
+	Run Program """C:\Program Files\GlobalMapper16_64bit\global_mapper.exe"" ""C:\Program Files (x86)\MapInfo\Naissus\tab2kml.gms"""
+
+	Print "Konverzija gotova. Pripremljeni KML fajlovi su u folderu:"
+	Print s_ExpFolder
+	
+	Exit Sub
+'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "Dialog_MZ_u_KML_OK")
+	Call ERRShow()
+	
+End Sub
+
+Sub Select_DIR_ZSExp
+
+	onerror goto Greska  
+		
+	Dim noviDir as string
+	
+	noviDir = BrowseForFolder(noviDir)
+
+	  If noviDir = "" Then
+		Note "Niste odabrali folder."
+	  Else
+		alter control 4 value noviDir+"\"
+		s_ExpFolder = noviDir+"\"
+'		f_setIni = SetIniVal(iniFile, "GIS_FOLDERI", "FOLDER_POD", s_FOLDER_POD)
+
+	  End If
+	
+	Exit Sub
+'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "Select_DIR_ZSExp")
+	Call ERRShow()
+		  
+End Sub
+
+Sub Dialog_MZ_u_KML_CANCEL
+
+	onerror goto Greska  
+	
+	Dialog remove
+	
+	Exit Sub
+	'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "Dialog_MZ_u_KML_CANCEL")
+	Call ERRShow()
+
+End Sub
+
+Sub Dialog_MZ_u_KML
+	
+Call arrZone
+	
+'***** DIALOG DESIGNER GENERATED CODE. DO NOT EDIT OR REMOVE THIS LINE OR BELOW THIS LINE! *****
+
+Dialog
+	Title "Priprema KML za ZoneScan"
+	Width 402 Height 66
+	
+Control PopupMenu
+	Id 2
+	Position 14, 22
+	Width 75
+	Title From Variable arr_Zone()
+	Value 1
+	Into sn_ZONA
+	
+Control GroupBox
+	Id 1
+	Position 10, 10
+	Width 83 Height 31
+	Title "Merna Zona:"
+	
+Control EditText
+	Id 4
+	Position 101, 22
+	Width 231 Height 12
+	Value "D:\_radni\EXPORT\GoogleEarth\ZoneScan\"
+	Into s_ExpFolder
+	
+Control Button
+	Title "Odaberi..."
+	Id 5
+	Position 336, 20
+	Width 51 Height 14
+	Calling Select_DIR_ZSExp
+	
+Control GroupBox
+	Id 3
+	Position 97, 10
+	Width 296 Height 32
+	Title "Folder za KML fajlove:"
+	
+Control OKButton
+	Title "Kreiraj KML"
+	Id 8
+	Position 336, 45
+	Width 51 Height 14
+	Calling Dialog_MZ_u_KML_OK
+	
+Control StaticText
+	Id 6
+	Position 14, 48
+	Width 221 Height 8
+	Title "* Nakon izvoza u KML podesiti simbole za hidrante u Google Earth !"
+	
+Control CancelButton
+	Title "Cancel"
+	Position 281, 45
+	Width 51 Height 14
+
+	Exit Sub
+'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "Dialog_MZ_u_KML")
+	Call ERRShow()
+	
+End Sub						

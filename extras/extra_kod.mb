@@ -1,0 +1,264 @@
+
+
+	i_SelInfoRows = SelectionInfo(SEL_INFO_NROWS)
+	i_TabInfoRows = TableInfo(Selection, TAB_INFO_NROWS)
+	
+	Print "i_SelInfoRows="+i_SelInfoRows
+	Print "i_TabInfoRows="+i_TabInfoRows
+	
+	' = LIVE tabela	
+
+'	Register Table s_ImeTabele  
+'		TYPE ODBC 
+'		TABLE "Select *  From ""GIS"".""data"".""Kupci-potrosaci_vode_GEOREF""  Where (""Zona"" = "+sn_ZONA+") and (""Knjiga"" = "+sn_KNJIGA+") Order By ""Zona"",""Knjiga"",""RedBroj""" 
+'		CONNECTION "DSN="+s_DSN+";UID="+s_USER+";PWD="+s_PASS+";APP=MapInfo Professional®;DATABASE=GIS;MARS_Connection=Yes;" toolkit  "ODBC" 
+'		Autokey Off 
+'		CACHE OFF 
+'		Versioned Off Workspace "" ParentWorkspace "" Symbol (40,255,10)  
+'		Into s_ImeTabeleFull 
+'		
+'		Open Table s_ImeTabeleFull Interactive
+		
+		
+
+' - pomeranje map prozora na sever za 100 metara
+'	Set Map Window iMapWindowID Pan 500 Units "m" North Smart Redraw
+
+
+									'	print "minX = "+minX
+									'	print "maxX = "+maxX
+									'	print "minY = "+minY
+									'	print "maxY = "+maxY
+	
+									'	Set Map Window iMapWindowID Layer 0 Editable On
+									'
+									'	Create Rect (minX,maxY) (maxX,minY)
+									'		Pen (1,4,65535) 
+									'		Brush (1,0,10777215)
+									'	Create Point (minX,maxY) Symbol (70,0,24,"MapInfo Cartographic",0,0)  
+									'	Create Point (maxX,maxY) Symbol (70,0,24,"MapInfo Cartographic",0,0)
+									'	Create Point (maxX,minY) Symbol (70,0,24,"MapInfo Cartographic",0,0)
+									'	Create Point (minX,minY) Symbol (70,0,24,"MapInfo Cartographic",0,0)
+
+									
+
+
+									'	iscrtavanje okvira mapper prozora i ivicnih tacaka u cosmetic layer-u
+									'	Set Map Window iMapWindowID Layer 0 Editable On
+									'
+									'	Create Rect (minX,maxY) (maxX,minY)
+									'		Pen (1,5,65535) 
+									'		Brush (1,0,16777215)
+									'	Create Point (minX,maxY) Symbol (69,0,24,"MapInfo Cartographic",0,0)  
+									'	Create Point (maxX,maxY) Symbol (69,0,24,"MapInfo Cartographic",0,0)
+									'	Create Point (maxX,minY) Symbol (69,0,24,"MapInfo Cartographic",0,0)
+									'	Create Point (minX,minY) Symbol (69,0,24,"MapInfo Cartographic",0,0)
+
+'=====================================================
+grupe lejera GLAVNI WOR
+
+
+NIVOS, 		1
+							[Pomocni],	8
+NIKAS, 		2
+[Radni], 9
+							_uklonjeno, 10
+[Saglasnosti i uslovi], 11
+Geodetski, 	3
+							_izmene, 	12
+Katastar, 	4
+	Izohipse,	13
+	Administrativne granice,	14
+	
+Podloge, 	5
+	Mreze, 		6
+	Planovi, 	7
+
+
+'================================================================
+
+
+Set Map Window FrontWindow() Order Layers LayerID(IZOHIPSE) DestGroupLayer GroupLayer_ID(IZOHIPSE)
+
+'	Server i_hdbc link table "Select * From ""MI_USER"".""TEMP""" Toolkit "ODBC" Into "temp" File s_FOLDER_RAD+"temp.tab"	
+'	Add Map layer TEMP
+'	Set Map Layer LayerID(temp) Editable On
+'
+''		Set Style Pen (1,15,16736352)
+'		Insert Into TEMP (obj) Values (objIzo)
+'		Commit Table TEMP Interactive
+'		Server Refresh TEMP
+'		Fetch last from TEMP
+'			pg = TEMP+".MI_PRINX"
+'			polig = pg
+''			print polig
+'		Close Table temp Interactive		
+
+'	Delete from layerinfo(frontwindow(),0,1)
+'	Delete From WindowInfo(FrontWindow(), WIN_INFO_TABLE)
+
+' ========================
+
+Graph Godina, Jan, Feb, Mar, Apr, Maj, Jun, Jul, Avgs, Sep, Okt, Nov, Decm From Potrosnja_MB_0165344 Using "C:\Program Files\MapInfo\Professional\Naissus\Grafik_potrosnje_vodomera.3tf"
+
+'			n = 1
+			While Not EOT(PotrosnjaTmp)
+				s_ImeTabele = "Potrosnja_MB_"+PotrosnjaTmp.col1
+				print s_ImeTabele
+
+				Select * From PotrosnjaTmp Into s_ImeTabele Where Sifra = PotrosnjaTmp.col1
+				Commit Table s_ImeTabele As s_FOLDER_RAD+s_ImeTabele TYPE NATIVE Charset "WindowsLatin2" Interactive
+				Call GrafikPotrosnje
+				Fetch Next From PotrosnjaTmp
+'				n = n+1
+			Wend	
+			
+			
+			
+		For Col = 1 To Server_NumCols(i_hstmt)
+			Kolona = Server_ColumnInfo(i_hstmt, Col, SRV_COL_INFO_NAME)
+			Server i_hstmt Bind Column Col To Kolona, am_stat
+		Next		
+'====================================
+	s_ImeTabele = "Potrosnja_MB_"+Server_ColumnInfo(i_hstmt, 1, SRV_COL_INFO_VALUE)+"_"+Server_ColumnInfo(i_hstmt, 2, SRV_COL_INFO_VALUE)
+	Server i_hstmt Bind Column 1 To s_SIF, am_stat
+	Server i_hstmt Bind Column 2 To s_GOD, am_stat					
+'	Petlja kroz sve selektovane godine
+	For l = 1 To Ubound(rs_GodPotrOdabrani)
+	Next
+'	- Sortiraj po godini
+	Set browse window 225998472 order by 2		
+
+	'====================================
+	s_verzija= GetRegVal(HKEY_CURRENT_USER,"Software\MapInfo\NMItools\NaissusGIS","verzija")
+
+	s_FOLDER_WOR = GetRegVal(HKEY_CURRENT_USER,"Software\MapInfo\NMItools\NaissusGIS","Folder_WOR")
+	s_FOLDER_TAB = GetRegVal(HKEY_CURRENT_USER,"Software\MapInfo\NMItools\NaissusGIS","Folder_TAB")
+	s_FOLDER_podloge=GetRegVal(HKEY_CURRENT_USER,"Software\MapInfo\NMItools\NaissusGIS","Folder_PODLOGE")
+'	s_FOLDER_podloge="\\Apl-naissus\GIS\Podloge\"
+	s_FOLDER_GG =GetRegVal(HKEY_CURRENT_USER,"Software\MapInfo\NMItools\NaissusGIS","Folder_NET")
+	
+	
+	s_FOLDER_TAB = GetPrivateProfileString32 ("GIS_FOLDERI", "Folder_TAB", Ret_Def, Val_Ret, Len(Val_Ret), iniFile)
+	
+	Note "drugi red : "+chr$(13)+chr$(13)+"Program je prekinut."
+
+	Print #1, " File """ + fajlServer + """"
+	
+	print "CurDate: "+CurDate()
+	print "CurTime: "+CurTime()		
+	
+	print "Day: "+Day(CurDate())
+	
+	print "CurDateTime: "+CurDateTime()
+
+	'		2013 12 03 13 16 31 000
+	'		2013 12 03 13 17 53 000
+	'		2007 03 01 21 42 37 582
+
+		rep = ExecuteAndWait(ApplicationDirectory$()+"")		
+
+		rep = ExecuteAndWait("@xcopy """ + s_Update_MBX + "*.*"" """ + ApplicationDirectory$() + """ /e /r /h /y /d")
+		Print "@xcopy """ + s_Update_MBX + "*.*"" """ + ApplicationDirectory$() + """ /e /r /h /y /d"
+		rep = ExecuteAndWait("@xcopy """ + s_Update_WOR + "*.*"" """ + s_FOLDER_WOR + """ /e /r /h /y /d")
+		Print "@xcopy """ + s_Update_WOR + "*.*"" """ + s_FOLDER_WOR + """ /e /r /h /y /d"
+		rep = ExecuteAndWait("@xcopy """ + s_Update_PRJ + "MAPINFOW.PRJ"" """+ ProgramDirectory$() + """ /e /r /h /y /d")
+	
+	' =====================================================================================================================
+'Sub Login_DLG 
+'	
+'' - dijalog prozor za logovanje korisnika
+'	
+'	login_start:
+'	DIALOG
+''		POSITION 645, 322
+'	    WIDTH 193 HEIGHT 180
+'	    TITLE "JKP ''Naissus'' GIS - Prijava korisnika"
+'	    CONTROL EditText
+'	      POSITION 75, 10
+'	      WIDTH 104 HEIGHT 14
+'	      ID s_USER_ID
+'	      VALUE s_USER 
+'	      INTO s_USER
+'	    CONTROL EditText
+'	      POSITION 75, 30
+'	      WIDTH 104 HEIGHT 14
+'	      ID s_PASS_ID
+'	      INTO s_PASS
+'	      PASSWORD
+'		CONTROL EditText
+'	      POSITION 75, 50
+'	      WIDTH 105
+'	      ID s_DSN_ID
+'	      VALUE s_DSN
+'	      INTO s_DSN
+'		CONTROL OKButton
+'	      POSITION 133, 153
+'	      WIDTH 48 HEIGHT 15
+'	      ID Login_OK_ID
+'	      TITLE "OK"
+'	      CALLING Login_Param_Check
+'	    CONTROL CancelButton
+'	      POSITION 64, 153
+'	      WIDTH 48 HEIGHT 15
+'	      ID Login_Cancel_ID
+'	      TITLE "Odustani"
+'	      CALLING Login_CANCEL
+'	    CONTROL Button
+'	      POSITION 11, 153
+'	      WIDTH 48 HEIGHT 15
+'	      ID Login_Help_ID
+'	      TITLE "Pomoc"
+'	      CALLING Login_HELP
+'	    CONTROL StaticText
+'	      POSITION 12, 15
+'	      WIDTH 52 HEIGHT 10
+'	      TITLE "Korisnicko Ime:"
+'	    CONTROL StaticText
+'	      POSITION 12, 35
+'	      WIDTH 40 HEIGHT 10
+'	      TITLE "Lozinka:"
+'	    CONTROL StaticText
+'	      POSITION 12, 54
+'	      WIDTH 51 HEIGHT 10
+'	      TITLE "Baza podataka:"
+'	    CONTROL GroupBox
+'	      POSITION 11, 69
+'	      WIDTH 169 HEIGHT 72
+'	      TITLE "Opcije"
+'	    CONTROL RadioGroup
+'	      POSITION 27, 83
+'	      ID Login_RG_1_ID
+'	      TITLE "Ucitaj samo alate;Otvori postojeci .WOR;Kreiraj standardni GIS radni prostor;Offline mod (bez konekcije ka SQL)"
+'	      VALUE 1
+'	      INTO i_Login_RG_1
+'
+'End Sub     
+
+' =====================================================================================================================
+
+			Server i_hstmt Bind Column 1 To sifra, am_stat			
+			Server i_hstmt Bind Column 2 To naziv, am_stat
+			Server i_hstmt Bind Column 3 To kategorija, am_stat
+			Server i_hstmt Bind Column 4 To ulica, am_stat
+			Server i_hstmt Bind Column 5 To broj, am_stat
+			Server i_hstmt Bind Column 6 To mesto, am_stat
+			Server i_hstmt Bind Column 7 To zona, am_stat
+			Server i_hstmt Bind Column 8 To knjiga, am_stat
+			Server i_hstmt Bind Column 9 To redbroj, am_stat
+			Server i_hstmt Bind Column 10 To status, am_stat
+			Server i_hstmt Bind Column 11 To jan, am_stat
+			Server i_hstmt Bind Column 12 To feb, am_stat
+			Server i_hstmt Bind Column 13 To mar, am_stat
+			Server i_hstmt Bind Column 14 To apr, am_stat
+			Server i_hstmt Bind Column 15 To maj, am_stat
+			Server i_hstmt Bind Column 16 To jun, am_stat
+			Server i_hstmt Bind Column 17 To jul, am_stat
+			Server i_hstmt Bind Column 18 To avgs, am_stat
+			Server i_hstmt Bind Column 19 To sep, am_stat
+			Server i_hstmt Bind Column 20 To okt, am_stat
+			Server i_hstmt Bind Column 21 To nov, am_stat
+			Server i_hstmt Bind Column 22 To decm, am_stat
+			Server i_hstmt Bind Column 23 To sumagodpotr, am_stat
+			Server i_hstmt Bind Column 24 To profil, am_stat
+			Server i_hstmt Bind Column 25 To q, am_stat

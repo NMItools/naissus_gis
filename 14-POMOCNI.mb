@@ -1,0 +1,345 @@
+include "mapbasic.def"
+include "menu.def"
+include "icons.def"
+include "..\Library\ERRORLib.def"
+include "..\nmiWin.def"
+include "..\nmiFunkcije.def"
+include "..\nmiDotNet.def"
+include "NAISSUS-GIS.def"
+
+Declare Sub PrintMapWinSTATUS
+Declare Sub KoordinateTest
+
+
+Sub Pomocni
+	
+	onerror goto Greska  
+	
+	Create Menu "Razno" as
+		"MapInfo Podešavanja" calling MIPodesavanja,
+		"(-",		
+		"Prikazi sistemske prozore" calling SysWindows,
+		"Prvi lejer na dno" Calling PrviNaDno,
+		"Spisak ID lejera" Calling LayerIDLista,
+		"Taèka u WKT string" calling TackaWKT,
+		"Visina objekta na osnovu OF senke" Calling VisinaObjekta,	
+		"Koordinate" Calling KoordinateTest
+	
+	Create ButtonPad "Razno" As
+		
+		ToggleButton
+			Calling MIPodesavanja
+			ID 992
+			Icon 8397 File "nmiIcons.dll"
+			HelpMsg  "Informacije o podesavanjima MapInfo 2\nMapInfo podešavanja"
+			Uncheck
+			Enable 
+			
+		SEPARATOR
+		
+		PushButton
+			Calling SysWindows
+			Icon 8417 File "nmiIcons.dll"	
+			HelpMsg "Resetuje sistemske prozore\nReset sys. prozora"
+			
+		PushButton
+			Calling PrviNaDno
+			Icon 8381 File "nmiIcons.dll"	
+			HelpMsg "Pomera prvi lejer na dno \nPrvi lejer na dno"
+
+		PushButton
+			Calling LayerIDLista
+			Icon 8425 File "nmiIcons.dll"	
+			HelpMsg "ID svih lejera u Map prozoru \nLejer ID"
+			
+		ToolButton 
+			Calling TackaWKT
+			ID 991
+			Icon 8347 File "nmiIcons.dll"	
+			Cursor MI_CURSOR_ARROW
+			DrawMode DM_CUSTOM_POINT
+			HelpMsg "XY u WKT\nPointWKT"		
+			
+		ToolButton 
+			Calling VisinaObjekta
+			ID 993
+			Icon MI_ICON_MB_11
+			Cursor MI_CURSOR_ARROW
+			DrawMode DM_CUSTOM_POINT
+			HelpMsg "Visina objekta na osnovu senke\nVisina objekta"		
+		
+		SEPARATOR
+		
+		PushButton
+			Calling PrintMapWinSTATUS
+			Icon 8425 File "nmiIcons.dll"	
+			HelpMsg "MapWinSTATUS(0)\nMapWinSTATUS(0)"		
+
+		PushButton
+			Calling KoordinateTest
+			Icon MI_ICON_MB_8
+			HelpMsg "Testiranje koordinata\nTestiranje koordinata"			
+	
+	Alter Menu "JKP Naissus" Add 
+		"Razno" As "Razno",
+		"(-"
+		
+	Alter ButtonPad "Razno" 
+'		Position(28,5.5) Units "cm"
+		ToolbarPosition (2,4)
+		Fixed     
+		Title "Razno"
+		Width 10
+		Show   
+		
+	Exit Sub
+'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "Pomocni")
+	Call ERRShow()
+	
+End Sub
+
+
+Sub PrintMapWinSTATUS
+
+Print "================"
+Print "MapWinSTATUS(0)"
+Print MapWinSTATUS(0)
+Print "================"
+Print "MapWinID(0)"
+Print MapWinID(0)
+Print "================"
+'Print "MapWinSTATUS(0)"
+'Print MapWinSTATUS(0)
+'Print "================"
+'Print "MapWinSTATUS(0)"
+'Print MapWinSTATUS(0)
+'Print "================"
+	
+End Sub
+
+Sub MIPodesavanja
+
+	onerror goto Greska  
+	
+'	Set Window Message Font ("Courier New", 0, 7, BLUE)
+
+	Dim s_Mi_App_Data, 
+	s_Mi_Loc_App_Data,
+	s_Mi_Prf_File,
+	s_Mi_Comm_Data,
+	s_Fold_Data,
+	s_Loc_Data,
+	s_Comm_Data,
+	s_Comm_Docs,
+	s_My_Docs,
+	s_My_Pics as string
+	
+	Dim s_OS as String
+
+	Print ""
+	Print "=================================================================================="	
+	Print " Operativni Sistem: "
+	Print " - "+OSName()
+	Print " MapInfo v"+SystemInfo(SYS_INFO_MIFULLVERSION)
+	Print " Release Build: "+SystemInfo(SYS_INFO_MIBUILD_NUMBER)
+	Print "=================================================================================="	
+	Print " Lokalni GIS folderi:"
+	Print ""			
+	Print "	s_FOLDER_WOR ="+s_FOLDER_WOR
+	Print "	s_FOLDER_TAB ="+s_FOLDER_TAB
+	Print "	s_FOLDER_PRN ="+s_FOLDER_PRN
+	Print "	s_FOLDER_RAD ="+s_FOLDER_RAD
+	Print "=================================================================================="	
+	print "MapInfo podesavanja:"
+	Print ""			
+	print "	Koord. sistem: " + SessionInfo(SESSION_INFO_COORDSYS_CLAUSE)
+	print "	Duzine u : " + SessionInfo(SESSION_INFO_DISTANCE_UNITS)
+	print "	Povrsine u : " + SessionInfo(SESSION_INFO_AREA_UNITS)
+	print "	Dimenzije papira u : " + SessionInfo(SESSION_INFO_PAPER_UNITS)
+	Print "=================================================================================="	
+	print " MapInfo sistemski folderi:"	
+	Print ""		
+	Print " TEMP = "+pathtodirectory$(tempfilename$(""))
+	Print " HomeDirectory$() = "+HomeDirectory$()
+	Print " ApplicationDirectory$() = "+ApplicationDirectory$()
+	Print " ProgramDirectory$() = "+ProgramDirectory$()
+	Print " ----------------------------------------------------------------------------------"	
+	s_Mi_App_Data 		= GetFolderPath$(FOLDER_MI_APPDATA)
+	s_Mi_Loc_App_Data 	= GetFolderPath$(FOLDER_MI_LOCAL_APPDATA)
+	s_Mi_Prf_File 		= GetFolderPath$(FOLDER_MI_PREFERENCE)
+	s_Mi_Comm_Data 		= GetFolderPath$(FOLDER_MI_COMMON_APPDATA)
+	s_Fold_Data 		= GetFolderPath$(FOLDER_APPDATA)
+	s_Loc_Data 			= GetFolderPath$(FOLDER_LOCAL_APPDATA)
+	s_Comm_Data 		= GetFolderPath$(FOLDER_COMMON_APPDATA)
+	s_Comm_Docs 		= GetFolderPath$(FOLDER_COMMON_DOCS)
+	s_My_Docs 			= GetFolderPath$(FOLDER_MYDOCS)
+	s_My_Pics 			= GetFolderPath$(FOLDER_MYPICS)
+
+	Print " (FOLDER_MI_APPDATA) = "+s_Mi_App_Data
+	Print " (FOLDER_MI_LOCAL_APPDATA) = "+s_Mi_Loc_App_Data
+	Print " (FOLDER_MI_PREFERENCE) = "+s_Mi_Prf_File
+	Print " (FOLDER_MI_COMMON_APPDATA) = "+s_Mi_Comm_Data
+	Print "=================================================================================="	
+	Print "   OS folderi"
+	Print ""
+	Print " (FOLDER_APPDATA)="+s_Fold_Data
+	Print " (FOLDER_LOCAL_APPDATA)="+s_Loc_Data
+	Print " (FOLDER_COMMON_APPDATA)="+s_Comm_Data
+	Print " (FOLDER_COMMON_DOCS)="+s_Comm_Docs
+	Print " (FOLDER_MYDOCS)="+s_My_Docs
+	Print " (FOLDER_MYPICS)="+s_My_Pics 
+	Print "=================================================================================="	
+	
+'	Set Window Message Font ("MS Sans Serif", 0, 8, BLACK)
+	
+	Exit Sub
+'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "MIPodesavanja")
+	Call ERRShow()
+	
+End Sub
+
+Sub SysWindows
+	
+	onerror goto Greska
+	
+	Set Window Info position(0,0) width 7 height 5 units "cm"
+	Set Window Message position(0,5) width 11.5 height 5 units "cm"
+
+	
+	Exit Sub
+'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "MIPodesavanja")
+	Call ERRShow()
+	
+End Sub
+
+Sub PrviNaDno
+	
+	onerror goto Greska
+	
+	dim nlayers as smallint
+	dim acom as string
+	dim k as smallint
+	
+	nlayers = mapperinfo(FrontWindow(),9)
+	acom="Set Map Window FrontWindow() order "
+	
+	for k=2 to nlayers
+		acom=acom+str$(k)+","
+	next
+	
+	acom=acom+"1"
+	run command acom  
+	
+	Exit Sub
+'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "layorder")
+	Call ERRShow()	
+End Sub
+
+Sub LayerIDLista
+	
+	onerror goto Greska  
+
+	Dim i as integer
+	
+	If frontwindow() = 0 then Note "Nema otvorenog MAP prozora!"  Exit Function
+	End If      
+	
+	Print ""
+	Print "=================================="
+	Print "Spisak Lejera u Map prozoru ("+str$(MapperInfo(frontwindow(), MAPPER_INFO_LAYERS))+"):"
+	Print ""
+	
+	For i = 1 to mapperinfo(frontwindow(),MAPPER_INFO_LAYERS)
+		Print i + " = " + layerinfo(frontwindow(),i,LAYER_INFO_NAME)
+	Next
+
+	Print "=================================="	
+	
+	Exit Sub
+'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "LayerIDLista")
+	Call ERRShow()	
+	
+End Sub
+
+Sub TackaWKT
+
+	onerror goto Greska  
+	
+	Dim x,y as float
+	
+' - Oèitavanje koordinata na mesto klika
+	x = CommandInfo(CMD_INFO_X)
+	y = CommandInfo(CMD_INFO_Y)	
+	
+	Print WKT_Tacka(x,y)
+
+'	Alter Button ID 991 Uncheck
+'	Run Menu Command M_TOOLS_SELECTOR	
+	
+	Exit Sub
+'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "TackaWKT")
+	Call ERRShow()	
+	
+End Sub
+
+Sub VisinaObjekta
+Note "Yeee"
+End Sub
+
+Sub KoordinateTest
+
+	onerror goto Greska  
+	
+	Dim s_filespec_1, s_filespec_2, s_filedir As String
+
+' - imena tabela za rad
+	s_filespec_1 = "KoordTest_WGS84"
+'   s_filespec_2 = "KoordTest___GK7"
+
+	Print "Kreiranje tabele za rad: KoordTest_WGS84"
+
+'	If OtvorenTAB(s_filespec_1)
+'	Then 
+'		Close Table s_filespec_1
+'	End
+
+	If FileExists(s_filespec_1) 
+		Then
+		Open Table s_filespec_1 Interactive	
+	Else
+		Create Table s_filespec_1 (WGS84_4326_Lon Float,WGS84_4326_Lat Float,WGS84_4326_Lon_DMS Char(16),WGS84_4326_Lat_DMS Char(16),ETRS89_4258_Lon Float,ETRS89_4258_Lat Float,GK7_31277_X Float,GK7_31277_Y Float,UTM34_WGS84_32634_X Float,UTM34_WGS84_32634_Y Float,UTM34_ETRS89_25834_x Float,UTM34_ETRS89_25834_y Float,ETRS_TM34_3046_X Float,ETRS_TM34_3046_Y Float,WM_3857_x Float,WM_3857_y Float,Geomreze_32805_x Float,Geomreze_32805_y Float) file s_filespec_1+".TAB" TYPE NATIVE Charset "WindowsLatin2"
+			Create Map For s_filespec_1 CoordSys Earth Projection 1, 104
+			Add Map Layer s_filespec_1
+			Set Map Layer 1 Editable On
+	End If
+
+'	Commit Table KoordTest_WGS84 As s_filespec_1 TYPE NATIVE Charset "WindowsLatin2" CoordSys Earth Projection 1, 104 Interactive
+'   Commit Table KoordTest___GK7 As s_filespec_2 TYPE NATIVE Charset "WindowsLatin2" CoordSys Earth Projection 8, 9999, 10, 485.017844, 254.040967, 490.850757, -6.25099249, -3.40102363, 15.57471608, 3.12980309, 0, "m", 21, 0, 0.9999, 7500000, 0 Bounds (-747318.511274, -9999855.67907) (15747318.5113, 9999855.67907) Interactive
+
+	s_filedir = PathToDirectory$(s_filespec_1)
+
+	Print s_filedir+s_filespec_1
+'	Open Table s_filedir+s_filespec_1 Interactive
+'	Add Map Auto Layer KoordTest_WGS84
+
+' - Close Table KoordTest_WGS84 Interactive
+
+	Exit Sub
+'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "KoordinateTest")
+	Call ERRShow()	
+	
+End Sub

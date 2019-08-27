@@ -1,0 +1,263 @@
+include "mapbasic.def"
+include "menu.def"
+include "icons.def"
+include "..\Library\ERRORLib.def"
+include "..\nmiWin.def"
+include "..\nmiFunkcije.def"
+include "..\nmiDotNet.def"
+include "NAISSUS-GIS.def"
+
+'===================================================================================================================== 
+'	Video inspekcija kanalizacionih cevi CCTV kamerom
+
+SUB CCTV
+	
+	onerror goto Greska 
+	
+	Create Menu "NIKAS CCTV" as
+		"CCTV prikaz" ID 15010 calling CCTV_Tematska,
+		"Lista snimaka deonice" ID 15020 calling CCTV_NadjiDeonicu,
+		"Folder izvestaja" ID 15030 calling CCTV_NadjiDeonicu,	
+		"PDF izvestaj" ID 15040 calling CCTV_NadjiDeonicu
+
+	Alter Menu "JKP Naissus" Add 
+		"NIKAS CCTV" As "NIKAS CCTV"	
+
+	Alter Menu Item ID 15020 Disable		
+	Alter Menu Item ID 15030 Disable
+	Alter Menu Item ID 15040 Disable
+	
+	'---
+	  
+	Create ButtonPad "NIKAS CCTV" As
+		ToggleButton Calling CCTV_Tematska
+			ID 1501
+			Icon MI_ICON_MISC_11
+			HelpMsg "Prikazi snimljene deonice\nPrikazi snimljene deonice"
+			Uncheck
+			Enable 	
+		ToggleButton Calling CCTV_TematskaOFF
+			ID 1505
+			Icon MI_ICON_MISC_11
+			HelpMsg "Ukloni snimljene deonice\nUkloni snimljene deonice"
+			Uncheck
+			Disable
+			SEPARATOR
+		ToolButton Calling CCTV_NadjiDeonicu
+			ID 1502
+			DrawMode DM_CUSTOM_POINT
+			Icon MI_ICON_MB_10
+			HelpMsg "WinCan projekat snimanja izabrane deonice\nWinCan projekat deonice"
+			Uncheck
+			Enable
+		ToolButton Calling CCTV_NadjiDeonicu
+			ID 1503
+			DrawMode DM_CUSTOM_POINT
+			Icon MI_ICON_CLOSE_ALL
+			HelpMsg "Otvori folder izvestaja\nFolder izvestaja"
+			Uncheck
+			Enable 
+		ToolButton Calling CCTV_NadjiDeonicu
+			ID 1504
+			DrawMode DM_CUSTOM_POINT
+			Icon MI_ICON_PRINT_PDF
+			HelpMsg "Otvori direktno PDF izvestaj\nIzvestaj u PDF"
+			Uncheck
+			Enable 		
+	
+	'---
+		
+	Alter ButtonPad "NIKAS CCTV" 
+	'	Position(8,5.5) Units "cm"
+		ToolbarPosition (1,6)
+		Fixed
+		Title "NIKAS CCTV"
+		Width 21
+		Show        
+
+	Exit Sub
+	'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "CCTV")
+	Call ERRShow()	               
+
+End SUB   
+
+SUB CCTV_Tematska
+
+	onerror goto Greska 
+
+	If MapWinSTATUS(0) <> 1 
+	Then
+		Alter Button ID 1501 Uncheck
+		Exit Sub
+	End If
+
+	If OtvorenTAB("FEKALNA") = FALSE 
+		or
+	   OtvorenTAB("FEK_KAN_SAHT") = FALSE 
+		or
+	   OtvorenTAB("ATMOSFERSKA") = FALSE 
+		or
+	   OtvorenTAB("ATM_SAHT") = FALSE 
+	Then
+		Note "Potrebne tabele NIKAS nisu otvorene!"
+		Exit Sub
+	End If
+	
+'	Set Map Window FrontWindow() Layer LayerID("ATMOSFERSKA") Label Auto Off
+'	Set Map Window FrontWindow() Layer LayerID("FEKALNA") Label Auto Off
+	
+	Call lab_fek_kan_saht_miprinx
+	Call lab_atm_saht_miprinx
+	Call lab_fekalna_miprinx
+	Call lab_atmosferska_miprinx
+	
+	cctvTemF = TemLayerID("FEKALNA")
+	Call TEM_fek_CCTV
+	
+	cctvTemA = TemLayerID("ATMOSFERSKA")	
+	Call TEM_atm_CCTV
+	
+	Alter Button ID 1501 Disable
+	Alter Button ID 1505 Enable
+	
+	Exit Sub
+	'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "CCTV_Tematska")
+	Call ERRShow()	               
+	
+End Sub
+
+SUB CCTV_TematskaOFF
+
+	onerror goto Greska 
+	
+	Remove Map Window FrontWindow() Layer cctvTemA
+	Remove Map Window FrontWindow() Layer cctvTemF
+	
+	Call lab_fek_kan_saht_KTiKD
+	Call lab_fekalna_mat_prec
+	
+	Call lab_atm_saht_KTiKD
+	Call lab_atmosferska_mat_prec
+	
+	Alter Button ID 1505 Uncheck	
+	Alter Button ID 1505 Disable
+
+	Alter Button ID 1501 Enable
+	Alter Button ID 1501 Uncheck	
+
+	Exit Sub
+	'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "CCTV_TematskaOFF")
+	Call ERRShow()	               
+
+End Sub
+
+Sub CCTV_NadjiDeonicu
+	
+	onerror goto Greska 
+	
+	Dim x,y As float
+	Dim objTmp As Object	
+	Dim i_found, i as SmallInt
+		
+' - Oèitavanje koordinata na mesto klika
+	x = CommandInfo(CMD_INFO_X)
+	y = CommandInfo(CMD_INFO_Y)
+	
+	i_found = 0	
+	s_ImeLejera = ""
+	i_BrReda = 0
+	
+' - da li postoje objekti na mestu klika ?
+	i_found = SearchPoint(FrontWindow(), x, y)											 									
+	
+	Do Case i_found
+	
+		Case 0
+			Print "Nema objekata !"
+			Print " :( "
+			Exit Sub
+	
+		Case else
+			Print "Broj objekata: "+i_found
+				
+	End Case
+	
+	postoji:
+' - Procesiranje rezultata
+	For i = 1 to i_found
+	
+	'	ime tabele koja je "pogodjena" ispod klika.
+		s_ImeLejera = SearchInfo(i, SEARCH_INFO_TABLE)
+	'	broj reda objekta u tabeli
+		i_BrReda = SearchInfo(i, SEARCH_INFO_ROW)
+	
+	'	Print s_ImeLejera + LayerID(s_ImeLejera)
+
+		Do Case s_ImeLejera
+			
+			Case "FEKALNA"
+			miprinx = GIS_ID(s_ImeLejera,i_BrReda)			
+			s_cctv_ID = "fek " & miprinx
+			
+			Case "ATMOSFERSKA"
+			miprinx = GIS_ID(s_ImeLejera,i_BrReda)						
+			s_cctv_ID = "atm " & miprinx
+		
+			Case Else
+			Print ""
+		
+		End Case	
+
+		If FOLDER_Exists(s_FOLDER_CCTV & "Projects\" & s_cctv_ID) = 0
+		Then 
+			Note "Projekat snimanja deonice ne postoji !" 
+			Exit For
+		End If
+				
+		Do Case CommandInfo(CMD_INFO_TOOLBTN)
+		
+			Case 1502
+			s_kom = s_WINCAN_PROG & " /P:" &  s_FOLDER_CCTV & "Projects\" & s_cctv_ID & "\" & " /mdb/projectname=;"
+	
+				'	"\\VERDI\GIS\CCTV\Viewer\WincanViewer.exe" /P:\\VERDI\GIS\CCTV\Projects\atm 1331 /mdb/projectname=;
+	
+			Case 1503
+			s_kom = "explorer /e,/root," & s_FOLDER_CCTV & "Projects\" & s_cctv_ID & "\"
+			
+				'	explorer /e,/root,\\verdi\GIS\CCTV\Projects\fek 5236\Video\
+			
+			Case 1504
+			s_kom = "explorer /e,/root," & s_FOLDER_CCTV & "Projects\" & s_cctv_ID & "\PDF\" & s_cctv_ID & ".pdf" 
+		
+		End Case
+	
+		Print "Prikaz deonice " & s_cctv_ID
+	
+	'	Selekcija i zoom na odabrani objekat
+		Select * from s_ImeLejera where MI_PRINX = miprinx into SelCev
+		Run Menu Command 312  
+		
+	'	Pokretanje izabrane opcije 
+		Run Program s_kom				
+		
+	Next		
+	
+' - Strelica na mesto poèetne šahte i pokazuje u pravcu kretanja kamere prema drugoj šahti
+
+'	Set Map Window FrontWindow() Layer 0 Editable On
+'	Create Point (x,y) Symbol (68,16776960,24,"MapInfo Cartographic",16,0) 
+
+	Exit Sub
+'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "CCTV_NadjiDeonicu")
+	Call ERRShow()	  
+	
+End Sub
+

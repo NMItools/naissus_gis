@@ -1,0 +1,1029 @@
+include "mapbasic.def"
+include "menu.def"
+include "icons.def"
+include "..\Library\ERRORLib.def"
+include "..\nmiWin.def"
+include "..\nmiFunkcije.def"
+include "..\nmiDotNet.def"
+include "NAISSUS-GIS.def"
+
+
+'============================================================================================
+
+SUB Tematike
+
+Create Menu "Tematske Mape" As 
+	"Vodovod po precnicima" HelpMsg "Submenu Item" Calling TEM_vod_precnici,
+	"Vodovod po materijalu" HelpMsg "Submenu Item" Calling TEM_vod_materijal,
+	"Vodovod po visinskim zonama" HelpMsg "Submenu Item" Calling TEM_vod_vis_zon,
+	"Vodovod po mernim zonama" HelpMsg "Submenu Item" Calling TEM_vod_MZ,
+	"Vodovod po sistemima" HelpMsg "Submenu Item" Calling TEM_vod_sistem,
+	"(-",
+	"Fekalna po precnicima" HelpMsg "Submenu Item" Calling TEM_fek_precnici,	
+	"Fekalna po materijalu" HelpMsg "Submenu Item" Calling TEM_fek_materijal,
+	"Fekalna CCTV" HelpMsg "Submenu Item" Calling TEM_fek_CCTV,
+	"(-",
+	"Atmosferska po precnicima" HelpMsg "Submenu Item" Calling TEM_atm_precnici,
+	"Atmosferska po materijalu" HelpMsg "Submenu Item" Calling TEM_atm_materijal,
+	"Atmosferska CCTV" HelpMsg "Submenu Item" Calling TEM_atm_CCTV,
+	"(-",
+	"Vodovod Info" HelpMsg "Submenu Item" Calling TEM_CEVOVOD_info,
+  	"Hidranti Info" HelpMsg "Submenu Item" Calling TEM_HIDRANT_info,
+	"Zatvaraci Info" HelpMsg "Submenu Item" Calling TEM_ZATVARAC_info,
+	"Prikljucci Info" HelpMsg "Submenu Item" Calling TEM_prikljucci_info,
+	"Vodomeri Info" HelpMsg "Submenu Item" Calling TEM_vodomeri_info,
+	"(-",
+	"Vodomeri REON" HelpMsg "Submenu Item" Calling TEM_vodomeri_reon,	
+	"Vodomeri REON-KNJIGA" HelpMsg "Submenu Item" Calling TEM_vodomeri_reon_knjiga
+	
+	Alter Menu "JKP Naissus" Add 
+		"Tematske Mape" As "Tematske Mape"	
+		
+END SUB
+
+'============================================================================================
+     
+Sub TEM_vod_precnici 
+
+Shade CEVOVOD with DN_MM ranges Apply All Use size Line (60,2,4227327) 
+  10: 80 Line (15,2,12416) ,
+  80: 100 Line (24,2,12416) ,
+  100: 200 Line (31,2,12416) ,
+  200: 300 Line (38,2,12416) ,
+  300: 400 Line (43,2,12416) ,
+  400: 600 Line (48,2,12416) ,
+  600: 800 Line (52,2,12416) ,
+  800: 1000 Line (56,2,12416) ,
+  1000: 1200 Line (60,2,4227327) 
+  default Line (1,2,0) 
+
+set legend layer LayerID("Cevovod") 
+ display on 
+ shades off 
+ symbols off 
+ lines on 
+ count on 
+ title "Vodovodna mreža"  Font ("Arial",0,9,0) 
+ subtitle "tematika po PRECNIKU cevovoda" Font ("Arial",0,8,0) 
+ ascending on 
+ ranges Font ("Arial",0,8,0) "(ostalo)" 
+ display on 
+  ,auto display on 
+  ,auto display on 
+  ,auto display on 
+  ,auto display on 
+  ,auto display on 
+  ,auto display on 
+  ,auto display on 
+  ,auto display on 
+  ,auto display on   
+
+
+Create Cartographic Legend From Window FrontWindow() Window Title "Vodovodna mreža - tematika po PRECNIKU cevovoda"
+	Scrollbars On 
+	Portrait Style
+	Size Small
+Default Frame Title "#" Font ("Arial",0,10,0) 
+Default Frame Style "%" Font ("Arial",0,8,0)
+Frame From Layer LayerID("Cevovod")
+	Title "Vodovodna mreža"
+	subtitle "tematika po PRECNIKU cevovoda" 
+
+End Sub
+
+'============================================================================================
+
+Sub TEM_vod_materijal
+
+shade CEVOVOD with MATERIJAL values apply color
+	"" Line (2,2,8421504) ,
+	"AC" Line (2,2,16711680) ,
+	"CC" Line (2,2,65535) ,
+	"DCI" Line (2,2,44031) ,
+	"DCI-T" Line (2,2,44031) ,
+	"LC" Line (2,2,255) ,
+	"PE" Line (2,2,0) ,
+	"POC" Line (2,2,8245248) 
+	default Line (1,2,0)  
+
+set legend layer LayerID("Cevovod") 
+	display on 
+	shades off 
+	symbols off 
+	lines on 
+	count on 
+	Title "Vodovodna mreža" Font ("Arial",0,9,0) 
+	subtitle "tematika po MATERIJALU cevovoda" Font ("Arial",0,8,0) 
+	ascending on 
+	ranges Font ("Arial",0,8,0) "(ostalo)" 
+	display on ,
+	auto display on ,
+	auto display on ,
+	auto display on ,
+	auto display on ,
+	auto display on ,
+	auto display on ,
+	auto display on ,
+	auto display on  
+
+Create Cartographic Legend From Window FrontWindow() Window Title "Vodovodna mreža - tematika po MATERIJALU cevovoda"
+Scrollbars On 
+Portrait Style
+Size Small
+Default Frame Title "#" Font ("Arial",0,10,0) 
+Default Frame Style "%" Font ("Arial",0,8,0)
+Frame From Layer LayerID("Cevovod")
+Title "Vodovodna mreža"
+subtitle "tematika po MATERIJALU cevovoda" 
+
+End Sub
+
+'============================================================================================
+
+Sub TEM_vod_vis_zon
+
+Shade Cevovod with VISINSKA_ZONA values 1 Line (1,2,5278719) ,2 Line (1,2,19424) ,3 Line (1,2,160) ,4 Line (1,2,9437256) default Line (1,2,0) 
+
+End Sub
+
+'============================================================================================
+
+Sub TEM_vod_MZ
+
+shade CEVOVOD with MERNA_ZONA values apply color 
+  10 Brush (17,16711680) Pen (1,2,0) ,
+  11 Brush (17,65280) Pen (1,2,0) ,
+  20 Brush (17,255) Pen (1,2,0) ,
+  21 Brush (2,8405056,16777215) Pen (1,2,0) Line (1,2,8405056) Symbol (34,8405056,12) ,
+  22 Brush (17,16711935) Pen (1,2,0) ,
+  30 Brush (17,16711935) Pen (1,2,0) ,
+  40 Brush (17,16776960) Pen (1,2,0) ,
+  50 Brush (17,15774720) Pen (1,2,0) ,
+  60 Brush (17,65535) Pen (1,2,0) ,
+  70 Brush (17,16765160) Pen (1,2,0) ,
+  71 Brush (17,16744448) Pen (1,2,0) ,
+  80 Brush (17,8388736) Pen (1,2,0) ,
+  81 Brush (17,16776960) Pen (1,2,0) ,
+  82 Brush (17,32896) Pen (1,2,0) ,
+  90 Brush (17,10551200) Pen (1,2,0) ,
+  91 Brush (17,8454016) Pen (1,2,0) ,
+  100 Brush (17,16776960) Pen (1,2,0) ,
+  120 Brush (17,16744703) Pen (1,2,0) ,
+  121 Brush (17,16777088) Pen (1,2,0) ,
+  130 Brush (17,8454143) Pen (1,2,0) Line (1,2,8454143) Symbol (34,8454143,12) ,
+  140 Brush (2,16732240,16777215) Pen (1,2,0) Line (1,2,16732240) Symbol (34,16732240,12) ,
+  150 Brush (2,12615935,16777215) Pen (1,2,0) Line (1,2,12615935) Symbol (34,12615935,12) ,
+  160 Brush (2,16736432,16777215) Pen (1,2,0) Line (1,2,16736432) Symbol (34,16736432,12) ,
+  170 Brush (2,15774720,16777215) Pen (1,2,0) Line (1,2,15774720) Symbol (34,15774720,12) ,
+  171 Brush (2,4227200,16777215) Pen (1,2,0) Line (1,2,4227200) Symbol (34,4227200,12) ,
+  180 Brush (2,16761024,16777215) Pen (1,2,0) Line (1,2,16761024) Symbol (34,16761024,12) ,
+  181 Brush (2,12648384,16777215) Pen (1,2,0) Line (1,2,12648384) Symbol (34,12648384,12) ,
+  190 Brush (2,12632319,16777215) Pen (1,2,0) Line (1,2,12632319) Symbol (34,12632319,12) ,
+  990 Brush (2,16761087,16777215) Pen (1,2,0) Line (1,2,16761087) Symbol (34,16761087,12) ,
+  991 Brush (2,16777152,16777215) Pen (1,2,0) Line (1,2,16777152) Symbol (34,16777152,12) ,
+  992 Brush (2,12648447,16777215) Pen (1,2,0) Line (1,2,12648447) Symbol (34,12648447,12) ,
+  993 Brush (2,8413280,16777215) Pen (1,2,0) Line (1,2,8413280) Symbol (34,8413280,12) ,
+  994 Brush (2,6324320,16777215) Pen (1,2,0) Line (1,2,6324320) Symbol (34,6324320,12) ,
+  996 Brush (2,6316160,16777215) Pen (1,2,0) Line (1,2,6316160) Symbol (34,6316160,12) ,
+  997 Brush (2,8413312,16777215) Pen (1,2,0) Line (1,2,8413312) Symbol (34,8413312,12) 
+  default Brush (1,0,16777215) Pen (1,2,0)
+  
+End Sub
+
+'============================================================================================
+
+Sub TEM_vod_sistem
+End Sub
+
+'============================================================================================                
+
+Sub TEM_fek_precnici
+	
+shade FEKALNA with DN_mm ranges apply all use all Line (56,2,14694400) 
+  0: 1 Line (18,2,14694400) ,
+  1: 199 Line (20,2,14694400) ,
+  200: 399 Line (24,2,14694400) ,
+  400: 499 Line (28,2,14694400) ,
+  500: 600 Line (38,2,14694400) ,
+  600: 799 Line (44,2,14694400) ,
+  800: 999 Line (50,2,14694400) ,
+  1000: 2000 Line (56,2,14694400) 
+  default Line (20,2,10526880) 
+  
+End Sub             
+
+'============================================================================================
+
+Sub TEM_fek_materijal  
+End Sub
+
+Sub TEM_fek_CCTV
+
+	Shade FEKALNA with CCTV values apply All
+		0 Line (1,1,16711680) ,
+		1 Line (2,75,14694400) 
+		default Line (1,2,0)
+		
+End Sub
+
+Sub TEM_atm_CCTV
+
+	Shade ATMOSFERSKA with CCTV values apply All
+		0 Line (1,1,16711680) ,
+		1 Line (2,75,57344) 
+		default Line (1,2,0)
+		
+End Sub
+	
+'============================================================================================
+
+Sub TEM_atm_precnici
+	
+shade ATMOSFERSKA with DN_mm ranges apply all use all Line (18,2,45056) 
+  0: 1 Line (18,2,45056) ,
+  1: 199 Line (20,2,45056) ,
+  200: 399 Line (24,2,45056) ,
+  400: 499 Line (28,2,45056) ,
+  500: 600 Line (38,2,45056) ,
+  600: 799 Line (46,2,45056) ,
+  800: 999 Line (52,2,45056) ,
+  1000: 2000 Line (58,2,45056) 
+  default Line (20,2,10526880) 
+  
+End Sub
+
+'============================================================================================
+
+Sub TEM_atm_materijal
+End Sub
+
+'============================================================================================
+
+Sub TEM_CEVOVOD_info 
+
+Shade CEVOVOD with IZVOR_INFORMACIJE 
+values  
+"GEODETSKI" Line (2,2,16711680)
+,"Katastar" Line (2,2,14708736) 
+,"Planovi" Line (2,2,11579392)  
+,"Sema" Line (2,2,53456)  
+,"GPS" Line (2,65,16776960) 
+,"Terenska Skica" Line (2,2,65280) 
+,"Iz projekta" Line (2,2,14201087) 
+,"Pretpostavljeno" Line (2,2,16711935) 
+,"-" Line (2,2,7368816) 
+default Line (5,2,0)  
+
+set legend layer LayerID("Cevovod")
+display on 
+shades off 
+symbols off 
+lines on 
+count on 
+title "Tacnost pozicije CEVOVODA" Font ("Arial",0,9,0) 
+subtitle "po metodi unosa" Font ("Arial",0,8,0) 
+ascending on 
+ranges Font ("Arial",0,8,0) "(ostalo)" 
+display on 
+,auto display on 
+,auto display on 
+,auto display on 
+,auto display on 
+,auto display on 
+,auto display on 
+,auto display on 
+,auto display on    
+,auto display on
+  
+Create Cartographic Legend From Window FrontWindow() Window Title "Tacnost pozicije CEVOVODA"
+Scrollbars On 
+Portrait Style
+Size Small
+Default Frame Title "#" Font ("Arial",0,10,0) 
+Default Frame Style "%" Font ("Arial",0,8,0)
+Frame From Layer LayerID("Cevovod")
+Title "Tacnost pozicije CEVOVODA"
+subtitle "po metodi unosa" 
+
+End Sub
+
+'============================================================================================
+
+Sub TEM_HIDRANT_info            
+
+shade Hidrant with IZVOR_INFORMACIJE 
+values  "-" Symbol (48,12632256,10,"MapInfo Cartographic",256,0) 
+,"GEODETSKI" Symbol (48,16711680,10,"MapInfo Cartographic",256,0) 
+,"GPS" Symbol (48,16776960,10,"MapInfo Cartographic",16,0) 
+,"projekat" Symbol (48,16711935,10,"MapInfo Cartographic",256,0) 
+,"KATASTAR" Symbol (48,11556864,10,"MapInfo Cartographic",256,0) 
+,"Planovi" Symbol (48,16736432,10,"MapInfo Cartographic",256,0) 
+,"Terenska Skica" Symbol (48,65280,10,"MapInfo Cartographic",256,0) 
+,"sema" Symbol (48,9493503,10,"MapInfo Cartographic",256,0) 
+,"KP" Symbol (48,13671424,10,"MapInfo Cartographic",256,0) 
+default Symbol (40,0,12)  
+
+set legend layer LayerID("Hidrant") 
+display on
+shades off 
+symbols on 
+lines off 
+count on 
+title "Tacnost pozicije HIDRANATA" Font ("Arial",0,9,0) 
+subtitle "po metodi unosa" Font ("Arial",0,8,0)  
+ascending on 
+style size small 
+ranges Font ("Arial",0,8,0) "(ostalo)"  
+display on 
+,auto display on 
+,auto display on 
+,auto display on 
+,auto display on 
+,auto display on 
+,auto display on 
+,auto display on              
+,auto display on 
+,auto display on 
+
+Create Cartographic Legend From Window FrontWindow() Window Title "Tacnost pozicije HIDRANATA"
+Scrollbars On 
+Portrait Style
+Size Small
+Default Frame Title "#" Font ("Arial",0,10,0) 
+Default Frame Style "%" Font ("Arial",0,8,0)
+Frame From Layer LayerID("Hidrant")
+Title "Tacnost pozicije HIDRANATA"
+subtitle "po metodi unosa"
+
+End Sub
+
+'============================================================================================
+
+Sub TEM_ZATVARAC_info 
+
+shade ZATVARAC with IZVOR_INFORMACIJE
+values "-" Symbol (63,12632256,10,"MapInfo Weather",256,0) 
+,"GEODETSKI" Symbol (63,16711680,10,"MapInfo Weather",256,0) 
+,"GPS" Symbol (63,16776960,10,"MapInfo Weather",16,0) 
+,"Odrzavanje ViK" Symbol (63,5308415,10,"MapInfo Weather",16,0) 
+,"projekat" Symbol (63,16744640,10,"MapInfo Weather",256,0) 
+,"Planovi" Symbol (63,8421376,10,"MapInfo Weather",256,0) 
+,"Terenska skica" Symbol (63,65280,10,"MapInfo Weather",256,0) 
+,"sema" Symbol (63,5278719,10,"MapInfo Weather",256,0) 
+default Symbol (40,0,12)  
+
+set legend layer LayerID("ZATVARAC")
+display on 
+shades off 
+symbols on 
+lines off 
+count on 
+title "Tacnost pozicije zatvaraca" Font ("Arial",0,9,0) 
+subtitle "po metodi unosa" Font ("Arial",0,8,0) 
+ascending on 
+ranges Font ("Arial",0,8,0) "(ostalo)" 
+display on
+,auto display on 
+,auto display on 
+,auto display on 
+,auto display on 
+,auto display on 
+,auto display on  
+,auto display on  
+,auto display on  
+
+Create Cartographic Legend From Window FrontWindow() Window Title "Tacnost pozicije zatvaraca"
+Scrollbars On 
+Portrait Style
+Size Small
+Default Frame Title "#" Font ("Arial",0,10,0) 
+Default Frame Style "%" Font ("Arial",0,8,0)
+Frame From Layer LayerID("ZATVARAC")
+title "Tacnost pozicije zatvaraca"
+subtitle "po metodi unosa"
+
+End Sub
+                           
+'============================================================================================
+
+Sub TEM_prikljucci_info
+
+shade Prikljucci with IZVOR_INFORMACIJE
+values  "-" Line (2,2,12632256) 
+,"GEODETSKI" Line (2,2,16728128) 
+,"GPS" Line (2,65,16776960) 
+,"Katastar" Line (2,65,14708736) 
+,"KP" Line (2,2,16756991) 
+,"Sema" Line (2,2,53456) 
+,"Planovi" Line (2,2,16711935) 
+,"Pretpostavljeno" Line (2,2,65280) 
+,"Terenska skica" Brush (2,65280,16777215) Pen (1,2,0) Line (2,65,65280) Symbol (34,65280,12) 
+default Line (5,2,0)  
+
+set legend layer LayerID("Prikljucci")
+display on 
+shades off 
+symbols off 
+lines on 
+count on 
+title "Tacnost pozicije kucnih prikljucaka" Font ("Arial",0,9,0) 
+subtitle "po metodi unosa" Font ("Arial",0,8,0) 
+ascending on 
+ranges Font ("Arial",0,8,0) "(ostalo)" 
+display on 
+,auto display on 
+,auto display on 
+,auto display on 
+,auto display on 
+,auto display on 
+,auto display on 
+,auto display on 
+,auto display on 
+,auto display on 
+
+Create Cartographic Legend From Window FrontWindow() Window Title "Tacnost pozicije kucnih prikljucaka"
+Scrollbars On 
+Portrait Style
+Size Small
+Default Frame Title "#" Font ("Arial",0,10,0) 
+Default Frame Style "%" Font ("Arial",0,8,0)
+Frame From Layer LayerID("Prikljucci")
+title "Tacnost pozicije kucnih prikljucaka"
+subtitle "po metodi unosa"
+
+End Sub
+
+'============================================================================================
+
+Sub TEM_vodomeri_info
+
+Shade Vodomeri with IZVOR_INFORMACIJE 
+values
+"-" Symbol (34,16711680,12) 
+,"GEODETSKI" Symbol (59,65535,12) 
+,"GPS" Symbol (59,16776960,12) 
+,"Karte" Symbol (34,12632256,12) 
+,"Katastar" Symbol (59,12595200,12) 
+,"Pretpostavljeno" Symbol (59,16711935,12) 
+,"Terenska skica" Symbol (34,65280,12) 
+default Symbol (40,0,12)   
+
+set legend layer LayerID("Vodomeri") 
+display on 
+shades off 
+symbols on 
+lines off 
+count on 
+title "Tacnost pozicije vodomera" Font ("Arial",0,9,0) 
+subtitle "po metodi unosa" Font ("Arial",0,8,0) 
+ascending on 
+ranges Font ("Arial",0,8,0) "(ostalo)" 
+display on
+,auto display on 
+,auto display on 
+,auto display on 
+,auto display on 
+,auto display on
+,auto display on 
+,auto display on
+                                
+Create Cartographic Legend From Window FrontWindow() Window Title "Tacnost pozicije vodomera" 
+Scrollbars On 
+Portrait Style 
+Size Small 
+Default Frame Title "#" Font ("Arial",0,10,0) 
+Default Frame Style "%" Font ("Arial",0,8,0) 
+Frame From Layer LayerID("Vodomeri") Title "Tacnost pozicije vodomera" Subtitle "po metodi unosa"
+
+End Sub                               
+
+'============================================================================================
+
+Sub TEM_vodomeri_reon
+
+Shade Vodomeri with INKASO_REON 
+values
+
+	0 Symbol (35,16777215,24) ,
+  10 Symbol (34,16711680,12) ,
+  11 Symbol (34,65280,12) ,
+  20 Symbol (34,255,12) ,
+  21 Symbol (34,8405056,12) ,
+  30 Symbol (34,16711935,12) ,
+  40 Symbol (34,16776960,12) ,
+  50 Symbol (34,15774720,12) ,
+  60 Symbol (34,65535,12) ,
+  70 Symbol (34,16765160,12) ,
+  80 Symbol (34,8388736,12) ,
+  81 Symbol (34,16776960,12) ,
+  90 Symbol (34,10551200,12) ,
+  91 Symbol (34,8454016,12) ,
+  100 Symbol (34,16776960,12) ,
+  120 Symbol (34,16744703,12) ,
+  121 Symbol (34,16777088,12) ,
+  130 Symbol (34,8454143,12) ,
+  140 Symbol (34,16732240,12) ,
+  150 Symbol (34,12615935,12) ,
+  160 Symbol (34,16736432,12) ,
+  170 Symbol (34,15774720,12) ,
+  180 Symbol (34,16761024,12) ,
+  181 Symbol (34,12648384,12) ,
+  999 Symbol (35,0,24) 
+  default Symbol (40,0,12)  
+  
+End Sub
+             
+'--------------------------------------    
+Sub TEM_vodomeri_reon_knjiga
+
+Shade Vodomeri with INKASO_REON+"-"+INKASO_KNJIGA
+values
+      
+    "0-0" Symbol (34,16711680,12) ,
+   "10-1" Symbol (34,65280,12) ,  
+   "10-2" Symbol (34,16744576,12),   
+   "10-3" Symbol (34,4227200,12) ,
+   "10-4" Symbol (34,8421472,12) ,  
+   "10-5" Symbol (34,8388736,12) ,  
+   "10-6" Symbol (34,4210816,12) ,  
+   "10-7" Symbol (34,8413280,12) ,
+   "10-8" Symbol (34,6316160,12),
+   "10-9" Symbol (34,8413312,12),
+  "10-10" Symbol (34,255,12) ,   
+  "10-11" Symbol (34,16711935,12),
+  "10-12" Symbol (34,16776960,12),
+  "10-13" Symbol (34,65535,12) , 
+  "10-14" Symbol (34,8388608,12), 
+  "10-15" Symbol (34,32768,12) , 
+  "10-16" Symbol (34,128,12) ,   
+  "10-17" Symbol (34,8388736,12), 
+  "10-18" Symbol (34,8421376,12), 
+  "10-19" Symbol (34,32896,12) , 
+  "10-20" Symbol (34,8454016,12), 
+  "10-21" Symbol (34,8421631,12) ,
+  "10-22" Symbol (34,16744703,12),
+  "10-23" Symbol (34,16777088,12),
+  "10-24" Symbol (34,8454143,12) ,
+  "10-25" Symbol (34,8405056,12) ,
+  "10-26" Symbol (34,4227136,12) ,
+  "10-27" Symbol (34,4210816,12) ,
+  "10-28" Symbol (34,8405120,12) ,
+  "10-29" Symbol (34,8421440,12) ,
+  "10-30" Symbol (34,16761024,12),
+  "10-31" Symbol (34,12648384,12),
+  "10-32" Symbol (34,12632319,12),
+  "10-33" Symbol (34,16761087,12),
+  "10-34" Symbol (34,16777152,12),
+  "10-35" Symbol (34,12648447,12),
+  "10-36" Symbol (34,8413280,12) ,
+  "10-37" Symbol (34,6324320,12) ,
+  "10-38" Symbol (34,6316160,12) ,
+  "10-39" Symbol (34,8413312,12) ,
+  "10-40" Symbol (34,6324352,12) ,
+  "10-41" Symbol (34,16711680,12),
+  "10-42" Symbol (34,65280,12) , 
+  "10-43" Symbol (34,255,12) ,   
+  "10-44" Symbol (34,16711935,12),
+  "10-45" Symbol (34,16776960,12),
+  "10-46" Symbol (34,65535,12) , 
+  "10-47" Symbol (34,8388608,12) ,
+  "10-48" Symbol (34,32768,12) , 
+  "10-49" Symbol (34,128,12) ,   
+  "10-50" Symbol (34,8421376,12) ,
+  "10-51" Symbol (34,32896,12) , 
+  "10-52" Symbol (34,16744576,12),
+  "10-53" Symbol (34,8454016,12) ,
+  "10-54" Symbol (34,8421631,12) ,
+  "10-55" Symbol (34,16744703,12),
+  "10-56" Symbol (34,16777088,12),
+  "10-57" Symbol (34,8454143,12) ,
+  "10-58" Symbol (34,8405056,12) ,
+  "10-59" Symbol (34,4227136,12) ,
+  "10-60" Symbol (34,8405120,12) ,
+  "10-61" Symbol (34,8421440,12) ,
+  "10-62" Symbol (34,4227200,12) ,
+  "10-63" Symbol (34,16761024,12),
+  "10-64" Symbol (34,12648384,12),
+  "10-65" Symbol (34,12632319,12),
+  "10-66" Symbol (34,16761087,12),
+  "10-67" Symbol (34,16777150,12),
+  "10-68" Symbol (34,16777110,12),
+  "10-69" Symbol (34,12648447,12),
+  "10-70" Symbol (34,8413280,12) ,   
+  "10-71" Symbol (34,24320,12) ,
+  "100-1" Symbol (34,8421472,12) ,
+  "100-10" Symbol (34,6324352,12) ,
+  "100-11" Symbol (34,16711680,12) ,
+  "100-12" Symbol (34,65280,12) ,
+  "100-13" Symbol (34,255,12) ,
+  "100-2" Symbol (34,16711935,12) ,
+  "100-3" Symbol (34,16776960,12) ,
+  "100-4" Symbol (34,65535,12) ,
+  "100-5" Symbol (34,8388608,12) ,
+  "100-6" Symbol (34,32768,12) ,
+  "100-7" Symbol (34,128,12) ,
+  "100-8" Symbol (34,8388736,12) ,
+  "100-9" Symbol (34,8421376,12) ,
+  "11-1" Symbol (34,32896,12) ,
+  "11-2" Symbol (34,16744576,12) ,
+  "11-3" Symbol (34,8454016,12) ,
+  "11-4" Symbol (34,8421631,12) ,
+  "11-5" Symbol (34,16744703,12) ,
+  "120-1" Symbol (34,16777088,12) ,
+  "120-2" Symbol (34,8454143,12) ,
+  "120-3" Symbol (34,8405056,12) ,
+  "120-4" Symbol (34,4227136,12) ,
+  "120-5" Symbol (34,4210816,12) ,
+  "120-6" Symbol (34,8405120,12) ,
+  "120-7" Symbol (34,8421440,12) ,
+  "121-1" Symbol (34,4227200,12) ,
+  "121-2" Symbol (34,16761024,12) ,
+  "121-3" Symbol (34,12648384,12) ,
+  "130-1" Symbol (34,12632319,12) ,
+  "130-10" Symbol (34,16761087,12) ,
+  "130-11" Symbol (34,16777152,12) ,
+  "130-12" Symbol (34,12648447,12) ,
+  "130-13" Symbol (34,8413280,12) ,
+  "130-14" Symbol (34,6324320,12) ,
+  "130-15" Symbol (34,6316160,12) ,
+  "130-16" Symbol (34,8413312,12) ,
+  "130-17" Symbol (34,8421472,12) ,
+  "130-2" Symbol (34,6324352,12) ,
+  "130-3" Symbol (34,16711680,12) ,
+  "130-4" Symbol (34,65280,12) ,
+  "130-5" Symbol (34,255,12) ,
+  "130-6" Symbol (34,16711935,12) ,
+  "130-7" Symbol (34,16776960,12) ,
+  "130-8" Symbol (34,65535,12) ,
+  "130-9" Symbol (34,8388608,12) ,
+  "140-1" Symbol (34,32768,12) ,
+  "140-10" Symbol (34,128,12) ,
+  "140-11" Symbol (34,8388736,12) ,
+  "140-12" Symbol (34,8421376,12) ,
+  "140-13" Symbol (34,32896,12) ,
+  "140-14" Symbol (34,16744576,12) ,
+  "140-15" Symbol (34,8454016,12) ,
+  "140-16" Symbol (34,8421631,12) ,
+  "140-17" Symbol (34,16744703,12) ,
+  "140-18" Symbol (34,16777088,12) ,
+  "140-19" Symbol (34,8454143,12) ,
+  "140-2" Symbol (34,8405056,12) ,
+  "140-20" Symbol (34,4227136,12) ,
+  "140-21" Symbol (34,4210816,12) ,
+  "140-22" Symbol (34,8405120,12) ,
+  "140-23" Symbol (34,8421440,12) ,
+  "140-24" Symbol (34,4227200,12) ,
+  "140-25" Symbol (34,16761024,12) ,
+  "140-26" Symbol (34,12648384,12) ,
+  "140-27" Symbol (34,12632319,12) ,
+  "140-28" Symbol (34,16761087,12) ,
+  "140-3" Symbol (34,16777152,12) ,
+  "140-4" Symbol (34,12648447,12) ,
+  "140-5" Symbol (34,8413280,12) ,
+  "140-6" Symbol (34,6324320,12) ,
+  "140-7" Symbol (34,6316160,12) ,
+  "140-8" Symbol (34,8413312,12) ,
+  "140-9" Symbol (34,8421472,12) ,
+  "150-1" Symbol (34,6324352,12) ,
+  "150-10" Symbol (34,16711680,12) ,
+  "150-11" Symbol (34,65280,12) ,
+  "150-12" Symbol (34,255,12) ,
+  "150-13" Symbol (34,16711935,12) ,
+  "150-14" Symbol (34,16776960,12) ,
+  "150-15" Symbol (34,65535,12) ,
+  "150-16" Symbol (34,8388608,12) ,
+  "150-17" Symbol (34,32768,12) ,
+  "150-18" Symbol (34,128,12) ,
+  "150-19" Symbol (34,8388736,12) ,
+  "150-2" Symbol (34,8421376,12) ,
+  "150-20" Symbol (34,32896,12) ,
+  "150-21" Symbol (34,16744576,12) ,
+  "150-22" Symbol (34,8454016,12) ,
+  "150-23" Symbol (34,8421631,12) ,
+  "150-24" Symbol (34,16744703,12) ,
+  "150-25" Symbol (34,16777088,12) ,
+  "150-26" Symbol (34,8454143,12) ,
+  "150-27" Symbol (34,8405056,12) ,
+  "150-28" Symbol (34,4227136,12) ,
+  "150-29" Symbol (34,4210816,12) ,
+  "150-3" Symbol (34,8405120,12) ,
+  "150-30" Symbol (34,8421440,12) ,
+  "150-31" Symbol (34,4227200,12) ,
+  "150-32" Symbol (34,16761024,12) ,
+  "150-4" Symbol (34,12648384,12) ,
+  "150-5" Symbol (34,12632319,12) ,
+  "150-6" Symbol (34,16761087,12) ,
+  "150-7" Symbol (34,16777152,12) ,
+  "150-8" Symbol (34,12648447,12) ,
+  "150-9" Symbol (34,8413280,12) ,
+  "160-1" Symbol (34,6324320,12) ,
+  "160-10" Symbol (34,6316160,12) ,
+  "160-11" Symbol (34,8413312,12) ,
+  "160-12" Symbol (34,8421472,12) ,
+  "160-13" Symbol (34,6324352,12) ,
+  "160-14" Symbol (34,16711680,12) ,
+  "160-15" Symbol (34,65280,12) ,
+  "160-16" Symbol (34,255,12) ,
+  "160-17" Symbol (34,16711935,12) ,
+  "160-18" Symbol (34,16776960,12) ,
+  "160-19" Symbol (34,65535,12) ,
+  "160-2" Symbol (34,8388608,12) ,
+  "160-20" Symbol (34,32768,12) ,
+  "160-21" Symbol (34,128,12) ,
+  "160-22" Symbol (34,8388736,12) ,
+  "160-23" Symbol (34,8421376,12) ,
+  "160-24" Symbol (34,32896,12) ,
+  "160-25" Symbol (34,16744576,12) ,
+  "160-26" Symbol (34,8454016,12) ,
+  "160-27" Symbol (34,8421631,12) ,
+  "160-28" Symbol (34,16744703,12) ,
+  "160-29" Symbol (34,16777088,12) ,
+  "160-3" Symbol (34,8454143,12) ,
+  "160-30" Symbol (34,8405056,12) ,
+  "160-31" Symbol (34,4227136,12) ,
+  "160-32" Symbol (34,4210816,12) ,
+  "160-33" Symbol (34,8405120,12) ,
+  "160-34" Symbol (34,8421440,12) ,
+  "160-35" Symbol (34,4227200,12) ,
+  "160-36" Symbol (34,16761024,12) ,
+  "160-37" Symbol (34,12648384,12) ,
+  "160-38" Symbol (34,12632319,12) ,
+  "160-39" Symbol (34,16761087,12) ,
+  "160-4" Symbol (34,16777152,12) ,
+  "160-40" Symbol (34,12648447,12) ,
+  "160-41" Symbol (34,8413280,12) ,
+  "160-42" Symbol (34,6324320,12) ,
+  "160-43" Symbol (34,6316160,12) ,
+  "160-44" Symbol (34,8413312,12) ,
+  "160-45" Symbol (34,8421472,12) ,
+  "160-46" Symbol (34,6324352,12) ,
+  "160-47" Symbol (34,16711680,12) ,
+  "160-48" Symbol (34,65280,12) ,
+  "160-49" Symbol (34,255,12) ,
+  "160-5" Symbol (34,16711935,12) ,
+  "160-50" Symbol (34,16776960,12) ,
+  "160-51" Symbol (34,65535,12) ,
+  "160-52" Symbol (34,8388608,12) ,
+  "160-53" Symbol (34,32768,12) ,
+  "160-54" Symbol (34,128,12) ,
+  "160-55" Symbol (34,8388736,12) ,
+  "160-6" Symbol (34,8421376,12) ,
+  "160-7" Symbol (34,32896,12) ,
+  "160-8" Symbol (34,16744576,12) ,
+  "160-9" Symbol (34,8454016,12) ,
+  "170-1" Symbol (34,8421631,12) ,
+  "170-10" Symbol (34,16744703,12) ,
+  "170-11" Symbol (34,16777088,12) ,
+  "170-12" Symbol (34,8454143,12) ,
+  "170-13" Symbol (34,8405056,12) ,
+  "170-14" Symbol (34,4227136,12) ,
+  "170-15" Symbol (34,4210816,12) ,
+  "170-16" Symbol (34,8405120,12) ,
+  "170-17" Symbol (34,8421440,12) ,
+  "170-18" Symbol (34,4227200,12) ,
+  "170-19" Symbol (34,16761024,12) ,
+  "170-20" Symbol (34,12648384,12) ,
+  "170-21" Symbol (34,12632319,12) ,
+  "170-22" Symbol (34,16761087,12) ,
+  "170-3" Brush (2,16777152,16777215) Pen (1,2,0) Line (1,2,16777152) Symbol (34,16777152,12) ,
+  "170-4" Brush (2,12648447,16777215) Pen (1,2,0) Line (1,2,12648447) Symbol (34,12648447,12) ,
+  "170-5" Brush (2,8413280,16777215) Pen (1,2,0) Line (1,2,8413280) Symbol (34,8413280,12) ,
+  "170-6" Brush (2,6324320,16777215) Pen (1,2,0) Line (1,2,6324320) Symbol (34,6324320,12) ,
+  "170-7" Brush (2,6316160,16777215) Pen (1,2,0) Line (1,2,6316160) Symbol (34,6316160,12) ,
+  "170-8" Brush (2,8413312,16777215) Pen (1,2,0) Line (1,2,8413312) Symbol (34,8413312,12) ,
+  "170-9" Brush (2,8421472,16777215) Pen (1,2,0) Line (1,2,8421472) Symbol (34,8421472,12) ,
+  "180-1" Brush (2,6324352,16777215) Pen (1,2,0) Line (1,2,6324352) Symbol (34,6324352,12) ,
+  "181-1" Brush (2,16711680,16777215) Pen (1,2,0) Line (1,2,16711680) Symbol (34,16711680,12) ,
+  "181-2" Brush (2,65280,16777215) Pen (1,2,0) Line (1,2,65280) Symbol (34,65280,12) ,
+  "20-1" Brush (2,255,16777215) Pen (1,2,0) Line (1,2,255) Symbol (34,255,12) ,
+  "20-10" Brush (2,16711935,16777215) Pen (1,2,0) Line (1,2,16711935) Symbol (34,16711935,12) ,
+  "20-12" Brush (2,16776960,16777215) Pen (1,2,0) Line (1,2,16776960) Symbol (34,16776960,12) ,
+  "20-13" Brush (2,65535,16777215) Pen (1,2,0) Line (1,2,65535) Symbol (34,65535,12) ,
+  "20-14" Brush (2,8388608,16777215) Pen (1,2,0) Line (1,2,8388608) Symbol (34,8388608,12) ,
+  "20-15" Brush (2,32768,16777215) Pen (1,2,0) Line (1,2,32768) Symbol (34,32768,12) ,
+  "20-16" Brush (2,128,16777215) Pen (1,2,0) Line (1,2,128) Symbol (34,128,12) ,
+  "20-17" Brush (2,8388736,16777215) Pen (1,2,0) Line (1,2,8388736) Symbol (34,8388736,12) ,
+  "20-18" Brush (2,8421376,16777215) Pen (1,2,0) Line (1,2,8421376) Symbol (34,8421376,12) ,
+  "20-19" Brush (2,32896,16777215) Pen (1,2,0) Line (1,2,32896) Symbol (34,32896,12) ,
+  "20-2" Brush (2,16744576,16777215) Pen (1,2,0) Line (1,2,16744576) Symbol (34,16744576,12) ,
+  "20-20" Brush (2,8454016,16777215) Pen (1,2,0) Line (1,2,8454016) Symbol (34,8454016,12) ,
+  "20-21" Brush (2,8421631,16777215) Pen (1,2,0) Line (1,2,8421631) Symbol (34,8421631,12) ,
+  "20-22" Brush (2,16744703,16777215) Pen (1,2,0) Line (1,2,16744703) Symbol (34,16744703,12) ,
+  "20-23" Brush (2,16777088,16777215) Pen (1,2,0) Line (1,2,16777088) Symbol (34,16777088,12) ,
+  "20-24" Brush (2,8454143,16777215) Pen (1,2,0) Line (1,2,8454143) Symbol (34,8454143,12) ,
+  "20-25" Brush (2,8405056,16777215) Pen (1,2,0) Line (1,2,8405056) Symbol (34,8405056,12) ,
+  "20-26" Brush (2,4227136,16777215) Pen (1,2,0) Line (1,2,4227136) Symbol (34,4227136,12) ,
+  "20-27" Brush (2,4210816,16777215) Pen (1,2,0) Line (1,2,4210816) Symbol (34,4210816,12) ,
+  "20-28" Brush (2,8405120,16777215) Pen (1,2,0) Line (1,2,8405120) Symbol (34,8405120,12) ,
+  "20-29" Brush (2,8421440,16777215) Pen (1,2,0) Line (1,2,8421440) Symbol (34,8421440,12) ,
+  "20-3" Brush (2,4227200,16777215) Pen (1,2,0) Line (1,2,4227200) Symbol (34,4227200,12) ,
+  "20-30" Brush (2,16761024,16777215) Pen (1,2,0) Line (1,2,16761024) Symbol (34,16761024,12) ,
+  "20-31" Brush (2,12648384,16777215) Pen (1,2,0) Line (1,2,12648384) Symbol (34,12648384,12) ,
+  "20-32" Brush (2,12632319,16777215) Pen (1,2,0) Line (1,2,12632319) Symbol (34,12632319,12) ,
+  "20-33" Brush (2,16761087,16777215) Pen (1,2,0) Line (1,2,16761087) Symbol (34,16761087,12) ,
+  "20-34" Brush (2,16777152,16777215) Pen (1,2,0) Line (1,2,16777152) Symbol (34,16777152,12) ,
+  "20-35" Brush (2,12648447,16777215) Pen (1,2,0) Line (1,2,12648447) Symbol (34,12648447,12) ,
+  "20-36" Brush (2,8413280,16777215) Pen (1,2,0) Line (1,2,8413280) Symbol (34,8413280,12) ,
+  "20-37" Brush (2,6324320,16777215) Pen (1,2,0) Line (1,2,6324320) Symbol (34,6324320,12) ,
+  "20-38" Brush (2,6316160,16777215) Pen (1,2,0) Line (1,2,6316160) Symbol (34,6316160,12) ,
+  "20-39" Brush (2,8413312,16777215) Pen (1,2,0) Line (1,2,8413312) Symbol (34,8413312,12) ,
+  "20-4" Brush (2,8421472,16777215) Pen (1,2,0) Line (1,2,8421472) Symbol (34,8421472,12) ,
+  "20-40" Brush (2,6324352,16777215) Pen (1,2,0) Line (1,2,6324352) Symbol (34,6324352,12) ,
+  "20-41" Brush (2,16711680,16777215) Pen (1,2,0) Line (1,2,16711680) Symbol (34,16711680,12) ,
+  "20-42" Brush (2,65280,16777215) Pen (1,2,0) Line (1,2,65280) Symbol (34,65280,12) ,
+  "20-43" Brush (2,255,16777215) Pen (1,2,0) Line (1,2,255) Symbol (34,255,12) ,
+  "20-44" Brush (2,16711935,16777215) Pen (1,2,0) Line (1,2,16711935) Symbol (34,16711935,12) ,
+  "20-45" Brush (2,16776960,16777215) Pen (1,2,0) Line (1,2,16776960) Symbol (34,16776960,12) ,
+  "20-46" Brush (2,65535,16777215) Pen (1,2,0) Line (1,2,65535) Symbol (34,65535,12) ,
+  "20-47" Brush (2,8388608,16777215) Pen (1,2,0) Line (1,2,8388608) Symbol (34,8388608,12) ,
+  "20-48" Brush (2,32768,16777215) Pen (1,2,0) Line (1,2,32768) Symbol (34,32768,12) ,
+  "20-49" Brush (2,128,16777215) Pen (1,2,0) Line (1,2,128) Symbol (34,128,12) ,
+  "20-5" Brush (2,8388736,16777215) Pen (1,2,0) Line (1,2,8388736) Symbol (34,8388736,12) ,
+  "20-50" Brush (2,8421376,16777215) Pen (1,2,0) Line (1,2,8421376) Symbol (34,8421376,12) ,
+  "20-51" Brush (2,32896,16777215) Pen (1,2,0) Line (1,2,32896) Symbol (34,32896,12) ,
+  "20-6" Brush (2,16744576,16777215) Pen (1,2,0) Line (1,2,16744576) Symbol (34,16744576,12) ,
+  "20-7" Brush (2,8454016,16777215) Pen (1,2,0) Line (1,2,8454016) Symbol (34,8454016,12) ,
+  "21-1" Brush (2,8421631,16777215) Pen (1,2,0) Line (1,2,8421631) Symbol (34,8421631,12) ,
+  "21-10" Brush (2,16744703,16777215) Pen (1,2,0) Line (1,2,16744703) Symbol (34,16744703,12) ,
+  "21-2" Brush (2,16777088,16777215) Pen (1,2,0) Line (1,2,16777088) Symbol (34,16777088,12) ,
+  "21-3" Brush (2,8454143,16777215) Pen (1,2,0) Line (1,2,8454143) Symbol (34,8454143,12) ,
+  "21-4" Brush (2,8405056,16777215) Pen (1,2,0) Line (1,2,8405056) Symbol (34,8405056,12) ,
+  "21-5" Brush (2,4227136,16777215) Pen (1,2,0) Line (1,2,4227136) Symbol (34,4227136,12) ,
+  "21-6" Brush (2,4210816,16777215) Pen (1,2,0) Line (1,2,4210816) Symbol (34,4210816,12) ,
+  "21-7" Brush (2,8405120,16777215) Pen (1,2,0) Line (1,2,8405120) Symbol (34,8405120,12) ,
+  "21-8" Brush (2,8421440,16777215) Pen (1,2,0) Line (1,2,8421440) Symbol (34,8421440,12) ,
+  "21-9" Brush (2,4227200,16777215) Pen (1,2,0) Line (1,2,4227200) Symbol (34,4227200,12) ,
+  "30-1" Brush (2,16761024,16777215) Pen (1,2,0) Line (1,2,16761024) Symbol (34,16761024,12) ,
+  "30-10" Brush (2,12648384,16777215) Pen (1,2,0) Line (1,2,12648384) Symbol (34,12648384,12) ,
+  "30-11" Brush (2,12632319,16777215) Pen (1,2,0) Line (1,2,12632319) Symbol (34,12632319,12) ,
+  "30-12" Brush (2,16761087,16777215) Pen (1,2,0) Line (1,2,16761087) Symbol (34,16761087,12) ,
+  "30-13" Brush (2,16777152,16777215) Pen (1,2,0) Line (1,2,16777152) Symbol (34,16777152,12) ,
+  "30-14" Brush (2,12648447,16777215) Pen (1,2,0) Line (1,2,12648447) Symbol (34,12648447,12) ,
+  "30-15" Brush (2,8413280,16777215) Pen (1,2,0) Line (1,2,8413280) Symbol (34,8413280,12) ,
+  "30-16" Brush (2,6324320,16777215) Pen (1,2,0) Line (1,2,6324320) Symbol (34,6324320,12) ,
+  "30-17" Brush (2,6316160,16777215) Pen (1,2,0) Line (1,2,6316160) Symbol (34,6316160,12) ,
+  "30-18" Brush (2,8413312,16777215) Pen (1,2,0) Line (1,2,8413312) Symbol (34,8413312,12) ,
+  "30-19" Brush (2,8421472,16777215) Pen (1,2,0) Line (1,2,8421472) Symbol (34,8421472,12) ,
+  "30-2" Brush (2,6324352,16777215) Pen (1,2,0) Line (1,2,6324352) Symbol (34,6324352,12) ,
+  "30-20" Brush (2,16711680,16777215) Pen (1,2,0) Line (1,2,16711680) Symbol (34,16711680,12) ,
+  "30-21" Brush (2,65280,16777215) Pen (1,2,0) Line (1,2,65280) Symbol (34,65280,12) ,
+  "30-3" Brush (2,255,16777215) Pen (1,2,0) Line (1,2,255) Symbol (34,255,12) ,
+  "30-4" Brush (2,16711935,16777215) Pen (1,2,0) Line (1,2,16711935) Symbol (34,16711935,12) ,
+  "30-5" Brush (2,16776960,16777215) Pen (1,2,0) Line (1,2,16776960) Symbol (34,16776960,12) ,
+  "30-6" Brush (2,65535,16777215) Pen (1,2,0) Line (1,2,65535) Symbol (34,65535,12) ,
+  "30-7" Brush (2,8388608,16777215) Pen (1,2,0) Line (1,2,8388608) Symbol (34,8388608,12) ,
+  "30-8" Brush (2,32768,16777215) Pen (1,2,0) Line (1,2,32768) Symbol (34,32768,12) ,
+  "30-9" Brush (2,128,16777215) Pen (1,2,0) Line (1,2,128) Symbol (34,128,12) ,
+  "40-1" Brush (2,8388736,16777215) Pen (1,2,0) Line (1,2,8388736) Symbol (34,8388736,12) ,
+  "40-10" Brush (2,8421376,16777215) Pen (1,2,0) Line (1,2,8421376) Symbol (34,8421376,12) ,
+  "40-11" Brush (2,32896,16777215) Pen (1,2,0) Line (1,2,32896) Symbol (34,32896,12) ,
+  "40-12" Brush (2,16744576,16777215) Pen (1,2,0) Line (1,2,16744576) Symbol (34,16744576,12) ,
+  "40-13" Brush (2,8454016,16777215) Pen (1,2,0) Line (1,2,8454016) Symbol (34,8454016,12) ,
+  "40-14" Brush (2,8421631,16777215) Pen (1,2,0) Line (1,2,8421631) Symbol (34,8421631,12) ,
+  "40-15" Brush (2,16744703,16777215) Pen (1,2,0) Line (1,2,16744703) Symbol (34,16744703,12) ,
+  "40-16" Brush (2,16777088,16777215) Pen (1,2,0) Line (1,2,16777088) Symbol (34,16777088,12) ,
+  "40-17" Brush (2,8454143,16777215) Pen (1,2,0) Line (1,2,8454143) Symbol (34,8454143,12) ,
+  "40-18" Brush (2,8405056,16777215) Pen (1,2,0) Line (1,2,8405056) Symbol (34,8405056,12) ,
+  "40-19" Brush (2,4227136,16777215) Pen (1,2,0) Line (1,2,4227136) Symbol (34,4227136,12) ,
+  "40-2" Brush (2,4210816,16777215) Pen (1,2,0) Line (1,2,4210816) Symbol (34,4210816,12) ,
+  "40-20" Brush (2,8405120,16777215) Pen (1,2,0) Line (1,2,8405120) Symbol (34,8405120,12) ,
+  "40-21" Brush (2,8421440,16777215) Pen (1,2,0) Line (1,2,8421440) Symbol (34,8421440,12) ,
+  "40-3" Brush (2,4227200,16777215) Pen (1,2,0) Line (1,2,4227200) Symbol (34,4227200,12) ,
+  "40-4" Brush (2,16761024,16777215) Pen (1,2,0) Line (1,2,16761024) Symbol (34,16761024,12) ,
+  "40-5" Brush (2,12648384,16777215) Pen (1,2,0) Line (1,2,12648384) Symbol (34,12648384,12) ,
+  "40-6" Brush (2,12632319,16777215) Pen (1,2,0) Line (1,2,12632319) Symbol (34,12632319,12) ,
+  "40-7" Brush (2,16761087,16777215) Pen (1,2,0) Line (1,2,16761087) Symbol (34,16761087,12) ,
+  "40-8" Brush (2,16777152,16777215) Pen (1,2,0) Line (1,2,16777152) Symbol (34,16777152,12) ,
+  "40-9" Brush (2,12648447,16777215) Pen (1,2,0) Line (1,2,12648447) Symbol (34,12648447,12) ,
+  "50-1" Brush (2,8413280,16777215) Pen (1,2,0) Line (1,2,8413280) Symbol (34,8413280,12) ,
+  "50-10" Brush (2,6324320,16777215) Pen (1,2,0) Line (1,2,6324320) Symbol (34,6324320,12) ,
+  "50-11" Brush (2,6316160,16777215) Pen (1,2,0) Line (1,2,6316160) Symbol (34,6316160,12) ,
+  "50-12" Brush (2,8413312,16777215) Pen (1,2,0) Line (1,2,8413312) Symbol (34,8413312,12) ,
+  "50-13" Brush (2,8421472,16777215) Pen (1,2,0) Line (1,2,8421472) Symbol (34,8421472,12) ,
+  "50-14" Brush (2,6324352,16777215) Pen (1,2,0) Line (1,2,6324352) Symbol (34,6324352,12) ,
+  "50-15" Brush (2,16711680,16777215) Pen (1,2,0) Line (1,2,16711680) Symbol (34,16711680,12) ,
+  "50-16" Brush (2,65280,16777215) Pen (1,2,0) Line (1,2,65280) Symbol (34,65280,12) ,
+  "50-17" Brush (2,255,16777215) Pen (1,2,0) Line (1,2,255) Symbol (34,255,12) ,
+  "50-18" Brush (2,16711935,16777215) Pen (1,2,0) Line (1,2,16711935) Symbol (34,16711935,12) ,
+  "50-19" Brush (2,16776960,16777215) Pen (1,2,0) Line (1,2,16776960) Symbol (34,16776960,12) ,
+  "50-2" Brush (2,65535,16777215) Pen (1,2,0) Line (1,2,65535) Symbol (34,65535,12) ,
+  "50-20" Brush (2,8388608,16777215) Pen (1,2,0) Line (1,2,8388608) Symbol (34,8388608,12) ,
+  "50-3" Brush (2,32768,16777215) Pen (1,2,0) Line (1,2,32768) Symbol (34,32768,12) ,
+  "50-4" Brush (2,128,16777215) Pen (1,2,0) Line (1,2,128) Symbol (34,128,12) ,
+  "50-5" Brush (2,8388736,16777215) Pen (1,2,0) Line (1,2,8388736) Symbol (34,8388736,12) ,
+  "50-6" Brush (2,8421376,16777215) Pen (1,2,0) Line (1,2,8421376) Symbol (34,8421376,12) ,
+  "50-7" Brush (2,32896,16777215) Pen (1,2,0) Line (1,2,32896) Symbol (34,32896,12) ,
+  "50-8" Brush (2,16744576,16777215) Pen (1,2,0) Line (1,2,16744576) Symbol (34,16744576,12) ,
+  "50-9" Brush (2,8454016,16777215) Pen (1,2,0) Line (1,2,8454016) Symbol (34,8454016,12) ,
+  "60-1" Brush (2,8421631,16777215) Pen (1,2,0) Line (1,2,8421631) Symbol (34,8421631,12) ,
+  "60-10" Brush (2,16744703,16777215) Pen (1,2,0) Line (1,2,16744703) Symbol (34,16744703,12) ,
+  "60-11" Brush (2,16777088,16777215) Pen (1,2,0) Line (1,2,16777088) Symbol (34,16777088,12) ,
+  "60-12" Brush (2,8454143,16777215) Pen (1,2,0) Line (1,2,8454143) Symbol (34,8454143,12) ,
+  "60-13" Brush (2,8405056,16777215) Pen (1,2,0) Line (1,2,8405056) Symbol (34,8405056,12) ,
+  "60-14" Brush (2,4227136,16777215) Pen (1,2,0) Line (1,2,4227136) Symbol (34,4227136,12) ,
+  "60-15" Brush (2,4210816,16777215) Pen (1,2,0) Line (1,2,4210816) Symbol (34,4210816,12) ,
+  "60-2" Brush (2,8405120,16777215) Pen (1,2,0) Line (1,2,8405120) Symbol (34,8405120,12) ,
+  "60-3" Brush (2,8421440,16777215) Pen (1,2,0) Line (1,2,8421440) Symbol (34,8421440,12) ,
+  "60-4" Brush (2,4227200,16777215) Pen (1,2,0) Line (1,2,4227200) Symbol (34,4227200,12) ,
+  "60-5" Brush (2,16761024,16777215) Pen (1,2,0) Line (1,2,16761024) Symbol (34,16761024,12) ,
+  "60-6" Brush (2,12648384,16777215) Pen (1,2,0) Line (1,2,12648384) Symbol (34,12648384,12) ,
+  "60-7" Brush (2,12632319,16777215) Pen (1,2,0) Line (1,2,12632319) Symbol (34,12632319,12) ,
+  "60-8" Brush (2,16761087,16777215) Pen (1,2,0) Line (1,2,16761087) Symbol (34,16761087,12) ,
+  "60-9" Brush (2,16777152,16777215) Pen (1,2,0) Line (1,2,16777152) Symbol (34,16777152,12) ,
+  "70-1" Brush (2,12648447,16777215) Pen (1,2,0) Line (1,2,12648447) Symbol (34,12648447,12) ,
+  "70-10" Brush (2,8413280,16777215) Pen (1,2,0) Line (1,2,8413280) Symbol (34,8413280,12) ,
+  "70-11" Brush (2,6324320,16777215) Pen (1,2,0) Line (1,2,6324320) Symbol (34,6324320,12) ,
+  "70-12" Brush (2,6316160,16777215) Pen (1,2,0) Line (1,2,6316160) Symbol (34,6316160,12) ,
+  "70-13" Brush (2,8413312,16777215) Pen (1,2,0) Line (1,2,8413312) Symbol (34,8413312,12) ,
+  "70-14" Brush (2,8421472,16777215) Pen (1,2,0) Line (1,2,8421472) Symbol (34,8421472,12) ,
+  "70-15" Brush (2,6324352,16777215) Pen (1,2,0) Line (1,2,6324352) Symbol (34,6324352,12) ,
+  "70-16" Brush (2,16711680,16777215) Pen (1,2,0) Line (1,2,16711680) Symbol (34,16711680,12) ,
+  "70-17" Brush (2,65280,16777215) Pen (1,2,0) Line (1,2,65280) Symbol (34,65280,12) ,
+  "70-18" Brush (2,255,16777215) Pen (1,2,0) Line (1,2,255) Symbol (34,255,12) ,
+  "70-19" Brush (2,16711935,16777215) Pen (1,2,0) Line (1,2,16711935) Symbol (34,16711935,12) ,
+  "70-2" Brush (2,16776960,16777215) Pen (1,2,0) Line (1,2,16776960) Symbol (34,16776960,12) ,
+  "70-20" Brush (2,65535,16777215) Pen (1,2,0) Line (1,2,65535) Symbol (34,65535,12) ,
+  "70-21" Brush (2,8388608,16777215) Pen (1,2,0) Line (1,2,8388608) Symbol (34,8388608,12) ,
+  "70-22" Brush (2,32768,16777215) Pen (1,2,0) Line (1,2,32768) Symbol (34,32768,12) ,
+  "70-23" Brush (2,128,16777215) Pen (1,2,0) Line (1,2,128) Symbol (34,128,12) ,
+  "70-24" Brush (2,8388736,16777215) Pen (1,2,0) Line (1,2,8388736) Symbol (34,8388736,12) ,
+  "70-25" Brush (2,8421376,16777215) Pen (1,2,0) Line (1,2,8421376) Symbol (34,8421376,12) ,
+  "70-26" Brush (2,32896,16777215) Pen (1,2,0) Line (1,2,32896) Symbol (34,32896,12) ,
+  "70-27" Brush (2,16744576,16777215) Pen (1,2,0) Line (1,2,16744576) Symbol (34,16744576,12) ,
+  "70-28" Brush (2,8454016,16777215) Pen (1,2,0) Line (1,2,8454016) Symbol (34,8454016,12) ,
+  "70-29" Brush (2,8421631,16777215) Pen (1,2,0) Line (1,2,8421631) Symbol (34,8421631,12) ,
+  "70-3" Brush (2,16744703,16777215) Pen (1,2,0) Line (1,2,16744703) Symbol (34,16744703,12) ,
+  "70-30" Brush (2,16777088,16777215) Pen (1,2,0) Line (1,2,16777088) Symbol (34,16777088,12) ,
+  "70-31" Brush (2,8454143,16777215) Pen (1,2,0) Line (1,2,8454143) Symbol (34,8454143,12) ,
+  "70-32" Brush (2,8405056,16777215) Pen (1,2,0) Line (1,2,8405056) Symbol (34,8405056,12) ,
+  "70-33" Brush (2,4227136,16777215) Pen (1,2,0) Line (1,2,4227136) Symbol (34,4227136,12) ,
+  "70-34" Brush (2,4210816,16777215) Pen (1,2,0) Line (1,2,4210816) Symbol (34,4210816,12) ,
+  "70-35" Brush (2,8405120,16777215) Pen (1,2,0) Line (1,2,8405120) Symbol (34,8405120,12) ,
+  "70-36" Brush (2,8421440,16777215) Pen (1,2,0) Line (1,2,8421440) Symbol (34,8421440,12) ,
+  "70-4" Brush (2,4227200,16777215) Pen (1,2,0) Line (1,2,4227200) Symbol (34,4227200,12) ,
+  "70-5" Brush (2,16761024,16777215) Pen (1,2,0) Line (1,2,16761024) Symbol (34,16761024,12) ,
+  "70-6" Brush (2,12648384,16777215) Pen (1,2,0) Line (1,2,12648384) Symbol (34,12648384,12) ,
+  "70-7" Brush (2,12632319,16777215) Pen (1,2,0) Line (1,2,12632319) Symbol (34,12632319,12) ,
+  "70-8" Brush (2,16761087,16777215) Pen (1,2,0) Line (1,2,16761087) Symbol (34,16761087,12) ,
+  "70-9" Brush (2,16777152,16777215) Pen (1,2,0) Line (1,2,16777152) Symbol (34,16777152,12) ,
+  "80-1" Brush (2,12648447,16777215) Pen (1,2,0) Line (1,2,12648447) Symbol (34,12648447,12) ,
+  "80-10" Brush (2,8413280,16777215) Pen (1,2,0) Line (1,2,8413280) Symbol (34,8413280,12) ,
+  "80-11" Brush (2,6324320,16777215) Pen (1,2,0) Line (1,2,6324320) Symbol (34,6324320,12) ,
+  "80-12" Brush (2,6316160,16777215) Pen (1,2,0) Line (1,2,6316160) Symbol (34,6316160,12) ,
+  "80-13" Brush (2,8413312,16777215) Pen (1,2,0) Line (1,2,8413312) Symbol (34,8413312,12) ,
+  "80-14" Brush (2,8421472,16777215) Pen (1,2,0) Line (1,2,8421472) Symbol (34,8421472,12) ,
+  "80-15" Brush (2,6324352,16777215) Pen (1,2,0) Line (1,2,6324352) Symbol (34,6324352,12) ,
+  "80-16" Brush (2,16711680,16777215) Pen (1,2,0) Line (1,2,16711680) Symbol (34,16711680,12) ,
+  "80-17" Brush (2,65280,16777215) Pen (1,2,0) Line (1,2,65280) Symbol (34,65280,12) ,
+  "80-18" Brush (2,255,16777215) Pen (1,2,0) Line (1,2,255) Symbol (34,255,12) ,
+  "80-19" Brush (2,16711935,16777215) Pen (1,2,0) Line (1,2,16711935) Symbol (34,16711935,12) ,
+  "80-2" Brush (2,16776960,16777215) Pen (1,2,0) Line (1,2,16776960) Symbol (34,16776960,12) ,
+  "80-3" Brush (2,65535,16777215) Pen (1,2,0) Line (1,2,65535) Symbol (34,65535,12) ,
+  "80-4" Brush (2,8388608,16777215) Pen (1,2,0) Line (1,2,8388608) Symbol (34,8388608,12) ,
+  "80-5" Brush (2,32768,16777215) Pen (1,2,0) Line (1,2,32768) Symbol (34,32768,12) ,
+  "80-6" Brush (2,128,16777215) Pen (1,2,0) Line (1,2,128) Symbol (34,128,12) ,
+  "80-7" Brush (2,8388736,16777215) Pen (1,2,0) Line (1,2,8388736) Symbol (34,8388736,12) ,
+  "80-8" Brush (2,8421376,16777215) Pen (1,2,0) Line (1,2,8421376) Symbol (34,8421376,12) ,
+  "80-9" Brush (2,32896,16777215) Pen (1,2,0) Line (1,2,32896) Symbol (34,32896,12) ,
+  "81-1" Brush (2,16744576,16777215) Pen (1,2,0) Line (1,2,16744576) Symbol (34,16744576,12) ,
+  "81-10" Brush (2,8454016,16777215) Pen (1,2,0) Line (1,2,8454016) Symbol (34,8454016,12) ,
+  "81-11" Brush (2,8421631,16777215) Pen (1,2,0) Line (1,2,8421631) Symbol (34,8421631,12) ,
+  "81-12" Brush (2,16744703,16777215) Pen (1,2,0) Line (1,2,16744703) Symbol (34,16744703,12) ,
+  "81-13" Brush (2,16777088,16777215) Pen (1,2,0) Line (1,2,16777088) Symbol (34,16777088,12) ,
+  "81-14" Brush (2,8454143,16777215) Pen (1,2,0) Line (1,2,8454143) Symbol (34,8454143,12) ,
+  "81-15" Brush (2,8405056,16777215) Pen (1,2,0) Line (1,2,8405056) Symbol (34,8405056,12) ,
+  "81-16" Brush (2,4227136,16777215) Pen (1,2,0) Line (1,2,4227136) Symbol (34,4227136,12) ,
+  "81-17" Brush (2,4210816,16777215) Pen (1,2,0) Line (1,2,4210816) Symbol (34,4210816,12) ,
+  "81-18" Brush (2,8405120,16777215) Pen (1,2,0) Line (1,2,8405120) Symbol (34,8405120,12) ,
+  "81-2" Brush (2,8421440,16777215) Pen (1,2,0) Line (1,2,8421440) Symbol (34,8421440,12) ,
+  "81-3" Brush (2,4227200,16777215) Pen (1,2,0) Line (1,2,4227200) Symbol (34,4227200,12) ,
+  "81-4" Brush (2,16761024,16777215) Pen (1,2,0) Line (1,2,16761024) Symbol (34,16761024,12) ,
+  "81-5" Brush (2,12648384,16777215) Pen (1,2,0) Line (1,2,12648384) Symbol (34,12648384,12) ,
+  "81-6" Brush (2,12632319,16777215) Pen (1,2,0) Line (1,2,12632319) Symbol (34,12632319,12) ,
+  "81-7" Brush (2,16761087,16777215) Pen (1,2,0) Line (1,2,16761087) Symbol (34,16761087,12) ,
+  "81-8" Brush (2,16777152,16777215) Pen (1,2,0) Line (1,2,16777152) Symbol (34,16777152,12) ,
+  "81-9" Brush (2,12648447,16777215) Pen (1,2,0) Line (1,2,12648447) Symbol (34,12648447,12) ,
+  "90-1" Brush (2,8413280,16777215) Pen (1,2,0) Line (1,2,8413280) Symbol (34,8413280,12) ,
+  "90-2" Brush (2,6324320,16777215) Pen (1,2,0) Line (1,2,6324320) Symbol (34,6324320,12) ,
+  "90-3" Brush (2,6316160,16777215) Pen (1,2,0) Line (1,2,6316160) Symbol (34,6316160,12) ,
+  "90-4" Brush (2,8413312,16777215) Pen (1,2,0) Line (1,2,8413312) Symbol (34,8413312,12) ,
+  "91-1" Brush (2,8421472,16777215) Pen (1,2,0) Line (1,2,8421472) Symbol (34,8421472,12) ,
+  "91-10" Brush (2,6324352,16777215) Pen (1,2,0) Line (1,2,6324352) Symbol (34,6324352,12) ,
+  "91-11" Brush (2,16711680,16777215) Pen (1,2,0) Line (1,2,16711680) Symbol (34,16711680,12) ,
+  "91-12" Brush (2,65280,16777215) Pen (1,2,0) Line (1,2,65280) Symbol (34,65280,12) ,
+  "91-13" Brush (2,255,16777215) Pen (1,2,0) Line (1,2,255) Symbol (34,255,12) ,
+  "91-14" Brush (2,16711935,16777215) Pen (1,2,0) Line (1,2,16711935) Symbol (34,16711935,12) ,
+  "91-2" Brush (2,16776960,16777215) Pen (1,2,0) Line (1,2,16776960) Symbol (34,16776960,12) ,
+  "91-3" Brush (2,65535,16777215) Pen (1,2,0) Line (1,2,65535) Symbol (34,65535,12) ,
+  "91-4" Brush (2,8388608,16777215) Pen (1,2,0) Line (1,2,8388608) Symbol (34,8388608,12) ,
+  "91-5" Brush (2,32768,16777215) Pen (1,2,0) Line (1,2,32768) Symbol (34,32768,12) ,
+  "91-6" Brush (2,128,16777215) Pen (1,2,0) Line (1,2,128) Symbol (34,128,12) ,
+  "91-7" Brush (2,8388736,16777215) Pen (1,2,0) Line (1,2,8388736) Symbol (34,8388736,12) ,
+  "91-8" Brush (2,8421376,16777215) Pen (1,2,0) Line (1,2,8421376) Symbol (34,8421376,12) ,
+  "91-9" Brush (2,32896,16777215) Pen (1,2,0) Line (1,2,32896) Symbol (34,32896,12) ,
+  "999-1" Brush (2,16776960,16777215) Pen (1,2,0) Line (1,2,16776960) Symbol (35,16776960,24) ,
+  "999-999" Brush (2,8454016,16777215) Pen (1,2,0) Line (1,2,8454016) Symbol (34,8454016,12) 
+  default Symbol (40,0,12)
+
+end sub
+

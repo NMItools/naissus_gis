@@ -1,0 +1,92 @@
+'include "mapbasic.def"
+'include "menu.def"
+'include "icons.def"
+include "..\..\Library\ERRORLib.def"
+include "..\NAISSUS-GIS.def"
+
+Sub DLG_ReonKnjigaRbr
+
+Call arrZone
+Call arrKnjige2("1")
+Call arrRedniBrojevi2("1")
+
+smbl_Marker = MakeSymbol(48, 16776960, 48)
+
+'***** DIALOG DESIGNER GENERATED CODE. DO NOT EDIT OR REMOVE THIS LINE OR BELOW THIS LINE! *****
+Dialog
+	Title "Prikaz vodomera po reonskim knjigama"
+	Width 266 Height 57
+
+Control StaticText
+	Id 0
+	Position 56, 40
+	Width 46 Height 8
+	Title "(0 - Paušalci)"
+	
+Control GroupBox
+	Id 1
+	Position 8, 7
+	Width 197 Height 44
+	Title "Izaberite Zonu \ Knjigu \ Redni Broj :"
+	
+Control PopupMenu
+	Id 2
+	Position 11, 25
+	Width 41
+	Title From Variable arr_Zone()
+	Calling arrKnjige1
+	Value 1
+	Into sn_ZONA
+	
+Control PopupMenu
+	Id 3
+	Position 56, 25
+	Width 41
+	Title From Variable arr_Knjige()
+	Calling arrRedniBrojevi1
+	Value 1
+	Into sn_KNJIGA
+	
+Control PopupMenu
+	Id 4
+	Position 101, 25
+	Width 41
+	Title From Variable arr_RedniBrojevi()
+	Value 1
+	Into sn_REDBROJ
+	
+Control StaticText
+	Id 5
+	Position 144, 27
+	Width 29 Height 8
+	Title "Marker:"
+	
+Control SymbolPicker
+	Value MakeFontSymbol(67,16776960,18,"MapInfo Cartographic",16,0)
+	Into smbl_Marker
+	Id 6
+	Position 177, 20
+	Width 22 Height 20
+	
+Control CancelButton
+	Title "Cancel"
+	Id 7
+	Position 209, 7
+	Width 51 Height 14
+	Calling DLG_ReonKnjigaRbr_CANCEL
+	
+Control OKButton
+	Title "OK"
+	Id 8
+	Position 209, 37
+	Width 51 Height 14
+	Calling DLG_ReonKnjigaRbr_OK
+
+	Exit Sub
+	
+	'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "DLG_ReonKnjigaRbr")
+	Call ERRShow()
+
+End Sub						

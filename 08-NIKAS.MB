@@ -1,0 +1,422 @@
+INCLUDE "mapbasic.def"
+include "menu.def"
+include "icons.def"
+include "..\Library\ERRORLib.def"
+include "..\nmiWin.def"
+include "..\nmiFunkcije.def"
+include "..\nmiDotNet.def"
+include "NAISSUS-GIS.def"
+
+'===================================================================================================================== 
+'	Objekti NIKAS
+
+SUB NIKAS_OBJEKTI
+
+	onerror goto Greska 
+	
+	Create Menu "NIKAS objekti" as
+		"Fekalna kanalizacija" calling fekalna,
+		"Prikljucci na fekalnu" calling fek_kan_prikljucak,
+		"Fekalne sahte" calling fek_kan_saht,
+		"Izliv fekalne" calling fek_kan_izliv,
+		"(-",
+		"Atmosferska kanalizacija" calling atmosferska,
+		"Prikljucci na atmosfersku" calling atm_prikljucak,
+		"Atmosferske sahte" calling atm_saht,
+		"Izliv atmosferske" calling atm_izliv,       
+		"(-",
+		"Slivnici" calling slivnik,
+		"Prikljucci slivnika" calling slivnik_prikljucak,
+		"(-",
+		"Sahte korisnika" calling korisnicki_saht,
+		"Zastitne cevi" calling zastit_kanal_cevi,
+		"Prelivi" calling preliv,
+		"Sifoni" calling sifon,
+		"(-",
+		"Crpne stanice" calling cs_otpad_voda,
+		"Postrojenja za preciscavanje" calling postr_za_prec
+	
+   
+	Alter Menu "JKP Naissus" Add 
+		"(-",
+		"NIKAS objekti" As "NIKAS objekti"
+
+' ---
+		
+	Create ButtonPad "NIKAS objekti" As
+		ToggleButton
+			Icon 8061 File "nmiIcons.dll"
+			Calling fekalna
+			ID 801
+			Uncheck
+			Enable
+		HelpMsg "Cevovod fekalne kanalizacije \nFekalna kanalizacija"   
+
+		ToggleButton
+			Icon 8063 File "nmiIcons.dll"
+			Calling fek_kan_prikljucak
+			ID 802
+			Uncheck
+			Enable
+			HelpMsg "Prikljucne veze na fekalnu kanalizaciju \nPrikljucci na fekalnu"
+		
+		ToggleButton
+			Icon 8065 File "nmiIcons.dll"
+			Calling fek_kan_saht
+			ID 803
+			Uncheck
+			Enable
+			HelpMsg "Sahte fekalne kanalizacije \nFekalne sahte"
+		
+		ToggleButton
+			Icon 8067 File "nmiIcons.dll"
+			Calling fek_kan_izliv
+			ID 804
+			Uncheck
+			Enable
+			HelpMsg "Izlivi fekalne kanalizacije \nIzliv fekalne"
+		
+		ToggleButton
+			Icon 8069 File "nmiIcons.dll"
+			Calling atmosferska
+			ID 805
+			Uncheck
+			Enable
+			HelpMsg "Cevovod atmosferske kanalizacije \nAtmosferska kanalizacija"
+		
+		ToggleButton
+			Icon 8071 File "nmiIcons.dll"
+			Calling atm_prikljucak
+			ID 806
+			Uncheck
+			Enable
+			HelpMsg "Prikljucne veze na atmosfersku kanalizaciju \nPrikljucci na atmosfersku" 
+		
+		ToggleButton
+			Icon 8073 File "nmiIcons.dll"
+			Calling atm_saht
+			ID 807
+			Uncheck
+			Enable
+			HelpMsg "Sahte atmosferske kanalizacije \nAtmosferske sahte"
+		
+		ToggleButton
+			Icon 8075 File "nmiIcons.dll"
+			Calling atm_izliv
+			ID 808
+			Uncheck
+			Enable
+			HelpMsg "Izlivi atmosferske kanalizacije \nIzliv atmosferske"  
+		
+		ToggleButton
+			Icon 8077 File "nmiIcons.dll"
+			Calling slivnik
+			ID 809
+			Uncheck
+			Enable
+			HelpMsg "Slivnici \nSlivnici"
+		
+		ToggleButton
+			Icon 8079 File "nmiIcons.dll"
+			Calling slivnik_prikljucak
+			ID 810
+			Uncheck
+			Enable
+			HelpMsg "Prikljucci slivnika \nPrikljucci slivnika"
+		
+		ToggleButton
+			Icon 8081 File "nmiIcons.dll"
+			Calling korisnicki_saht
+			ID 811
+			Uncheck
+			Enable
+			HelpMsg "Sahte korisnika \nSahte korisnika" 
+		
+		ToggleButton
+			Icon 8083 File "nmiIcons.dll"
+			Calling zastit_kanal_cevi
+			ID 812
+			Uncheck
+			Enable
+			HelpMsg "Zastitne cevi \nZastitne cevi" 
+		
+		ToggleButton
+			Icon 8085 File "nmiIcons.dll"
+			Calling preliv
+			ID 813
+			Uncheck
+			Enable
+			HelpMsg "Prelivi \nPrelivi"
+		
+		ToggleButton
+			Icon 8087 File "nmiIcons.dll"
+			Calling sifon
+			ID 814
+			Uncheck
+			Enable
+			HelpMsg "Sifoni \nSifoni"
+		
+		ToggleButton
+			Icon 8089 File "nmiIcons.dll"
+			Calling cs_otpad_voda
+			ID 815
+			Uncheck
+			Enable
+			HelpMsg "Crpne stanice \nCrpne stanice"
+		
+		ToggleButton
+			Icon 8091 File "nmiIcons.dll"
+			Calling postr_za_prec
+			ID 816
+			Uncheck
+			Enable
+			HelpMsg "Postrojenja za preciscavanje \nPostrojenja za preciscavanje"
+		
+	'---
+	
+	Alter ButtonPad "NIKAS objekti" 
+		'Position(9.0,4.8) Units "cm"
+		ToolbarPosition (2,2)
+		Fixed          
+		Title "NIKAS objekti"
+		Width 30
+		Show        
+	
+	Exit Sub
+	'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "NIKAS_OBJEKTI")
+	Call ERRShow()
+	
+END SUB
+
+'======================================================
+SUB fekalna
+	
+	onerror goto Greska 
+	
+	namLejer=setTabSQL("FEKALNA",801)
+	
+	Exit Sub
+	'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "fekalna")
+	Call ERRShow()
+		
+END SUB
+
+'======================================================
+SUB fek_kan_prikljucak
+	
+	onerror goto Greska 
+	
+	namLejer=setTabSQL("FEK_KAN_PRIKLJUCAK",802)
+	
+	Exit Sub
+	'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "fek_kan_prikljucak")
+	Call ERRShow()
+		
+END SUB
+
+'======================================================
+SUB fek_kan_saht
+	
+	onerror goto Greska 
+	
+	namLejer=setTabSQL("FEK_KAN_SAHT",803)
+	
+	Exit Sub
+	'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "fek_kan_saht")
+	Call ERRShow()
+		
+END SUB
+
+'======================================================
+SUB fek_kan_izliv
+	
+	onerror goto Greska 
+	
+	namLejer=setTabSQL("FEK_KAN_IZLIV",804)
+	
+	Exit Sub
+	'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "fek_kan_izliv")
+	Call ERRShow()
+
+END SUB
+
+'======================================================
+SUB atmosferska
+	
+	onerror goto Greska 
+	
+	namLejer=setTabSQL("ATMOSFERSKA",805)
+	
+	Exit Sub
+	'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "atmosferska")
+	Call ERRShow()
+	
+END SUB
+
+'======================================================
+SUB atm_prikljucak
+	
+	onerror goto Greska 
+	
+	namLejer=setTabSQL("ATM_PRIKLJUCAK",806)
+	
+	Exit Sub
+	'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "atm_prikljucak")
+	Call ERRShow()
+	
+END SUB
+
+'======================================================
+SUB atm_saht        
+	
+	onerror goto Greska 
+	
+	namLejer=setTabSQL("ATM_SAHT",807)
+	
+	Exit Sub
+	'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "atm_saht")
+	Call ERRShow()
+		
+END SUB
+'======================================================
+SUB atm_izliv
+	
+	onerror goto Greska 
+	
+	namLejer=setTabSQL("ATM_IZLIV",808)
+	
+	Exit Sub
+	'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "atm_izliv")
+	Call ERRShow()
+		
+END SUB
+'======================================================
+SUB slivnik                
+	
+	onerror goto Greska 
+	
+	namLejer=setTabSQL("SLIVNIK",809)
+	
+	Exit Sub
+	'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "slivnik")
+	Call ERRShow()
+		
+END SUB
+'======================================================
+SUB slivnik_prikljucak
+	
+	onerror goto Greska 
+	
+	namLejer=setTabSQL("SLIVNIK_PRIKLJUCAK",810)
+	
+	Exit Sub
+	'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "slivnik_prikljucak")
+	Call ERRShow()
+		
+END SUB
+'======================================================
+SUB korisnicki_saht
+	
+	onerror goto Greska 
+	
+	namLejer=setTabSQL("KORISNICKI_SAHT",811)
+	
+	Exit Sub
+	'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "korisnicki_saht")
+	Call ERRShow()
+		
+END SUB
+'======================================================
+SUB zastit_kanal_cevi
+	
+	onerror goto Greska 
+	
+	namLejer=setTabSQL("ZASTIT_KANAL_CEVI",812)
+	
+	Exit Sub
+	'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "zastit_kanal_cevi")
+	Call ERRShow()
+		
+END SUB
+'======================================================
+SUB preliv
+	
+	onerror goto Greska 
+	
+	namLejer=setTabSQL("PRELIV",813)
+	
+	Exit Sub
+	'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "preliv")
+	Call ERRShow()
+		
+END SUB
+'======================================================
+SUB sifon
+	
+	onerror goto Greska 
+	
+	namLejer=setTabSQL("SIFON",814)
+	
+	Exit Sub
+	'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "sifon")
+	Call ERRShow()
+		
+END SUB
+'======================================================
+SUB cs_otpad_voda
+	
+	onerror goto Greska 
+	
+	namLejer=setTabSQL("CS_OTPAD_VODA",815)
+	
+	Exit Sub
+	'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "cs_otpad_voda")
+	Call ERRShow()
+		
+END SUB
+'======================================================
+SUB postr_za_prec
+	
+	onerror goto Greska 
+	
+	namLejer=setTabSQL("POSTR_ZA_PREC",816)
+	
+	Exit Sub
+	'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "postr_za_prec")
+	Call ERRShow()
+		
+END SUB

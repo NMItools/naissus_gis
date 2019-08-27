@@ -1,0 +1,5 @@
+Tables {Kupci_potrosaci_vode_GEOREF}
+Where {Zona = 10 and Knjiga = 1}
+Order {RedBroj}
+Into {KupciGeoref}
+Browse

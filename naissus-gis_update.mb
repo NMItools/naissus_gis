@@ -1,0 +1,245 @@
+include "mapbasic.def"
+include "menu.def"
+include "icons.def"
+include "..\nmiWin.def"
+include "..\nmiFunkcije.def"
+
+' POTREBNO ZA RAD:
+'
+' naissus-gis.INI (app folder)
+' naissus-gis.MBX (na serveru)
+
+declare sub main
+
+Sub Main
+
+	Dim iniFile as string
+	Dim fajlServer as string
+	Dim fajlLokal as string
+	
+	Dim vremeServer as DateTime
+	Dim vremeLokal as DateTime
+	Dim s_VremeServer as String
+	Dim s_VremeLokal as string
+
+	Dim s_MBX_ime as String
+	Dim s_FOLDER_WOR as string
+	Dim s_Update_PRJ as string
+	Dim s_Update_MBX as string
+	Dim s_Update_WOR as string	
+	
+	Dim rep as Integer
+	Dim f_setIni as String
+
+' - postavka prozora za informacije i poruke
+	Print CHR$(12)
+	Set Distance Units "m"
+	Set Area Units "sq m"
+	Set Paper Units "cm"
+	Set Window Message position(0.6,13) width 10 height 6 units "cm" title "Azuriranje programa..."
+	Set Window Info position(28,15) width 7 height 6 units "cm"
+
+' - lokacija INI fajla	
+	iniFile = ApplicationDirectory$()+"naissus-gis.ini"
+
+' - citanje lokacija aplikacionih foldera iz INI fajla
+	s_MBX_ime = GetIniVal(iniFile, "MBX", "IME")
+	s_FOLDER_WOR = GetIniVal(iniFile, "GIS_FOLDERI", "FOLDER_WOR")
+	s_Update_PRJ = GetIniVal(iniFile, "UPDATE_FOLDERI", "PRJ")
+	s_Update_MBX = GetIniVal(iniFile, "UPDATE_FOLDERI", "MBX")
+	s_Update_WOR = GetIniVal(iniFile, "UPDATE_FOLDERI", "WOR")
+
+' - apsolutna putanja MBX aplikacije na serveru
+	fajlServer = s_Update_MBX+s_MBX_ime
+
+' - apsolutna putanja lokalne MBX aplikacije
+	fajlLokal = ApplicationDirectory$()+s_MBX_ime
+
+
+' - provera da li postoje fajlovi na lokacijama i preuzmi datume kreiranja istih 	
+	If FileExists(fajlLokal) 
+	then
+		vremeLokal = vremefajla(fajlLokal)
+		s_VremeLokal = FormatDate$(GetDate(vremeLokal))+" - "+FormatTime$(GetTime(vremeLokal),"HH:mm:ss")
+	Else 
+	'	Lokalni fajl ne postoji, preuzmi lazni datum za lokalni fajl
+		vremeLokal = NumberToDateTime(19731016121212000)
+	End If
+
+	If FileExists(fajlServer)
+	then 
+		vremeServer = vremefajla(fajlServer)
+		s_VremeServer = FormatDate$(GetDate(vremeServer))+" - "+FormatTime$(GetTime(vremeServer),"HH:mm:ss")
+	else 
+	'	Ako NE postoji azuriranje se obustavlja
+		Print "Azuriranje 'naissus-gis.MBX' na noviju verziju trenutno nije moguce."+chr$(13)+"Novo azuriranje desice se prilikom sledeceg pokretanja MapInfo."
+'		End Program
+	End If		
+	
+'	Poredjenje vremena kreiranja fajlova
+	If vremeServer > vremeLokal 
+	then
+		Print "Nova verzija programa na serveru: ("+s_VremeServer+")."
+		Open File ApplicationDirectory$()+"update.bat" For OUTPUT As #1
+			Print #1, "@echo off"
+			Print #1, "@xcopy """ + s_Update_MBX + "*.*"" """ + ApplicationDirectory$() + """ /r /h /y /d"
+			Print #1, "@xcopy """ + s_Update_WOR + "*.*"" """ + s_FOLDER_WOR + """ /r /h /y /d"
+			Print #1, "@xcopy """ + s_Update_PRJ + "MAPINFOW.PRJ"" """+ ProgramDirectory$() + """ /r /h /y /d"			
+		'	Print #1, "@pause"
+		Close File #1                                               
+		rep = ExecuteAndWait(ApplicationDirectory$()+"update.bat")	
+		vremeLokal = vremefajla(fajlLokal)
+		s_VremeLokal = FormatDate$(GetDate(vremeLokal))+" - "+FormatTime$(GetTime(vremeLokal),"HH:mm:ss")
+		Note "JKP ""Naissus"" GIS je azuriran na noviju verziju ("+s_VremeLokal+")"
+	Else
+		Print "Koristite aktuelnu verziju programa: ("+s_VremeLokal+")"
+	End If
+
+	f_setIni = SetIniVal(iniFile, "MBX", "VER", s_VremeLokal)
+	Set Window Message position(0.6,13) width 10 height 6 units "cm" title "JKP Naissus GIS ažuriranje završeno."
+
+	End Program
+	
+End Sub
+
+' =====================================================================================================================
+'       [ExecuteAndWait]  Pokretanje spoljnog programa i cekanje da se izvrsi         
+' =====================================================================================================================
+Function ExecuteAndWait(ByVal cmdLine as string) as integer
+
+	ONERROR GOTO ErrorHandle
+	
+	Dim nRetVal as integer
+	Dim NameOfProc as Process_Information, NameStart as StartUpInfo
+	
+	NameStart.cb = 256
+	NameStart.dwFlags = 1
+	NameStart.wShowWindow = 1
+	nRetVal = CreateProcessA(0, cmdLine, 0, 0, 1, NORMAL_PRIORITY_CLASS, 0, 0, NameStart, NameOfProc)
+	
+	nRetVal = NameOfProc.hProcess
+	nRetVal = WaitForSingleObject(NameOfProc.hProcess, INFINITE)
+	nRetVal = CloseHandle(NameOfProc.hProcess)
+	ExecuteAndWait = TRUE
+	
+	EXIT FUNCTION
+	ErrorHandle:
+	ExecuteAndWait = FALSE
+	Print "Greska kod izvrsavanja spoljnog programa: " + str$(Err()) + ": " + Error$()
+	exit function
+END FUNCTION
+
+' =====================================================================================================================
+'	[vremeFajla] Citanje vremenskih atributa fajla                        
+' =====================================================================================================================
+Function vremeFajla(byVal afile as string) as DateTime
+
+	Dim hFile As Integer ' handle to the opened file
+	Dim ctime As FILETIME ' receives time of creation
+	Dim atime As FILETIME ' receives time of last access
+	Dim mtime As FILETIME ' receives time of last modification
+	Dim thetime As SYSTEMTIME ' used to manipulate the time
+	Dim retval As Integer ' return value
+	Dim a_sec as Security_Attributes 'required for the createfile function
+	'Dim afile as string 'to hold the file path/name
+	
+	Dim Godina as smallint
+	Dim Mesec as string
+	Dim Dan as string
+
+	Dim Cas as string
+	Dim Minut as string
+	Dim Sekund as string	
+		
+	' Get the handle for the file
+	'afile=fileopendlg("","","","File to query")
+
+	If afile="" then 
+		exit sub 
+	end if
+	
+	hFile = CreateFile(afile, &H80000000, &H1, a_sec, 3, &H20, 0)
+	
+	If hFile = -1 Then Print "Ne mogu da otvorim fajl -- prekid rada !"
+		Exit sub 
+	End If
+	
+	' Get the creation, last-access, and last-modification times.
+	retval = GetFileTime(hFile, ctime, atime, mtime)
+	' Convert the creation time to the local time zone. To get last-access, last-modification, repeat the conversion for each time'
+	retval = FileTimeToLocalFileTime (mtime, mtime)
+	' Convert the FILETIME format to the SYSTEMTIME format.
+	retval = FileTimeToSystemTime (mtime, thetime)
+	
+	' Display the date and time of creation of the file
+	Godina = thetime.wYear
+
+	If thetime.wMonth < 10 then Mesec = "0"+thetime.wMonth
+		else Mesec = thetime.wMonth
+	End If
+	
+	If thetime.wDay < 10 then Dan = "0"+thetime.wDay
+		else Dan = thetime.wDay
+	End If
+	
+	If thetime.wHour < 10 then Cas = "0"+thetime.wHour
+		else Cas = thetime.wHour
+	End If
+
+	If thetime.wMinute < 10 then Minut = "0"+thetime.wMinute
+		else Minut = thetime.wMinute
+	End If
+
+	If thetime.wSecond < 10 then Sekund = "0"+thetime.wSecond
+		else Sekund = thetime.wSecond
+	End If
+	
+	vremeFajla = NumbertoDateTime(val(Godina+Mesec+Dan+Cas+Minut+Sekund+"000"))
+	
+	' Close the file to free up resources.
+	retval = CloseHandle(hFile)
+
+End Function
+
+' =====================================================================================================================
+'		[GetIniVal ]  Citaj vrednost u INI fajlu
+' =====================================================================================================================
+Function GetIniVal(ByVal iniFile as string, ByVal iniSection as string, ByVal iniKey as string) as string
+	
+	Dim Ret_Def as String
+	Dim Val_Ret as String
+	Dim iniRead as smallint
+	
+	Ret_Def="?"
+	Val_Ret=String$(255,"X")
+	
+	iniRead = GetPrivateProfileString32 (iniSection, iniKey, Ret_Def, Val_Ret, Len(Val_Ret), iniFile)
+	
+	if Val_Ret="?" then 
+		Print "Citanje fajla "+PathToFileName$(iniFile)+" nije moguce ?"
+		GetIniVal=""
+		Exit Function
+	else 
+		GetIniVal=Val_Ret 
+	end if
+	
+End Function
+
+' =====================================================================================================================
+'		[SetIniVal ]  Upisi vrednost u INI fajlu
+' =====================================================================================================================
+Function SetIniVal(ByVal iniFile as string, ByVal iniSection as string, ByVal iniKey as string, ByVal iniVal as string) as string
+	
+	Dim iniWrite as SmallInt
+		
+	iniWrite = WritePrivateProfileString32 (iniSection, iniKey,"""" + iniVal + """", inifile)
+	
+	if iniWrite=0 then 
+		Print "Upis u "+PathToFileName$(iniFile)+" nije moguc ?"
+		SetIniVal=iniWrite
+		Exit Function
+	else 
+		SetIniVal=iniWrite
+	end if
+	
+End Function

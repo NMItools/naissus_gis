@@ -1,0 +1,172 @@
+
+  <Object type="System.Windows.Forms.Form, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" name="Form1" children="Controls">
+    <Object type="DialogDesigner.ToolboxLib.MapBasicControls.MapBasicCancelButton, DialogDesigner, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" name="MapBasicCancelButton1" children="Controls">
+      <Property name="Title">Cancel</Property>
+      <Property name="ControlCode" />
+      <Property name="Id" />
+      <Property name="Name">MapBasicCancelButton1</Property>
+      <Property name="Position">413, 73</Property>
+      <Property name="Size">75, 23</Property>
+      <Property name="Calling" />
+      <Property name="Disable">False</Property>
+      <Property name="Hide">False</Property>
+      <Property name="TabIndex">7</Property>
+      <Property name="TabIndexSet">False</Property>
+      <Property name="Text">Cancel</Property>
+      <Property name="UseVisualStyleBackColor">True</Property>
+      <Property name="DataBindings">
+        <Property name="DefaultDataSourceUpdateMode">OnValidation</Property>
+      </Property>
+      <Property name="Location">413, 73</Property>
+      <Property name="Tag">Inited</Property>
+    </Object>
+    <Object type="DialogDesigner.ToolboxLib.MapBasicControls.MapBasicStaticText, DialogDesigner, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" name="MapBasicStaticText1" children="Controls">
+      <Property name="ControlCode" />
+      <Property name="Id">6</Property>
+      <Property name="Name">MapBasicStaticText1</Property>
+      <Property name="Position">20, 78</Property>
+      <Property name="Size">325, 13</Property>
+      <Property name="Disable">False</Property>
+      <Property name="AutoSize">True</Property>
+      <Property name="Title">* Nakon izvoza u KML podesiti simbole za hidrante u Google Earth !</Property>
+      <Property name="Hide">False</Property>
+      <Property name="TabIndex">6</Property>
+      <Property name="TabIndexSet">False</Property>
+      <Property name="Text">* Nakon izvoza u KML podesiti simbole za hidrante u Google Earth !</Property>
+      <Property name="DataBindings">
+        <Property name="DefaultDataSourceUpdateMode">OnValidation</Property>
+      </Property>
+      <Property name="Location">20, 78</Property>
+      <Property name="Tag">Inited</Property>
+    </Object>
+    <Object type="DialogDesigner.ToolboxLib.MapBasicControls.MapBasicOKButton, DialogDesigner, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" name="MapBasicOKButton2" children="Controls">
+      <Property name="Title">Kreiraj KML</Property>
+      <Property name="ControlCode" />
+      <Property name="Id">8</Property>
+      <Property name="Name">MapBasicOKButton2</Property>
+      <Property name="Position">494, 73</Property>
+      <Property name="Size">75, 23</Property>
+      <Property name="Calling">Dialog_MZ_u_KML_OK</Property>
+      <Property name="Disable">False</Property>
+      <Property name="Hide">False</Property>
+      <Property name="TabIndex">4</Property>
+      <Property name="TabIndexSet">False</Property>
+      <Property name="Text">Kreiraj KML</Property>
+      <Property name="UseVisualStyleBackColor">True</Property>
+      <Property name="DataBindings">
+        <Property name="DefaultDataSourceUpdateMode">OnValidation</Property>
+      </Property>
+      <Property name="Location">494, 73</Property>
+      <Property name="Tag">Inited</Property>
+    </Object>
+    <Object type="DialogDesigner.ToolboxLib.MapBasicControls.MapBasicGroupBox, DialogDesigner, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" name="MapBasicGroupBox1" children="Controls">
+      <Object type="DialogDesigner.ToolboxLib.MapBasicControls.MapBasicPopupMenu, DialogDesigner, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" name="MZ_PopupMenu1" children="Controls">
+        <Property name="ControlCode" />
+        <Property name="Id">2</Property>
+        <Property name="Name">MZ_PopupMenu1</Property>
+        <Property name="Position">6, 19</Property>
+        <Property name="Size">110, 21</Property>
+        <Property name="Title">
+        </Property>
+        <Property name="FromVariable">arr_Zone()</Property>
+        <Property name="Calling" />
+        <Property name="Disable">False</Property>
+        <Property name="Value">1</Property>
+        <Property name="Into">sn_ZONA</Property>
+        <Property name="TabIndex">0</Property>
+        <Property name="TabIndexSet">False</Property>
+        <Property name="FormattingEnabled">True</Property>
+        <Property name="DataBindings">
+          <Property name="DefaultDataSourceUpdateMode">OnValidation</Property>
+        </Property>
+        <Property name="Location">6, 19</Property>
+        <Property name="Tag">Inited</Property>
+      </Object>
+      <Property name="ControlCode" />
+      <Property name="Id">1</Property>
+      <Property name="Name">MapBasicGroupBox1</Property>
+      <Property name="Position">14, 16</Property>
+      <Property name="Size">122, 50</Property>
+      <Property name="Title">Merna Zona:</Property>
+      <Property name="Hide">False</Property>
+      <Property name="TabIndex">1</Property>
+      <Property name="TabIndexSet">False</Property>
+      <Property name="TabStop">False</Property>
+      <Property name="Text">Merna Zona:</Property>
+      <Property name="DataBindings">
+        <Property name="DefaultDataSourceUpdateMode">OnValidation</Property>
+      </Property>
+      <Property name="Location">14, 16</Property>
+      <Property name="Tag">Inited</Property>
+    </Object>
+    <Object type="DialogDesigner.ToolboxLib.MapBasicControls.MapBasicGroupBox, DialogDesigner, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" name="MapBasicGroupBox2" children="Controls">
+      <Object type="DialogDesigner.ToolboxLib.MapBasicControls.MapBasicButton, DialogDesigner, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" name="MapBasicButton1" children="Controls">
+        <Property name="Title">Odaberi...</Property>
+        <Property name="ControlCode" />
+        <Property name="Id">5</Property>
+        <Property name="Name">MapBasicButton1</Property>
+        <Property name="Position">352, 17</Property>
+        <Property name="Size">75, 23</Property>
+        <Property name="Calling">Select_DIR_ZSExp</Property>
+        <Property name="Disable">False</Property>
+        <Property name="Hide">False</Property>
+        <Property name="TabIndex">3</Property>
+        <Property name="TabIndexSet">False</Property>
+        <Property name="Text">Odaberi...</Property>
+        <Property name="UseVisualStyleBackColor">True</Property>
+        <Property name="DataBindings">
+          <Property name="DefaultDataSourceUpdateMode">OnValidation</Property>
+        </Property>
+        <Property name="Location">352, 17</Property>
+        <Property name="Tag">Inited</Property>
+      </Object>
+      <Object type="DialogDesigner.ToolboxLib.MapBasicControls.MapBasicEditText, DialogDesigner, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" name="Folder_EditText1" children="Controls">
+        <Property name="ControlCode" />
+        <Property name="Id">4</Property>
+        <Property name="Name">Folder_EditText1</Property>
+        <Property name="Position">6, 19</Property>
+        <Property name="Size">340, 20</Property>
+        <Property name="Disable">False</Property>
+        <Property name="Hide">False</Property>
+        <Property name="Value">D:\_radni\EXPORT\GoogleEarth\ZoneScan\</Property>
+        <Property name="Into">s_ExpFolder</Property>
+        <Property name="Password">False</Property>
+        <Property name="TabIndex">2</Property>
+        <Property name="TabIndexSet">False</Property>
+        <Property name="Text">
+        </Property>
+        <Property name="DataBindings">
+          <Property name="DefaultDataSourceUpdateMode">OnValidation</Property>
+        </Property>
+        <Property name="Location">6, 19</Property>
+        <Property name="Tag">Inited</Property>
+      </Object>
+      <Property name="ControlCode" />
+      <Property name="Id">3</Property>
+      <Property name="Name">MapBasicGroupBox2</Property>
+      <Property name="Position">142, 16</Property>
+      <Property name="Size">436, 51</Property>
+      <Property name="Title">Folder za KML fajlove:</Property>
+      <Property name="Hide">False</Property>
+      <Property name="TabIndex">3</Property>
+      <Property name="TabIndexSet">False</Property>
+      <Property name="TabStop">False</Property>
+      <Property name="Text">Folder za KML fajlove:</Property>
+      <Property name="DataBindings">
+        <Property name="DefaultDataSourceUpdateMode">OnValidation</Property>
+      </Property>
+      <Property name="Location">142, 16</Property>
+      <Property name="Tag">Inited</Property>
+    </Object>
+    <Property name="AutoSize">True</Property>
+    <Property name="ClientSize">591, 106</Property>
+    <Property name="MaximizeBox">False</Property>
+    <Property name="MinimizeBox">False</Property>
+    <Property name="ShowIcon">False</Property>
+    <Property name="Text">Priprema KML za ZoneScan<Reference name="Form1" /></Property>
+    <Property name="DataBindings">
+      <Property name="DefaultDataSourceUpdateMode">OnValidation</Property>
+    </Property>
+    <Property name="Name">Form1</Property>
+    <Property name="Tag">-1|-1|</Property>
+  </Object>

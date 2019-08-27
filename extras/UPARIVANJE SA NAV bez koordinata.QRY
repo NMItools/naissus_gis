@@ -1,0 +1,7 @@
+Fields {NOVI_VODOMERI.SERIJSKI_BROJ "GPS SerBrVod", Kupci_potrosaci_vode_GEOREF.serijski_br "NAV SerBrVod", NOVI_VODOMERI.SIFRA "GPS MatBr", Kupci_potrosaci_vode_GEOREF.sifra "NAV MatBr", NOVI_VODOMERI.NAZIV "GPS Naziv", Kupci_potrosaci_vode_GEOREF.naziv "NAV Naziv", NOVI_VODOMERI.ULICA "GPS Ulica", Kupci_potrosaci_vode_GEOREF.ulica "NAV Ulica", NOVI_VODOMERI.KUCNI_BROJ "GPS K_Br", Kupci_potrosaci_vode_GEOREF.broj "NAV K_Br", Kupci_potrosaci_vode_GEOREF.mesto, Kupci_potrosaci_vode_GEOREF.marka, NOVI_VODOMERI.PRECNIK "GPS Precnik", Kupci_potrosaci_vode_GEOREF.profil "NAV Precnik", Kupci_potrosaci_vode_GEOREF.datum_aktiv, Kupci_potrosaci_vode_GEOREF.Zona, Kupci_potrosaci_vode_GEOREF.Knjiga, Kupci_potrosaci_vode_GEOREF.RedBroj, NOVI_VODOMERI.MERNA_ZONA, NOVI_VODOMERI.MI_PRINX}
+Tables {NOVI_VODOMERI, Kupci_potrosaci_vode_GEOREF}
+Where {(NOVI_VODOMERI.SERIJSKI_BROJ = Kupci_potrosaci_vode_GEOREF.serijski_br) and Kupci_potrosaci_vode_GEOREF.MI_PRINX = 0 and NOVI_VODOMERI.SERIJSKI_BROJ <> ""}
+Group {}
+Order {sifra}
+Into {UPARIVANJE_sa_NAV}
+Browse

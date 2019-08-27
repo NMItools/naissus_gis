@@ -1,0 +1,91 @@
+'include "mapbasic.def"
+'include "menu.def"
+'include "icons.def"
+include "..\..\Library\ERRORLib.def"
+include "..\NAISSUS-GIS.def"
+
+Sub DLG_Potrosnja
+	
+	Dim s_GodPotr as String
+	Dim n as SmallInt
+	
+	ReDim rs_GodPotr(0)
+	
+' - SQL StoredProc/query za selekciju svih tabela potrosnje
+	i_hstmt = Server_Execute(i_hdbc,"EXEC mbx.sp_PotrosnjaGOD") 
+		Server i_hstmt Bind Column 1 To s_GodPotr, am_stat
+		Server i_hstmt Fetch First
+
+	' - Kreiraj niz od godina na kraju imena tabela potrosnje (odseci 'POTROSNJA_NAV_') = rn_GodPotr() 
+		n=1
+		While Not Server_EOT(i_hstmt)
+			ReDim rs_GodPotr(n)
+			rs_GodPotr(n) = Right$(s_GodPotr, 4)
+			Server i_hstmt Fetch Next
+			n=n+1
+		Wend
+		
+	Server i_hstmt Close		
+	
+'***** DIALOG DESIGNER GENERATED CODE. DO NOT EDIT OR REMOVE THIS LINE OR BELOW THIS LINE! *****
+Dialog
+	Title "Prikaz potrošnje vodomera"
+	Width 254 Height 195
+
+Control StaticText
+	Id 1
+	Position 8, 6
+	Width 137 Height 8
+	Title "Odaberite jedan ili više vodomera sa liste:"
+	
+Control MultiListBox
+	Id 2
+	Position 8, 16
+	Width 238 Height 91
+	Title From Variable rs_MatBrPotr
+	
+Control GroupBox
+	Id 3
+	Position 8, 113
+	Width 105 Height 56
+	Title "Grafik potrošnje:"
+	
+Control RadioGroup
+	Id 4
+	Position 12, 132
+	Title "Pojedinaèni;Zbirni"
+	Value 1
+	
+Control GroupBox
+	Id 5
+	Position 118, 113
+	Width 129 Height 56
+	Title "Godina:"
+	
+Control MultiListBox
+	Id 6
+	Position 122, 123
+	Width 120 Height 43
+	Title From Variable rs_GodPotr
+	
+Control CancelButton
+	Title "Cancel"
+	Id 7
+	Position 8, 173
+	Width 51 Height 14
+	Calling DLG_PotrosnjaCANCEL
+	
+Control OKButton
+	Title "OK"
+	Id 8
+	Position 191, 173
+	Width 51 Height 14
+	Calling DLG_PotrosnjaOK
+	
+	Exit Sub	
+'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "DLG_Potrosnja")
+	Call ERRShow()	
+	
+End Sub		

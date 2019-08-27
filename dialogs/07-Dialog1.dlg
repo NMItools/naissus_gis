@@ -1,0 +1,166 @@
+  <Object type="System.Windows.Forms.Form, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" name="Form1" children="Controls">
+    <Object type="DialogDesigner.ToolboxLib.MapBasicControls.MapBasicOKButton, DialogDesigner, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" name="MapBasicOKButton1" children="Controls">
+      <Property name="Title">OK</Property>
+      <Property name="ControlCode" />
+      <Property name="Id">8</Property>
+      <Property name="Name">MapBasicOKButton1</Property>
+      <Property name="Position">281, 279</Property>
+      <Property name="Size">75, 23</Property>
+      <Property name="Calling">DLG_PotrosnjaOK</Property>
+      <Property name="Disable">False</Property>
+      <Property name="Hide">False</Property>
+      <Property name="Text">OK</Property>
+      <Property name="UseVisualStyleBackColor">True</Property>
+      <Property name="DataBindings">
+        <Property name="DefaultDataSourceUpdateMode">OnValidation</Property>
+      </Property>
+      <Property name="Location">281, 279</Property>
+      <Property name="TabIndex">5</Property>
+      <Property name="Tag">Inited</Property>
+    </Object>
+    <Object type="DialogDesigner.ToolboxLib.MapBasicControls.MapBasicCancelButton, DialogDesigner, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" name="MapBasicCancelButton1" children="Controls">
+      <Property name="Title">Cancel</Property>
+      <Property name="ControlCode" />
+      <Property name="Id">7</Property>
+      <Property name="Name">MapBasicCancelButton1</Property>
+      <Property name="Position">12, 279</Property>
+      <Property name="Size">75, 23</Property>
+      <Property name="Calling">DLG_PotrosnjaCANCEL</Property>
+      <Property name="Disable">False</Property>
+      <Property name="Hide">False</Property>
+      <Property name="Text">Cancel</Property>
+      <Property name="UseVisualStyleBackColor">True</Property>
+      <Property name="DataBindings">
+        <Property name="DefaultDataSourceUpdateMode">OnValidation</Property>
+      </Property>
+      <Property name="Location">12, 279</Property>
+      <Property name="TabIndex">4</Property>
+      <Property name="Tag">Inited</Property>
+    </Object>
+    <Object type="DialogDesigner.ToolboxLib.MapBasicControls.MapBasicGroupBox, DialogDesigner, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" name="MapBasicGroupBox2" children="Controls">
+      <Object type="DialogDesigner.ToolboxLib.MapBasicControls.MapBasicMultiListBox, DialogDesigner, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" name="Godine potrošnje u bazi" children="Controls">
+        <Property name="ControlCode" />
+        <Property name="Id">6</Property>
+        <Property name="Name">Godine potrošnje u bazi</Property>
+        <Property name="Position">6, 15</Property>
+        <Property name="Size">177, 69</Property>
+        <Property name="Title">
+        </Property>
+        <Property name="FromVariable">rs_GodPotr</Property>
+        <Property name="Calling" />
+        <Property name="Disable">False</Property>
+        <Property name="Hide">False</Property>
+        <Property name="Value" />
+        <Property name="Into" />
+        <Property name="FormattingEnabled">True</Property>
+        <Property name="DataBindings">
+          <Property name="DefaultDataSourceUpdateMode">OnValidation</Property>
+        </Property>
+        <Property name="Location">6, 15</Property>
+        <Property name="TabIndex">0</Property>
+        <Property name="Tag">Inited</Property>
+      </Object>
+      <Property name="ControlCode" />
+      <Property name="Id">5</Property>
+      <Property name="Name">MapBasicGroupBox2</Property>
+      <Property name="Position">173, 183</Property>
+      <Property name="Size">189, 90</Property>
+      <Property name="Title">Godina:</Property>
+      <Property name="Hide">False</Property>
+      <Property name="TabStop">False</Property>
+      <Property name="Text">Godina:</Property>
+      <Property name="DataBindings">
+        <Property name="DefaultDataSourceUpdateMode">OnValidation</Property>
+      </Property>
+      <Property name="Location">173, 183</Property>
+      <Property name="TabIndex">3</Property>
+      <Property name="Tag">Inited</Property>
+    </Object>
+    <Object type="DialogDesigner.ToolboxLib.MapBasicControls.MapBasicGroupBox, DialogDesigner, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" name="MapBasicGroupBox1" children="Controls">
+      <Object type="DialogDesigner.ToolboxLib.MapBasicControls.MapBasicRadioGroup, DialogDesigner, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" name="MapBasicRadioGroup1" children="Controls">
+        <Property name="ControlCode" />
+        <Property name="Id">4</Property>
+        <Property name="Name">MapBasicRadioGroup1</Property>
+        <Property name="Position">6, 30</Property>
+        <Property name="Title">Pojedinačni;Zbirni</Property>
+        <Property name="FromVariable" />
+        <Property name="Calling" />
+        <Property name="Disable">False</Property>
+        <Property name="Hide">False</Property>
+        <Property name="Value">1</Property>
+        <Property name="Into" />
+        <Property name="AutoSize">True</Property>
+        <Property name="DataBindings">
+          <Property name="DefaultDataSourceUpdateMode">OnValidation</Property>
+        </Property>
+        <Property name="Location">6, 30</Property>
+        <Property name="Size">107, 45</Property>
+        <Property name="TabIndex">0</Property>
+        <Property name="Tag">Inited</Property>
+      </Object>
+      <Property name="ControlCode" />
+      <Property name="Id">3</Property>
+      <Property name="Name">MapBasicGroupBox1</Property>
+      <Property name="Position">12, 183</Property>
+      <Property name="Size">155, 90</Property>
+      <Property name="Title">Grafik potrošnje:</Property>
+      <Property name="Hide">False</Property>
+      <Property name="TabStop">False</Property>
+      <Property name="Text">Grafik potrošnje:</Property>
+      <Property name="DataBindings">
+        <Property name="DefaultDataSourceUpdateMode">OnValidation</Property>
+      </Property>
+      <Property name="Location">12, 183</Property>
+      <Property name="TabIndex">2</Property>
+      <Property name="Tag">Inited</Property>
+    </Object>
+    <Object type="DialogDesigner.ToolboxLib.MapBasicControls.MapBasicMultiListBox, DialogDesigner, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" name="Lista svih vodomera na mestu klika" children="Controls">
+      <Property name="ControlCode" />
+      <Property name="Id">2</Property>
+      <Property name="Name">Lista svih vodomera na mestu klika</Property>
+      <Property name="Position">12, 25</Property>
+      <Property name="Size">350, 147</Property>
+      <Property name="Title">
+      </Property>
+      <Property name="FromVariable">rs_MatBrPotr</Property>
+      <Property name="Calling" />
+      <Property name="Disable">False</Property>
+      <Property name="Hide">False</Property>
+      <Property name="Value" />
+      <Property name="Into" />
+      <Property name="FormattingEnabled">True</Property>
+      <Property name="DataBindings">
+        <Property name="DefaultDataSourceUpdateMode">OnValidation</Property>
+      </Property>
+      <Property name="Location">12, 25</Property>
+      <Property name="TabIndex">1</Property>
+      <Property name="Tag">Inited</Property>
+    </Object>
+    <Object type="DialogDesigner.ToolboxLib.MapBasicControls.MapBasicStaticText, DialogDesigner, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" name="MapBasicStaticText1" children="Controls">
+      <Property name="ControlCode" />
+      <Property name="Id">1</Property>
+      <Property name="Name">MapBasicStaticText1</Property>
+      <Property name="Position">12, 9</Property>
+      <Property name="Size">201, 13</Property>
+      <Property name="AutoSize">True</Property>
+      <Property name="Title">Odaberite jedan ili više vodomera sa liste:</Property>
+      <Property name="Hide">False</Property>
+      <Property name="Text">Odaberite jedan ili više vodomera sa liste:</Property>
+      <Property name="DataBindings">
+        <Property name="DefaultDataSourceUpdateMode">OnValidation</Property>
+      </Property>
+      <Property name="Location">12, 9</Property>
+      <Property name="TabIndex">0</Property>
+      <Property name="Tag">Inited</Property>
+    </Object>
+    <Property name="ClientSize">374, 314</Property>
+    <Property name="MaximizeBox">False</Property>
+    <Property name="MinimizeBox">False</Property>
+    <Property name="ShowIcon">False</Property>
+    <Property name="Text">Prikaz potrošnje vodomera<Reference name="Form1" /></Property>
+    <Property name="DataBindings">
+      <Property name="DefaultDataSourceUpdateMode">OnValidation</Property>
+    </Property>
+    <Property name="Name">Form1</Property>
+    <Property name="Tag">Inited</Property>
+  </Object>

@@ -1,0 +1,707 @@
+include "mapbasic.def"
+include "menu.def"
+include "icons.def"
+include "..\Library\ERRORLib.def"
+include "..\nmiWin.def"
+include "..\nmiFunkcije.def"
+include "..\nmiDotNet.def"
+include "NAISSUS-GIS.def"
+                                                                                                
+'===================================================================================================================== 
+' Meni i toolbar za prikaz podloga
+
+Sub Podloge
+
+	onerror goto Greska  
+
+	Create Menu "Ortofoto 2006" As
+		"Ortofoto Nis" HelpMsg "Submenu Item" Calling OF_2006,
+		"(-",
+		"Mreza Ortofoto" HelpMsg "Submenu Item" Calling OF_2006_MREZA
+
+	Create Menu "Vojne Topografske" As
+		"1:25 000" HelpMsg "Submenu Item" Calling VT_25000,
+		"1:50 000" HelpMsg "Submenu Item" Calling VT_50000,
+		"(-",
+		"Mreza 1:25 000" HelpMsg "Submenu Item" Calling VT_25000_MREZA,
+		"Mreza 1:50 000" HelpMsg "Submenu Item" Calling VT_50000_MREZA
+
+	Create Menu "Katastar 1989" As
+		"1:1000" HelpMsg "Submenu Item" Calling KAT_1989_1000,
+		"1:5000" HelpMsg "Submenu Item" Calling KAT_1989_5000,
+		"(-",
+		"Mreza 1:1000" HelpMsg "Submenu Item" Calling KAT_1989_1000_MREZA,
+		"Mreza 1:5000" HelpMsg "Submenu Item" Calling KAT_1989_5000_MREZA
+
+	Create Menu "Katastar 1955" As
+		"1:500" HelpMsg "Submenu Item" Calling KAT_1955_500,
+		"1:1000" HelpMsg "Submenu Item" Calling KAT_1955_1000,
+		"(-",
+		"Mreza 1:500" HelpMsg "Submenu Item" Calling KAT_1955_500_MREZA,
+		"Mreza 1:1000" HelpMsg "Submenu Item" Calling KAT_1955_1000_MREZA
+		
+	Create Menu "Katastar 1963" As
+		"1:1000" HelpMsg "Submenu Item" Calling KAT_1963_1000,
+		"1:2500" HelpMsg "Submenu Item" Calling KAT_1963_2500,
+		"(-",
+		"Mreza 1:1000" HelpMsg "Submenu Item" Calling KAT_1963_1000_MREZA,
+		"Mreza 1:2500" HelpMsg "Submenu Item" Calling KAT_1963_2500_MREZA  
+	
+	Create Menu "Katastar 1939" As
+		"1:1000" HelpMsg "Submenu Item" Calling KAT_1939_1000,
+		"1:2500" HelpMsg "Submenu Item" Calling KAT_1939_2500,
+		"(-",
+		"Mreza 1:1000" HelpMsg "Submenu Item" Calling KAT_1939_1000_MREZA,
+		"Mreza 1:2500" HelpMsg "Submenu Item" Calling KAT_1939_2500_MREZA  
+
+	Create Menu "Podloge" As
+		"Katastar 1939" As "Katastar 1939",
+		"Katastar 1955" As "Katastar 1955",
+		"Katastar 1963" As "Katastar 1963",
+		"Katastar 1989" As "Katastar 1989",
+		"Vojne Topografske" As "Vojne Topografske",
+		"Ortofoto 2006" As "Ortofoto 2006",
+		"(-"
+'		"Planovi Grada" HelpMsg "Submenu Item" Calling PLANOVI_GRADA,
+'		"(-",
+'		"Koje podloge ?" HelpMsg "Submenu Item" Calling KOJA_KARTA, 
+'		"Zatvori sve podloge" HelpMsg "Submenu Item" Calling ZATVORI_SVE_KARTE,   
+'		"(-",
+'		"Definisanje Setova karata ..." HelpMsg "Submenu Item" Calling SETOVI_KARATA,
+'		"Podesavanje Svetline i Kontrasta ..." HelpMsg "Submenu Item" Calling SVET_KONTR_KARTE
+  
+	Alter Menu "JKP Naissus" Add 
+		"(-",
+		"Podloge" As "Podloge"
+		
+' -------    
+            
+	Create ButtonPad "Katastarske, topografske i geografske podloge" As
+	ToggleButton
+		Icon 8037 File "nmiIcons.dll"	
+		Calling OF_2006
+		ID 101
+		Uncheck
+		Enable
+		HelpMsg "Ortofoto snimak 2006 \nOrtofoto 2006" 
+	
+	SEPARATOR  
+	
+	ToggleButton
+		Icon 8043 File "nmiIcons.dll"	
+		Calling KAT_1989_1000
+		ID 102
+		Uncheck
+		Enable
+		HelpMsg "Katastar 1989 [R=1:1000] \nKatastar 1989 [R=1:1000]"
+		
+	ToggleButton
+		Icon 8043 File "nmiIcons.dll"	
+		Calling KAT_1989_5000
+		ID 103
+		Uncheck
+		Enable
+		HelpMsg "Katastar 1989 [R=1:5000] \nKatastar 1989 [R=1:5000]"
+	
+	SEPARATOR
+	
+	ToggleButton
+		Icon 8039 File "nmiIcons.dll"	
+		Calling KAT_1955_500
+		ID 104
+		Uncheck
+		Enable
+		HelpMsg "Katastar 1955(2000) [R=1:500] \nKatastar 1955 [R=1:500]"
+		
+	ToggleButton
+		Icon 8039 File "nmiIcons.dll"	
+		Calling KAT_1955_1000
+		ID 105
+		Uncheck
+		Enable
+		HelpMsg "Katastar 1955(2000) [R=1:1000] \nKatastar 1955 [R=1:1000]"
+	
+	SEPARATOR
+	
+	ToggleButton
+		Icon 8041 File "nmiIcons.dll"	
+		Calling KAT_1963_1000
+		ID 106
+		Uncheck
+		Enable
+		HelpMsg "Katastar 1963 [R=1:1000] \nKatastar 1963 [R=1:1000]"
+
+	ToggleButton
+		Icon 8041 File "nmiIcons.dll"	
+		Calling KAT_1963_2500
+		ID 107
+		Uncheck
+		Enable
+		HelpMsg "Katastar 1963 [R=1:2500] \nKatastar 1963 [R=1:2500]"
+	             
+	SEPARATOR
+	
+	ToggleButton
+		Icon 8045 File "nmiIcons.dll"	
+		Calling KAT_1939_1000
+		ID 108
+		Uncheck
+		Enable
+		HelpMsg "Katastar 1939 [R=1:1000] \nKatastar 1939 [R=1:1000]"
+
+	ToggleButton
+		Icon 8045 File "nmiIcons.dll"	
+		Calling KAT_1939_2500
+		ID 109
+		Uncheck
+		Enable
+		HelpMsg "Katastar 1939 [R=1:2500] \nKatastar 1939 [R=1:2500]"
+	
+	SEPARATOR
+	
+	ToggleButton
+		Icon 8047 File "nmiIcons.dll"	
+		Calling VT_25000
+		ID 1010
+		Uncheck
+		Enable
+		HelpMsg "Vojne Topografske [R=1:25000] \nVojne Topografske [R=1:25000]"
+
+	ToggleButton
+		Icon 8049 File "nmiIcons.dll"	
+		Calling VT_50000
+		ID 1011
+		Uncheck
+		Enable
+		HelpMsg "Vojne Topografske [R=1:50000] \nVojne Topografske [R=1:50000]" 
+
+'	SEPARATOR
+'
+'	PushButton
+'	Calling KOJA_KARTA
+'	Icon 51 File "neboysh.dll"
+'	HelpMsg "Koje se podloge nalaze ispod klika ? \n Koje podloge ?"
+
+'---
+
+	Alter ButtonPad "Katastarske, topografske i geografske podloge" 
+'	Position(0.5,2.8) Units "cm"
+	ToolbarPosition (1,0)
+	Fixed
+	Title "Katastarske, topografske i geografske podloge"
+	Width 15
+	Show    
+
+Exit Sub
+
+'	-------------------------
+
+Greska:
+
+Call ERRCreate(Err(), Error$(), "Podloge")
+
+Call ERRShow()
+
+End Sub
+
+'===================================================================================================================== 
+' ' Meni i toolbar za prikaz mreza podloga
+
+Sub MrezePodloga
+
+	onerror goto Greska  
+	
+	Create ButtonPad "Mreze podloga" As
+	ToggleButton
+		Icon 8051 File "nmiIcons.dll"
+		Calling OF_2006_MREZA
+		ID 1012
+		Uncheck
+		Enable
+		HelpMsg "Ortofoto snimak 2006 MREZA \nOrtofoto 2006 MREZA" 
+	      
+	SEPARATOR 
+	
+	ToggleButton
+		Icon 8051 File "nmiIcons.dll"
+		Calling KAT_1989_1000_MREZA
+		ID 1013
+		Uncheck
+		Enable
+		HelpMsg "Katastar 1989 MREZA [R=1:1000] \nKatastar 1989 MREZA [R=1:1000]"
+	ToggleButton
+		Icon 8051 File "nmiIcons.dll"
+		Calling KAT_1989_5000_MREZA
+		ID 1014
+		Uncheck
+		Enable
+		HelpMsg "Katastar 1989 MREZA [R=1:5000] \nKatastar 1989 MREZA [R=1:5000]"
+	
+	SEPARATOR
+	
+	ToggleButton
+		Icon 8051 File "nmiIcons.dll"
+		Calling KAT_1955_500_MREZA
+		ID 1015
+		Uncheck
+		Enable
+		HelpMsg "Katastar 1955(2000) MREZA [R=1:500] \nKatastar 1955 MREZA [R=1:500]"
+	ToggleButton
+		Icon 8051 File "nmiIcons.dll"
+		Calling KAT_1955_1000_MREZA
+		ID 1016
+		Uncheck
+		Enable
+		HelpMsg "Katastar 1955(2000) MREZA [R=1:1000] \nKatastar 1955 MREZA [R=1:1000]"
+	
+	SEPARATOR
+	
+	ToggleButton
+		Icon 8051 File "nmiIcons.dll"
+		Calling KAT_1963_1000_MREZA
+		ID 1017
+		Uncheck
+		Enable
+		HelpMsg "Katastar 1963 MREZA [R=1:1000] \nKatastar 1963 MREZA [R=1:1000]"
+	ToggleButton
+		Icon 8051 File "nmiIcons.dll"
+		Calling KAT_1963_2500_MREZA
+		ID 1018
+		Uncheck
+		Enable
+		HelpMsg "Katastar 1963 MREZA [R=1:2500] \nKatastar 1963 MREZA [R=1:2500]"
+	             
+	SEPARATOR
+	
+	ToggleButton
+		Icon 8051 File "nmiIcons.dll"
+		Calling KAT_1939_1000_MREZA
+		ID 1019
+		Uncheck
+		Enable
+		HelpMsg "Katastar 1939 MREZA [R=1:1000] \nKatastar 1939 MREZA [R=1:1000]"
+	ToggleButton
+		Icon 8051 File "nmiIcons.dll"
+		Calling KAT_1939_2500_MREZA
+		ID 1020
+		Uncheck
+		Enable
+		HelpMsg "Katastar 1939 MREZA [R=1:2500] \nKatastar 1939 MREZA [R=1:2500]"
+
+	SEPARATOR
+	
+	ToggleButton
+		Icon 8051 File "nmiIcons.dll"
+		Calling VT_25000_MREZA
+		ID 1021
+		Uncheck
+		Enable
+		HelpMsg "Vojne Topografske MREZA [R=1:25000] \nVojne Topografske MREZA [R=1:25000]"
+	ToggleButton
+		Icon 8051 File "nmiIcons.dll"
+		Calling VT_50000_MREZA
+		ID 1022
+		Uncheck
+		Enable
+		HelpMsg "Vojne Topografske [R=1:50000] \nVojne Topografske [R=1:50000]" 
+
+'	SEPARATOR
+'	PushButton
+'		Calling ZATVORI_SVE_KARTE
+'		Icon 53 File "neboysh.dll"
+'		HelpMsg "Zatvara sve podloge u sesiji \n Zatvori sve"
+
+	'---
+	
+	Alter ButtonPad "Mreze podloga" 
+	'Position(0.5,2.8) Units "cm"
+	ToolbarPosition (1,4)
+	Fixed
+	Title "Mreze podloga"
+	Width 15
+	Hide    
+	
+	Exit Sub
+'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "MrezePodloga")
+	Call ERRShow()
+
+End Sub
+
+
+'===================================================================================================================== 
+' .....
+
+Sub OF_2006
+
+	onerror goto Greska  
+	
+	namLejer = setRaster(s_FOLDER_POD,"set_ORTOFOTO_2006",101)
+'	grupaLejera = setTabGroup("Podloge","set_ORTOFOTO_2006")
+	
+	Exit Sub
+'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "OF_2006")
+	Call ERRShow()
+
+End Sub
+
+'===================================================================================================================== 
+' .....
+
+Sub KAT_1989_1000
+
+	onerror goto Greska  
+	
+	namLejer=setRaster(s_FOLDER_POD,"set_fg_1989_1000",102)
+	
+	Exit Sub
+'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "KAT_1989_1000")
+	Call ERRShow()
+
+End Sub
+
+'===================================================================================================================== 
+' .....
+
+Sub KAT_1989_5000
+
+	onerror goto Greska  
+	
+	namLejer=setRaster(s_FOLDER_POD,"set_fg_1989_5000",103)
+	
+	Exit Sub
+'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "KAT_1989_5000")
+	Call ERRShow()
+
+End Sub
+
+'===================================================================================================================== 
+' .....
+
+Sub KAT_1963_1000
+
+	onerror goto Greska  
+	
+	namLejer=setRaster(s_FOLDER_POD,"set_fg_1963_1000",106)
+	
+	Exit Sub
+'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "KAT_1963_1000")
+	Call ERRShow()
+
+End Sub
+
+'===================================================================================================================== 
+' .....
+
+Sub KAT_1963_2500
+
+	onerror goto Greska  
+	
+	namLejer=setRaster(s_FOLDER_POD,"set_fg_1963_2500",107)
+	
+	Exit Sub
+'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "KAT_1963_2500")
+	Call ERRShow()
+
+End Sub
+
+'===================================================================================================================== 
+' .....
+
+Sub KAT_1955_500
+
+	onerror goto Greska  
+	
+	namLejer=setRaster(s_FOLDER_POD,"set_pr_1955_00_500",104)
+	
+	Exit Sub
+'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "KAT_1955_500")
+	Call ERRShow()
+
+End Sub
+
+'===================================================================================================================== 
+' .....
+
+Sub KAT_1955_1000
+
+	onerror goto Greska  
+	
+	namLejer=setRaster(s_FOLDER_POD,"set_pr_1955_00_1000",105)
+	
+	Exit Sub
+'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "KAT_1955_1000")
+	Call ERRShow()
+
+End Sub
+
+'===================================================================================================================== 
+' .....
+
+Sub KAT_1939_1000
+
+	onerror goto Greska  
+	
+	namLejer=setRaster(s_FOLDER_POD,"set_pr_1939_1000",108)
+	
+	Exit Sub
+'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "KAT_1939_1000")
+	Call ERRShow()
+
+End Sub
+
+'===================================================================================================================== 
+' .....
+
+Sub KAT_1939_2500
+
+	onerror goto Greska  
+
+	namLejer=setRaster(s_FOLDER_POD,"set_pr_1939_2500",109)	
+	
+	Exit Sub
+'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "KAT_1939_2500")
+	Call ERRShow()
+
+End Sub
+
+'===================================================================================================================== 
+' .....
+
+Sub VT_25000
+
+	onerror goto Greska  
+	
+	namLejer=setRaster(s_FOLDER_POD,"set_vt_1973_25000",1010)
+	
+	Exit Sub
+'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "VT_25000")
+	Call ERRShow()
+
+End Sub
+
+'===================================================================================================================== 
+' .....
+
+Sub VT_50000
+
+	onerror goto Greska  
+	
+	namLejer=setRaster(s_FOLDER_POD,"set_vt_1983_50000",1011)
+	
+	Exit Sub
+'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "VT_50000")
+	Call ERRShow()
+
+End Sub
+
+'===================================================================================================================== 
+' .....
+Sub OF_2006_MREZA
+
+	onerror goto Greska  
+	
+	namLejer=setRaster(s_FOLDER_POD,"MREZA_of_2006",1012)
+	
+	Exit Sub
+'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "OF_2006_MREZA")
+	Call ERRShow()
+
+End Sub
+
+'===================================================================================================================== 
+' .....
+
+Sub KAT_1989_1000_MREZA
+
+	onerror goto Greska  
+	
+	namLejer=setRaster(s_FOLDER_POD,"MREZA_fg_1989_1000",1013)
+	
+	Exit Sub
+'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "KAT_1989_1000_MREZA")
+	Call ERRShow()
+
+End Sub
+
+'===================================================================================================================== 
+' .....
+
+Sub KAT_1989_5000_MREZA
+
+	onerror goto Greska  
+	
+	namLejer=setRaster(s_FOLDER_POD,"MREZA_fg_1989_5000",1014)
+	
+	Exit Sub
+'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "KAT_1989_5000_MREZA")
+	Call ERRShow()
+
+End Sub
+
+'===================================================================================================================== 
+' .....
+
+Sub KAT_1963_1000_MREZA
+
+	onerror goto Greska  
+	
+	namLejer=setRaster(s_FOLDER_POD,"MREZA_fg_1963_1000",1017)
+	
+	Exit Sub
+'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "KAT_1963_1000_MREZA")
+	Call ERRShow()
+
+End Sub
+
+'===================================================================================================================== 
+' .....
+
+Sub KAT_1963_2500_MREZA
+
+	onerror goto Greska  
+	
+	namLejer=setRaster(s_FOLDER_POD,"MREZA_fg_1963_2500",1018)
+	
+	Exit Sub
+'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "KAT_1963_2500_MREZA")
+	Call ERRShow()
+
+End Sub
+
+'===================================================================================================================== 
+' .....
+
+Sub KAT_1955_500_MREZA
+
+	onerror goto Greska  
+	
+	namLejer=setRaster(s_FOLDER_POD,"MREZA_pr_1955_00_500",1015)
+	
+	Exit Sub
+'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "KAT_1955_500_MREZA")
+	Call ERRShow()
+
+End Sub
+
+'===================================================================================================================== 
+' .....
+
+Sub KAT_1955_1000_MREZA
+
+	onerror goto Greska  
+
+	namLejer=setRaster(s_FOLDER_POD,"MREZA_pr_1955_00_1000",1016)
+	
+	Exit Sub
+'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "KAT_1955_1000_MREZA")
+	Call ERRShow()
+
+End Sub
+
+'===================================================================================================================== 
+' .....
+
+Sub KAT_1939_1000_MREZA
+
+	onerror goto Greska  
+	
+	namLejer=setRaster(s_FOLDER_POD,"MREZA_pr_1939_1000",1019)
+	
+	Exit Sub
+'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "KAT_1939_1000_MREZA")
+	Call ERRShow()
+
+End Sub
+
+'===================================================================================================================== 
+' .....
+
+Sub KAT_1939_2500_MREZA
+
+	onerror goto Greska  
+	
+	namLejer=setRaster(s_FOLDER_POD,"MREZA_pr_1939_2500",1020)
+	
+	Exit Sub
+'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "KAT_1939_2500_MREZA")
+	Call ERRShow()
+
+End Sub
+
+'===================================================================================================================== 
+' .....
+
+Sub VT_25000_MREZA
+
+	onerror goto Greska  
+	
+	namLejer=setRaster(s_FOLDER_POD,"MREZA_vt_1973_25000",1021)
+	
+	Exit Sub
+'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "VT_25000_MREZA")
+	Call ERRShow()
+
+End Sub
+
+'===================================================================================================================== 
+' .....
+
+Sub VT_50000_MREZA
+
+	onerror goto Greska  
+	
+	namLejer=setRaster(s_FOLDER_POD,"MREZA_vt_1983_50000",1022)
+	
+	Exit Sub
+'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "VT_50000_MREZA")
+	Call ERRShow()
+
+End Sub
+
+

@@ -1,0 +1,7 @@
+!Workspace
+!Version  400
+!Charset WindowsLatin2
+
+Run Application "..\Naissus\naissus-gis_update.MBX"
+Run Application "..\Naissus\naissus-gis_loader.MBX"
+

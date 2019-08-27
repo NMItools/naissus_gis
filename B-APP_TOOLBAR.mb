@@ -1,0 +1,565 @@
+include "mapbasic.def"
+include "menu.def"
+include "icons.def"
+include "..\Library\ERRORLib.def"
+include "..\nmiWin.def"
+include "..\nmiFunkcije.def"
+include "..\nmiDotNet.def"
+include "NAISSUS-GIS.def"
+
+' =====================================================================================================================
+Sub Toolbar_GLAVNI
+
+	onError goto greska
+	
+	Create ButtonPad "Glavni" As
+		PushButton
+			Calling WOR_default
+			Icon 8471 File "nmiIcons.dll"		
+			HelpMsg "naissus.WOR \n Pokreni osnovni radni prostor"
+		
+		SEPARATOR
+		
+		ToggleButton
+			Calling Toolbar_NIVOS
+			ID 1
+			HelpMsg "NIVOS \nObjekti NIVOS"
+			Icon 119
+			Uncheck
+			Enable 
+		
+		ToggleButton
+			Calling Toolbar_NIKAS
+			ID 2
+			HelpMsg "NIKAS \nObjekti NIKAS"
+			Icon 108
+			Uncheck
+			Enable 
+
+		ToggleButton
+			Calling Toolbar_GEO
+			Icon 8485 File "nmiIcons.dll"				
+			ID 3
+			HelpMsg "Geodetski snimljeni objekti NIVOS-a\nGeodetski (Kote cevi, terena, dubine cevi)"
+			Uncheck
+			Enable    
+			
+		SEPARATOR
+
+		ToggleButton
+			Calling Toolbar_KN
+			Icon 8451 File "nmiIcons.dll"				
+			ID 4
+			HelpMsg "Katastar nepokretnosti, izohipse, DTM\nKatastar (Parcele, Objekti, Izohipse, DTM)"
+			Uncheck
+			Enable     		
+
+		PushButton
+			Calling geoSrbija_URL
+			Icon 104
+			HelpMsg "Otvori aktivni prozor u GeoSrbija portalu\nGeoSrbija"
+			Enable     		
+			
+		SEPARATOR
+		
+		ToggleButton
+			Calling Toolbar_PODLOGE
+			ID 5
+			HelpMsg "Podloge \nPodloge,Planovi,Karte"
+			Icon 176
+			Uncheck
+			Enable 
+
+		ToggleButton
+			Calling Toolbar_MREZE
+			ID 6
+			HelpMsg "Mreze podloga \nMreze podloga"
+			Icon 186
+			Uncheck
+			Enable
+
+		ToggleButton
+			Calling Toolbar_PLANOVI
+			ID 7
+			HelpMsg "Planovi \nPlanovi"
+			Icon 8467 File "nmiIcons.dll"	
+			Uncheck
+			Enable 
+
+		
+		SEPARATOR
+		
+		ToggleButton
+			Calling Toolbar_NIVOS_POTROSACI
+			ID 8
+			HelpMsg "NIVOS korisnici i potrosnja\nOcitana potrosnja za vodomere i citacke knjige"
+			Icon MI_ICON_MB_3
+			Uncheck
+			Enable                
+		
+		SEPARATOR
+		
+		PushButton
+			Calling MapperPriprema
+			ID 9
+			Icon 41
+			HelpMsg "Podesavanje layouta za stampu \nPriprema za stampu"
+		
+		SEPARATOR
+		
+		PushButton
+			Calling DLG_Podesavanja
+			ID 20
+			Icon 8411 File "nmiIcons.dll"		
+			HelpMsg "Podesavanje radnih foldera \nRadni folderi"		
+		PushButton
+			Calling WOR_default_kreiranje
+			Icon MI_ICON_MB_14
+			HelpMsg "Kreiranje glavnog radnog prostora \nKreiraj .WOR"
+		PushButton
+			Calling MSSQL_tabele
+			Icon 8373 File "nmiIcons.dll"	
+			HelpMsg "Preuzimanje GIS tabela sa SQL servera  \nPreuzimanje GIS tabela sa SQL servera"
+		
+	'---
+	
+	If s_appmod = "User"
+	then	
+		Alter ButtonPad "Glavni"
+		Remove ID 7
+	End If
+	
+	If s_appmod = "Admin" or s_appmod = "Super"
+	then	
+		Alter ButtonPad "Glavni"
+		Remove ID 20
+	End If	
+	
+	Alter ButtonPad "Glavni" 
+		Position(1.8,3.8) Units "cm"
+		'ToolbarPosition (1,1)
+		Float
+		Title "JKP ''Naissus'' GIS"
+		Width 20
+		Show        
+
+	Exit Sub
+'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "Toolbar_GLAVNI")
+	Call ERRShow()
+			
+End Sub
+
+' =====================================================================================================================
+Sub WOR_default
+	
+	onError goto greska
+	
+' - WOR za tip korisnika
+
+	If s_appmod = "editor" or s_appmod = "admin" or s_appmod = "Super" 
+	Then
+		s_DefWOR = "naissus-GIS.wor"
+	Else
+		s_DefWOR = "naissus.wor"
+	End If
+	
+	l_Pitanje = Ask("Otvaranje osnovnog radnog prostora '"+s_DefWOR+"' zatvorice sve trenutno otvorene tabele ! Da li zelite da nastavite ?", "DA", "Odustani")
+	     
+	If l_Pitanje = false 
+	Then 
+		Print "Otvaranje "+s_DefWOR+" odlozeno!"
+		Exit Sub
+	else
+		Close All Interactive
+		Print ""
+		Print "Otvaranje radnog prostora "+s_FOLDER_WOR+s_DefWOR
+
+		Run Application s_FOLDER_WOR+s_DefWOR
+		Exit Sub
+	End If
+
+	Exit Sub
+	
+'	-------------------------
+	Greska:
+	Note  "Nije moguce otvoriti '"+s_DefWOR+"'"
+	print "----------------------------"
+	Print "Dosle je do greske u standardnom radnom prostoru '"+s_DefWOR+"'"
+	Print "Pokrenite ponovo MapInfo i izaberite opciju:"
+	Print "'Kreiraj standardni GIS radni prostor'"
+	Print "----------------------------"
+
+	Call ERRCreate(Err(), Error$(), "WOR_default")
+	Call ERRShow()
+
+End Sub
+
+' =====================================================================================================================
+Sub WOR_default_kreiranje
+
+	onError goto greska
+	
+	i_Start = 2
+
+	If s_appmod = "editor" or s_appmod = "admin" or s_appmod = "Super" 
+	Then
+		Call WOR_naissus_GIS
+	Else
+		Call WOR_naissus
+	End If
+
+	Exit Sub
+	
+'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "WOR_default")
+	Call ERRShow()
+	
+End Sub
+' =====================================================================================================================
+Sub Toolbar_NIVOS
+
+	onError goto greska
+
+	i_GrupaLejera = GroupLayerInfo_ID("NIVOS",1)
+
+	If i_GrupaLejera = 9999 
+	Then 
+		Exit Sub
+	Else		
+		If l_Tools = False
+		Then
+	'		Alter ButtonPad "NIVOS" Float
+			Alter ButtonPad "NIVOS objekti" Hide
+			Alter Button ID 1 UnCheck
+		Else
+			Alter ButtonPad "NIVOS objekti" Show
+	'		Alter ButtonPad "NIVOS" Fixed
+			Alter Button ID 1 Check
+		End if	
+	End If
+
+	Exit Sub
+'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "Toolbar_NIVOS")
+	Call ERRShow()
+	
+End Sub
+
+' =====================================================================================================================
+Sub Toolbar_NIKAS
+
+	onError goto greska
+	
+	i_GrupaLejera = GroupLayerInfo_ID("NIKAS",2)
+
+	If i_GrupaLejera = 9999 
+	then 
+		Exit Sub
+	Else		
+		If l_Tools = False
+		Then
+'			Alter ButtonPad "NIKAS" Float
+			Alter ButtonPad "NIKAS objekti" Hide
+			Alter Button ID 2 UnCheck
+		Else
+			Alter ButtonPad "NIKAS objekti" Show
+'			Alter ButtonPad "NIKAS" Fixed
+			Alter Button ID 2 Check
+		end if	
+	End If
+
+	Exit Sub
+'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "Toolbar_NIKAS")
+	Call ERRShow()
+
+End Sub
+
+' =====================================================================================================================
+Sub Toolbar_GEO
+	
+	onError goto greska
+	
+	i_GrupaLejera = GroupLayerInfo_ID("[Geodetski]",3)
+
+	If i_GrupaLejera = 9999 
+	then 
+		Exit Sub
+	Else		
+		If l_Tools = False
+		Then
+'			Alter ButtonPad "NIVOS Geodetski" Float
+			Alter ButtonPad "NIVOS Geodetski" Hide
+			Alter Button ID 3 UnCheck
+		Else
+			Alter ButtonPad "NIVOS Geodetski" Show
+'			Alter ButtonPad "NIVOS Geodetski" Fixed
+			Alter Button ID 3 Check
+		end if	
+	End If
+	
+	Exit Sub
+'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "Toolbar_KN")
+	Call ERRShow()
+	
+End Sub
+
+' =====================================================================================================================
+Sub Toolbar_KN
+	
+	onError goto greska
+	
+	i_GrupaLejera = GroupLayerInfo_ID("Katastar",4)
+
+	If i_GrupaLejera = 9999 
+	then 
+		Exit Sub
+	Else		
+		If l_Tools = False
+		Then
+'			Alter ButtonPad "Katastar, Izohipse, DTM" Float
+			Alter ButtonPad "Katastar, Izohipse, DTM" Hide
+			Alter Button ID 4 UnCheck
+		Else
+			Alter ButtonPad "Katastar, Izohipse, DTM" Show
+'			Alter ButtonPad "Katastar, Izohipse, DTM" Fixed
+			Alter Button ID 4 Check
+		end if	
+	End If
+	
+	Exit Sub
+'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "Toolbar_KN")
+	Call ERRShow()
+	
+End Sub
+
+' =====================================================================================================================
+Sub geoSrbija_URL
+	
+	onerror goto Greska
+	
+	If MapWinSTATUS(0) <> 1 then exit sub
+	End If	
+	
+	dim gs_URL as string
+	
+	iMapWindowID = WindowID(FrontWindow())
+
+	Set Coordsys Earth Projection 8, 104, 7, 21, 0, 0.9996, 500000, 0
+	
+' - krajnje koordinate map prozora	
+	minX = MapperInfo(iMapWindowID,MAPPER_INFO_MINX)
+	maxX = MapperInfo(iMapWindowID,MAPPER_INFO_MAXX)
+	minY = MapperInfo(iMapWindowID,MAPPER_INFO_MINY)
+	maxY = MapperInfo(iMapWindowID,MAPPER_INFO_MAXY)
+
+'	Print minX
+'	Print maxX
+'	Print minY
+'	Print maxY
+
+	Set Coordsys Earth Projection 8, 9999, 10, 485.017844, 254.040967, 490.850757, -6.25099249, -3.40102363, 15.57471608, 3.12980309, 0, 7, 21, 0, 0.9999, 7500000, 0 Bounds (7547700, 4755000) (7630000, 4820000)
+
+	Print "==================================================================="	
+	Print "Otvaranje portala GeoSrbija"
+	
+'za prikazano podrucje na mapi (Internet Explorer)"
+'	Print "sa sledecim aktiviranim slojevima:"
+'
+'	Print "- Administrativne jedinice:" 
+'	Print "  Grad, Opstina, Katastarska opstina, Naselje, Mesna zajednica"
+'	Print "- Adrese:"
+'	Print "  Kucni broj, Ulica"
+'	Print "- Katastarske parcele:"
+'	Print "  objekat, katastarska parcela, DKP nazivi"
+'	Print "- Ortofoto:"
+'	Print "  ortofoto_10cm_(2007-2010) 11.02.2010 "
+'	Print "  ortofoto_10cm_(2011-2013) "
+'	Print "  ortofoto_40cm_(2007-2010) 05.08.2010"
+
+	Print "==================================================================="	
+	
+	gs_URL="http://a3.geosrbija.rs/"
+	' gs_URL="http://www.geosrbija.rs/rga/default.aspx?gui=1&lang=3&minX="+minX+"&minY="+minY+"&maxX="+maxX+"&maxY="+maxY+"&layers=51%20130%20247%20248%20416%20418%20424%20429%20433%20548&baselayer=1&visibleOLOverlays="
+	
+	s_kom = "Run Program """+s_BROWSER_WWW+" "+gs_URL+""""
+'	print s_kom
+
+	Run Command s_kom
+	
+	Exit Sub
+'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "geoSrbija_URL")
+	Call ERRShow()
+	
+End Sub
+
+' =====================================================================================================================
+Sub Toolbar_PODLOGE
+
+	onError goto greska
+
+	i_GrupaLejera = GroupLayerInfo_ID("Podloge",5)
+
+	If i_GrupaLejera = 9999 
+	then 
+		Exit Sub
+	Else		
+		If l_Tools = False
+		Then
+'			Alter ButtonPad "Katastarske, topografske i geografske podloge" Float
+			Alter ButtonPad "Katastarske, topografske i geografske podloge" Hide
+			Alter Button ID 5 Uncheck		
+			Alter Button ID 6 Disable
+			Alter Button ID 7 Disable
+			
+		Else
+			Alter ButtonPad "Katastarske, topografske i geografske podloge" Show
+'			Alter ButtonPad "Katastarske, topografske i geografske podloge" Fixed
+			Alter Button ID 5 Check	
+			Alter Button ID 6 Enable
+			Alter Button ID 7 Enable
+		end if	
+	End If
+
+	Exit Sub
+'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "Toolbar_PODLOGE")
+	Call ERRShow()
+	
+End Sub
+
+' =====================================================================================================================
+Sub Toolbar_MREZE
+	
+	onError goto greska
+	
+	i_GrupaLejera = GroupLayerInfo_ID("_mreze",6)
+
+	If i_GrupaLejera = 9999 
+	then 
+		Exit Sub
+	Else		
+		If l_Tools = False
+		Then
+'			Alter ButtonPad "Mreze podloga" Float
+			Alter ButtonPad "Mreze podloga" Hide
+			Alter ButtonPad "Mreže planova" Hide
+			Alter Button ID 6 UnCheck
+		Else
+'			Alter ButtonPad "Mreze podloga" Fixed
+			Alter ButtonPad "Mreze podloga" Show
+			Alter ButtonPad "Mreže planova" Show
+
+			Alter Button ID 6 Check
+		end if	
+	End If
+	
+	Exit Sub
+'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "Toolbar_MREZE")
+	Call ERRShow()
+	
+End Sub
+
+' =====================================================================================================================
+Sub Toolbar_PLANOVI
+	
+	onError goto greska
+
+	i_GrupaLejera = GroupLayerInfo_ID("Planovi",7)
+
+	If i_GrupaLejera = 9999 
+	then 
+		Exit Sub
+	Else		
+		If l_Tools = False
+		Then
+'			Alter ButtonPad "Planovi" Float
+			Alter ButtonPad "Planovi" Hide
+			Alter Button ID 7 Uncheck		
+		Else
+			Alter ButtonPad "Planovi" Show
+'			Alter ButtonPad "Planovi" Fixed
+			Alter Button ID 7 Check	
+		end if	
+	End If
+
+	Exit Sub
+'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "Toolbar_PLANOVI")
+	Call ERRShow()
+	
+End Sub
+
+' =====================================================================================================================
+Sub Toolbar_NIVOS_POTROSACI
+
+	onError goto greska
+	
+	If MapWinSTATUS(0) <> 1 then exit sub
+	End If	
+		
+	If vidToolbar ("NIVOS Potrosaci") = True
+	Then
+'		Alter ButtonPad "NIVOS Potrosaci" Float
+		Alter ButtonPad "NIVOS Potrosaci" Hide
+		Alter Button ID 8 Uncheck		
+	Else
+		Alter ButtonPad "NIVOS Potrosaci" Show
+'		Alter ButtonPad "NIVOS Potrosaci" Fixed
+		Alter Button ID 8 Check	
+	end if
+
+	Exit Sub
+'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "Toolbar_NIVOS_POTROSACI")
+	Call ERRShow()
+		
+End Sub
+
+' =====================================================================================================================
+Sub Kraj_Rada 
+
+	onerror goto Greska  
+
+		Print "---------------------------------------"
+		Print "Izlazak iz programa!"
+		Print "Zatvaranje svih tabela..."
+	
+'	Close All Interactive
+	
+		Print "Zatvaranje konekcija ka MS SQL serveru..."
+	
+	Server i_hdbc Disconnect
+	
+		print "Kraj rada."
+		
+	Set Window Message title "Message"
+	Close window message
+	
+	End Program
+
+	Exit Sub
+'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "Kraj_Rada")
+	Call ERRShow()
+	
+	END PROGRAM
+	
+End Sub

@@ -1,0 +1,258 @@
+include "mapbasic.def"
+include "menu.def"
+include "icons.def"
+include "..\Library\ERRORLib.def"
+include "..\nmiWin.def"
+include "..\nmiFunkcije.def"
+include "..\nmiDotNet.def"
+include "NAISSUS-GIS.def"
+
+
+SUB Planovi
+
+OnError Goto Greska
+
+	Create Menu "Planovi" As
+		"Planovi - 1989 [R=1:1000]" Calling PLANOVI_1,
+		"Planovi 1 mreza" Calling PLANOVI_1_mreza,
+		"Planovi 2 - 1989 [R=1:1000]" Calling PLANOVI_2,
+		"Planovi 2 mreza" Calling PLANOVI_2_mreza,
+		"(-",		
+		"Planovi stari [R=1:500]" Calling PLANOVI_55_500,
+		"Planovi stari 1 mreza" Calling PLANOVI_55_500_mreza,
+		"Planovi stari [R=1:1000]" Calling PLANOVI_55_1000,
+		"Planovi stari 2 mreza" Calling PLANOVI_55_1000_mreza,
+		"Planovi stari [R=1:2500]" Calling PLANOVI_55_2500,
+		"Planovi stari 3 mreza" Calling PLANOVI_55_2500_mreza,
+		"(-",		
+		"Stara skica [R=1:2500]" Calling STARI_PLAN_2500,
+		"Stara skica mreza" Calling STARI_PLAN_2500_mreza,
+		"(-",		
+		"Stari skenovi (1989)- Radmila [R=1:1000]" Calling STARI_SKEN_Radmila,
+		"Stari skenovi mreza" Calling STARI_SKEN_Radmila_mreza
+		
+	Alter Menu "Podloge" Add
+		"Planovi" As "Planovi"
+	
+' ---	
+	
+	Create ButtonPad "Planovi" As
+
+	ToggleButton
+		Icon 221
+		Calling PLANOVI_1
+		ID 201
+		Uncheck
+		Enable
+	HelpMsg "Planovi - 1989 [R=1:1000] \nPlanovi - 1989 [R=1:1000]"
+		ToggleButton
+		Icon 222
+		Calling PLANOVI_2
+		ID 202
+		Uncheck
+		Enable
+		HelpMsg "Planovi 2 - 1989 [R=1:1000] \nPlanovi 2 - 1989 [R=1:1000]"
+		
+	SEPARATOR
+	
+	ToggleButton
+		Icon 8039 File "nmiIcons.dll"
+		Calling PLANOVI_55_500
+		ID 203
+		Uncheck
+		Enable
+		HelpMsg "Planovi stari [R=1:500] \nPlanovi stari [R=1:500]"
+	ToggleButton
+		Icon 8039 File "nmiIcons.dll"
+		Calling PLANOVI_55_1000
+		ID 204
+		Uncheck
+		Enable
+		HelpMsg "Planovi stari [R=1:1000] \nPlanovi stari [R=1:1000]"
+	ToggleButton
+		Icon 8039 File "nmiIcons.dll"
+		Calling PLANOVI_55_2500
+		ID 205
+		Uncheck
+		Enable
+		HelpMsg "Planovi stari [R=1:2500] \nPlanovi stari [R=1:2500]"
+	
+	SEPARATOR
+	
+	ToggleButton
+		Icon 113
+		Calling STARI_PLAN_2500
+		ID 206
+		Uncheck
+		Enable
+		HelpMsg "Stara skica [R=1:2500] \nStara skica [R=1:2500]"
+	
+	SEPARATOR
+	
+	ToggleButton
+		Icon 115
+		Calling STARI_SKEN_Radmila
+		ID 207
+		Uncheck
+		Enable
+		HelpMsg "Stari skenovi (1989)- Radmila [R=1:1000] \nStari skenovi 1989 [R=1:1000]"
+
+	'---
+	
+	Alter ButtonPad "Planovi" 
+		'Position(14,4) Units "cm"
+		ToolbarPosition (1,1)
+		Fixed            
+		Title "Planovi"
+		Width 7
+		Show      
+			
+	Exit Sub
+'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "Planovi")
+	Call ERRShow()
+	
+END SUB
+
+Sub MrezePlanova
+	
+	OnError Goto Greska
+	
+	Create ButtonPad "Mreže planova" As
+	ToggleButton
+		Icon 8051 File "nmiIcons.dll"
+		Calling PLANOVI_1_mreza
+		ID 211
+		Uncheck
+		Enable
+		HelpMsg "Planovi - 1989 [R=1:1000] \nPlanovi - 1989 [R=1:1000]"
+	ToggleButton
+		Icon 8051 File "nmiIcons.dll"
+		Calling PLANOVI_2_mreza
+		ID 5103
+		Uncheck
+		Enable
+		HelpMsg "Planovi 2 - 1989 [R=1:1000] \nPlanovi 2 - 1989 [R=1:1000]"
+	
+	SEPARATOR
+	
+	ToggleButton
+		Icon 8051 File "nmiIcons.dll"
+		Calling PLANOVI_55_500_mreza
+		ID 212
+		Uncheck
+		Enable
+		HelpMsg "Planovi stari [R=1:500] \nPlanovi stari [R=1:500]"
+	ToggleButton
+		Icon 8051 File "nmiIcons.dll"
+		Calling PLANOVI_55_1000_mreza
+		ID 213
+		Uncheck
+		Enable
+		HelpMsg "Planovi stari [R=1:1000] \nPlanovi stari [R=1:1000]"
+	ToggleButton
+		Icon 8051 File "nmiIcons.dll"
+		Calling PLANOVI_55_2500_mreza
+		ID 214
+		Uncheck
+		Enable
+		HelpMsg "Planovi stari [R=1:2500] \nPlanovi stari [R=1:2500]"
+	
+	SEPARATOR
+	
+	ToggleButton
+		Icon 8051 File "nmiIcons.dll"
+		Calling STARI_PLAN_2500_mreza
+		ID 215
+		Uncheck
+		Enable
+		HelpMsg "Stari plan [R=1:2500] \nStari plan [R=1:2500]"            
+	                                                                
+	SEPARATOR
+	
+	ToggleButton
+		Icon 8051 File "nmiIcons.dll"
+		Calling STARI_SKEN_Radmila_mreza
+		ID 216
+		Uncheck
+		Enable
+		HelpMsg "Stari skenovi (1989)- Radmila [R=1:1000] \nStari skenovi 1989 [R=1:1000]"        
+	
+' ---	
+	
+	Alter ButtonPad "Mreže planova"
+	'	Position(0.5,2.8) Units "cm"
+		ToolbarPosition (1,3)
+		Fixed
+		Title "Mreže planova"
+		Width 15
+		Hide  
+	
+	Exit Sub
+'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "MrezePlanova")
+	Call ERRShow()
+	
+End Sub
+
+'============================================================================================
+Sub PLANOVI_1
+		
+namLejer=setRaster(s_FOLDER_NET+"Planovi\","set_planovi_fg_1989_1",201)
+End Sub      
+
+Sub PLANOVI_2
+namLejer=setRaster(s_FOLDER_NET+"Planovi\","set_planovi_fg_1989_2",202)
+End Sub
+              
+Sub PLANOVI_55_500
+namLejer=setRaster(s_FOLDER_NET+"Planovi\","set_PLANOVI_pr_1955_500",203)
+End Sub       
+              
+Sub PLANOVI_55_1000
+namLejer=setRaster(s_FOLDER_NET+"Planovi\","set_PLANOVI_pr_1955_1000",204)
+End Sub       
+
+Sub PLANOVI_55_2500
+namLejer=setRaster(s_FOLDER_NET+"Planovi\","set_PLANOVI_pr_1955_2500",205)
+End Sub       
+
+Sub STARI_PLAN_2500
+namLejer=setRaster(s_FOLDER_NET+"Planovi\","set_planovi_STARA_MREZA_2500",206)
+End Sub       
+
+Sub STARI_SKEN_Radmila
+namLejer=setRaster(s_FOLDER_NET+"Planovi\","set_planovi_vod_st_sken_1989",207)
+End Sub 
+                                                
+' ------------------------------------------------------------
+
+Sub PLANOVI_1_mreza
+namLejer=setRaster(s_FOLDER_NET+"Planovi\","mreza_planovi_fg_1989_1",211)
+End Sub      
+
+Sub PLANOVI_2_mreza
+namLejer=setRaster(s_FOLDER_NET+"Planovi\","mreza_planovi_fg_1989_2",212)
+End Sub
+              
+Sub PLANOVI_55_500_mreza
+namLejer=setRaster(s_FOLDER_NET+"Planovi\","MREZA_PLANOVI_pr_1955_500",213)
+End Sub       
+              
+Sub PLANOVI_55_1000_mreza
+namLejer=setRaster(s_FOLDER_NET+"Planovi\","MREZA_PLANOVI_pr_1955_1000",214)
+End Sub       
+
+Sub PLANOVI_55_2500_mreza
+namLejer=setRaster(s_FOLDER_NET+"Planovi\","MREZA_PLANOVI_pr_1955_2500",215)
+End Sub       
+
+Sub STARI_PLAN_2500_mreza
+namLejer=setRaster(s_FOLDER_NET+"Planovi\","MREZA_PLANOVI_stara_mreza_2500",216)
+End Sub                                                    
+
+Sub STARI_SKEN_Radmila_mreza
+namLejer=setRaster(s_FOLDER_NET+"Planovi\","mreza_planovi_vod_st_sken_1989",217)
+End Sub                                                    

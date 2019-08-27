@@ -1,0 +1,1096 @@
+include "mapbasic.def"
+include "menu.def"
+include "icons.def"
+include "..\Library\ERRORLib.def"
+include "..\nmiWin.def"
+include "..\nmiFunkcije.def"
+include "..\nmiDotNet.def"
+include "NAISSUS-GIS.def"
+                                     
+' ===================================================================================================================== 
+SUB GIS_admin
+
+	onerror goto Greska  
+	
+	Create Menu "GIS Admin" as
+		"Podesavanja foldera" Calling DLG_Podesavanja,
+		"Kreiranje novog korisnika" Calling DLG_NoviLogin,
+		"(-",		
+		"Azuriraj MapInfo Viewer tabele" Calling Server_Update,
+		"Export u MIF za YUMA GPS" Calling MSSQL_tabele_2,
+		"ZoneScan KML izvoz" Calling MZ_u_KML,		
+		"(-",
+'		"NAV korisnici - IMPORT" calling NAV_imp_kor,
+'		"NAV potrosnja - IMPORT" calling NAV_imp_potr,
+'		"(-",		
+		"Mreza ucitanih karata" calling MREZA_KARATA
+
+	Alter Menu "JKP Naissus" Add
+		"GIS Admin" As "GIS Admin"
+		
+	'---
+	
+	Create ButtonPad "GIS Admin" As
+		PushButton
+			Calling DLG_Podesavanja
+			Icon 8411 File "nmiIcons.dll"		
+			HelpMsg "Podesavanje radnih foldera \nRadni folderi"
+		PushButton
+			Calling DLG_NoviLogin
+			Icon 8287 File "nmiIcons.dll"		
+			HelpMsg "Kreiranje novog korisnika \nNovi korisnik"		
+		
+		SEPARATOR
+				
+		PushButton
+			Calling Server_Update
+			Icon 175	
+			HelpMsg "Azuriranje SQL tabela za MapInfo Viewer v9.5 \nServer Update (v9.5)"
+
+'		SEPARATOR
+'	
+'		PushButton
+'			Calling NAV_imp_kor
+'			Icon 140	
+'			HelpMsg "Uvoz NAVISION tabele korisnika \nNAV Import korisnika"
+'		PushButton
+'			Calling NAV_imp_potr
+'			Icon 8427 File "nmiIcons.dll"
+'			HelpMsg "Uvoz NAVISION tabele potrosnji \nNAV Import potrosnje"
+	
+	SEPARATOR
+		
+		PushButton
+			Calling MREZA_KARATA
+			Icon 186	
+			HelpMsg "Kreiranje mreze karata \nMreza Karata"
+
+	
+	'---
+	
+	Alter ButtonPad "GIS Admin" 
+'		Position(28,4) Units "cm"
+		ToolbarPosition (2,5)
+		Fixed  
+		Title "GIS Admin"
+		Width 21
+		Show        
+	
+	Exit Sub
+'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "GIS_admin")
+	Call ERRShow()
+	
+END SUB 
+
+' =====================================================================================================================
+Sub POD_aktivni_folderi
+
+	onerror goto Greska  
+	
+' - Setovanje mreznih lokacija ( SQL tabela GIS.mbx.NET_LOKACIJE )
+	i_hstmt = Server_Execute(i_hdbc,"exec mbx.sp_AppFolderAkt 1") 
+	Server i_hstmt Bind Column 1 To AKTIV_LOK, am_stat
+	Server i_hstmt Bind Column 3 To s_FOLDER_POD, am_stat
+	Server i_hstmt Bind Column 4 To s_FOLDER_NET, am_stat
+	Server i_hstmt Bind Column 5 To s_Update_PRJ, am_stat	
+	Server i_hstmt Bind Column 6 To s_Update_MBX, am_stat	
+	Server i_hstmt Bind Column 7 To s_Update_WOR, am_stat		
+	Server i_hstmt Bind Column 8 To s_FOLDER_CCTV, am_stat
+	Server i_hstmt Bind Column 9 To s_FOLDER_WWW, am_stat
+	Server i_hstmt Fetch First
+	Server i_hstmt Close
+	
+		f_setIni = SetIniVal(iniFile, "GIS_FOLDERI", "FOLDER_POD", s_FOLDER_POD)
+		f_setIni = SetIniVal(iniFile, "GIS_FOLDERI", "FOLDER_NET", s_FOLDER_NET)
+		f_setIni = SetIniVal(iniFile, "GIS_FOLDERI", "FOLDER_CCTV", s_FOLDER_CCTV)
+		f_setIni = SetIniVal(iniFile, "GIS_FOLDERI", "FOLDER_WWW", s_FOLDER_WWW)		
+
+		f_setIni = SetIniVal(iniFile, "UPDATE_FOLDERI", "PRJ", s_Update_PRJ)	
+		f_setIni = SetIniVal(iniFile, "UPDATE_FOLDERI", "MBX", s_Update_MBX)
+		f_setIni = SetIniVal(iniFile, "UPDATE_FOLDERI", "WOR", s_Update_WOR)
+
+		cit_FOLDER_POD = s_FOLDER_POD
+		cit_FOLDER_NET = s_FOLDER_NET
+		cit_FOLDER_CCTV = s_FOLDER_CCTV
+		cit_Update_PRJ = s_Update_PRJ
+		cit_Update_MBX = s_Update_MBX
+		cit_Update_WOR = s_Update_WOR
+
+	Do Case AKTIV_LOK
+		
+		case 1
+		aktivna_lokacija = "Aktivna lokacija: GLAVNA"
+	
+		case 2
+		aktivna_lokacija = "Aktivna lokacija: BACKUP"
+	
+		case 3
+		aktivna_lokacija = "Aktivna lokacija: DEV"
+		
+	End Case
+	
+	Exit Sub
+'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "POD_aktivni_folderi")
+	Call ERRShow()
+		
+End Sub
+
+' ===================================================================================================================== 
+SUB POD_citaj
+
+	onerror goto Greska  
+
+	Dim am_stat as Integer
+	Dim RCV as smallint
+	
+	RCV = ReadControlValue(10)
+	s_kom = "exec mbx.sp_AppFolderRead " + RCV
+
+' - Citanje mreznih lokacija ( SQL tabela GIS.mbx.NET_LOKACIJE )
+	i_hstmt = Server_Execute(i_hdbc,s_kom) 
+	Server i_hstmt Bind Column 3 To cit_FOLDER_POD, am_stat
+	Server i_hstmt Bind Column 4 To cit_FOLDER_NET, am_stat
+	Server i_hstmt Bind Column 5 To cit_Update_PRJ, am_stat	
+	Server i_hstmt Bind Column 6 To cit_Update_MBX, am_stat	
+	Server i_hstmt Bind Column 7 To cit_Update_WOR, am_stat		
+	Server i_hstmt Fetch First		
+
+	If s_appmod = "admin" or s_appmod = "Super" 
+	then
+	
+		alter control 10 Enable
+		alter control 10 Value RCV
+
+		alter control 13 Enable
+		alter Control 13 Value cit_FOLDER_POD
+		alter control 14 Enable
+		
+		alter control 16 Enable
+		alter Control 16 Value cit_FOLDER_NET		
+		alter control 17 Enable
+		
+		alter control 20 Enable
+		alter Control 20 Value cit_Update_PRJ
+		alter control 21 Enable
+
+		alter control 23 Enable
+		alter Control 23 Value cit_Update_MBX
+		alter control 24 Enable
+
+		alter control 26 Enable
+		alter Control 26 Value cit_Update_WOR			
+		alter control 27 Enable
+		
+		alter control 29 Enable Show
+		alter control 30 Enable Show
+
+	Else		
+		print "Njeknjaa ! Nesi Admin"
+		alter control 31 Disable
+		
+	End IF
+	
+	Exit Sub
+'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "POD_citaj")
+	Call ERRShow()
+	
+End Sub
+
+' ===================================================================================================================== 
+SUB POD_azuriraj
+	
+	onerror goto Greska  
+		
+	l_Pitanje = Ask("Azurirate foldere za lokaciju "+ReadControlValue(10)+" ! Da li zelite da nastavite ?", "DA", "Odustani")
+	     
+	If l_Pitanje = false 
+		Then 
+		goto izlaz
+	Else
+	
+		s_kom = "EXEC MI_admin.sp_AppFolderUpdate '"+ ReadControlValue(10)+"','Folder_POD','"+ReadControlValue(13)+"'"
+		i_hstmt = Server_Execute(i_hdbc,s_kom)	
+		f_setIni = SetIniVal(iniFile, "GIS_FOLDERI", "FOLDER_POD", ReadControlValue(13))
+		
+		s_kom = "EXEC MI_admin.sp_AppFolderUpdate '"+ ReadControlValue(10)+"','Folder_NET','"+ReadControlValue(16)+"'"
+		i_hstmt = Server_Execute(i_hdbc,s_kom)
+		f_setIni = SetIniVal(iniFile, "GIS_FOLDERI", "FOLDER_NET", ReadControlValue(16))
+		
+		s_kom = "EXEC MI_admin.sp_AppFolderUpdate '"+ ReadControlValue(10)+"','Update_PRJ','"+ReadControlValue(20)+"'"
+		i_hstmt = Server_Execute(i_hdbc,s_kom)
+		f_setIni = SetIniVal(iniFile, "UPDATE_FOLDERI", "PRJ", ReadControlValue(20))
+		
+		s_kom = "EXEC MI_admin.sp_AppFolderUpdate '"+ ReadControlValue(10)+"','Update_MBX','"+ReadControlValue(23)+"'"
+		i_hstmt = Server_Execute(i_hdbc,s_kom)
+		f_setIni = SetIniVal(iniFile, "UPDATE_FOLDERI", "MBX", ReadControlValue(23))
+		
+		s_kom = "EXEC MI_admin.sp_AppFolderUpdate '"+ ReadControlValue(10)+"','Update_WOR','"+ReadControlValue(26)+"'"
+		i_hstmt = Server_Execute(i_hdbc,s_kom)
+		f_setIni = SetIniVal(iniFile, "UPDATE_FOLDERI", "WOR", ReadControlValue(26))
+		
+	End If
+	
+	izlaz:
+	Dialog Preserve
+
+	Exit Sub
+'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "POD_azuriraj")
+	Call ERRShow()
+	
+End Sub
+
+' =====================================================================================================================
+Sub POD_aktiviraj
+	
+	onerror goto Greska
+
+	l_Pitanje = Ask("Lokaciju "+ReadControlValue(10)+" postavljate za aktivnu! Da li zelite da nastavite ?", "DA", "Odustani")
+	     
+	If l_Pitanje = false 
+		Then 
+		Call DLG_Podesavanja
+	Else
+		s_kom = "exec MI_admin.sp_AppFolderSetAkt " + ReadControlValue(10)
+		Dialog Remove
+		i_hstmt = Server_Execute(i_hdbc,s_kom)
+		Call POD_azuriraj
+	End If
+
+	Dialog Preserve
+	
+	Exit Sub
+'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "POD_aktiviraj")
+	Call ERRShow()
+		
+End Sub
+
+' ===================================================================================================================== 
+Sub POD_cancel
+	
+End Sub
+
+' ===================================================================================================================== 
+' - Lokalni folderi 
+
+Sub Select_DIR_WOR
+
+	onerror goto Greska  
+		
+	dim noviDir as string
+	
+	noviDir = BrowseForFolder(noviDir)
+
+	  If noviDir = "" Then
+		Note "Niste odabrali folder."
+	  Else
+		alter control 3 value noviDir+"\"
+
+		s_FOLDER_WOR = noviDir+"\"
+		f_setIni = SetIniVal(iniFile, "GIS_FOLDERI", "Folder_WOR", s_FOLDER_WOR)		
+		
+		s_FOLDER_RAD = noviDir+"\_radni\"
+		f_setIni = SetIniVal(iniFile, "GIS_FOLDERI", "Folder_RAD", s_FOLDER_RAD)		
+		
+		s_FOLDER_PRN = noviDir+"\Print\"
+		f_setIni = SetIniVal(iniFile, "GIS_FOLDERI", "Folder_PRN", s_FOLDER_PRN)				
+
+		s_FOLDER_TAB = noviDir+"\SQL\"
+		f_setIni = SetIniVal(iniFile, "GIS_FOLDERI", "FOLDER_TAB", s_FOLDER_TAB)		
+		
+	  End If
+	
+	Exit Sub
+'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "Select_DIR_WOR")
+	Call ERRShow()
+		
+End Sub
+
+' ===================================================================================================================== 
+' - Mrezni folderi 
+
+Sub Select_DIR_POD
+
+	onerror goto Greska  
+		
+	Dim noviDir as string
+	
+	noviDir = BrowseForFolder(noviDir)
+
+	  If noviDir = "" Then
+		Note "Niste odabrali folder."
+	  Else
+		alter control 13 value noviDir+"\"
+		s_FOLDER_POD = noviDir+"\"
+		f_setIni = SetIniVal(iniFile, "GIS_FOLDERI", "FOLDER_POD", s_FOLDER_POD)
+
+	  End If
+	
+	Exit Sub
+'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "Select_DIR_POD")
+	Call ERRShow()
+		  
+End Sub
+
+Sub Select_DIR_NET
+
+	onerror goto Greska  
+		
+	dim noviDir as string
+	
+	noviDir = BrowseForFolder(noviDir)
+
+	  If noviDir = "" Then
+		Note "Niste odabrali folder."
+	  Else
+		alter control 16 value noviDir+"\"
+		s_FOLDER_NET = noviDir+"\"
+		f_setIni = SetIniVal(iniFile, "GIS_FOLDERI", "FOLDER_NET", s_FOLDER_NET)
+	  End If
+	
+	Exit Sub
+'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "Select_DIR_NET")
+	Call ERRShow()
+		  	
+End Sub
+
+Sub Select_DIR_UP_WOR
+
+	onerror goto Greska  
+		
+	dim noviDir as string
+	
+	noviDir = BrowseForFolder(noviDir)
+
+	  If noviDir = "" Then
+		Note "Niste odabrali folder."
+	  Else
+		alter control 26 value noviDir+"\"
+		s_Update_WOR = noviDir+"\"
+		f_setIni = SetIniVal(iniFile, "UPDATE_FOLDERI", "WOR", s_Update_WOR)
+	  End If
+	
+	Exit Sub
+'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "Select_DIR_UP_WOR")
+	Call ERRShow()
+		  	
+End Sub
+
+Sub Select_DIR_UP_MBX
+
+	onerror goto Greska  
+			
+	dim noviDir as string
+	
+	noviDir = BrowseForFolder(noviDir)
+
+	  If noviDir = "" Then
+		Note "Niste odabrali folder."
+	  Else
+		alter control 23 value noviDir+"\"
+		s_Update_MBX = noviDir+"\"
+		f_setIni = SetIniVal(iniFile, "UPDATE_FOLDERI", "MBX", s_Update_MBX)
+	  End If
+	
+	Exit Sub
+'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "Select_DIR_UP_MBX")
+	Call ERRShow()
+		
+End Sub
+
+Sub Select_DIR_UP_PRJ
+
+	onerror goto Greska  
+			
+	dim noviDir as string
+	
+	noviDir = BrowseForFolder(noviDir)
+
+	  If noviDir = "" Then
+		Note "Niste odabrali folder."
+	  Else
+		alter control 20 value noviDir+"\"
+		s_Update_PRJ = noviDir+"\"
+		f_setIni = SetIniVal(iniFile, "UPDATE_FOLDERI", "PRJ", s_Update_PRJ)
+	  End If
+	
+	Exit Sub
+'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "Select_DIR_UP_PRJ")
+	Call ERRShow()
+	
+End Sub
+
+'===================================================================================================================== 
+' - Kreiranje novog korisnika
+
+Sub DLG_sektori
+	
+	onerror goto Greska
+	
+	dim i as smallint
+	dim n as smallint
+	dim s_sktr as string
+	
+	i_hstmt = Server_Execute(i_hdbc,"SELECT COUNT(distinct SEKTOR) AS COUNT FROM data.NAISSUS_ORG") 
+		Server i_hstmt Bind Column 1 To i, am_stat
+		Server i_hstmt Fetch First
+		Server i_hstmt Close
+
+' - Spisak sektora u niz
+	s_kom = "SELECT DISTINCT sektor_ID, SEKTOR FROM data.NAISSUS_ORG ORDER BY sektor_ID"
+	i_hstmt = Server_Execute(i_hdbc,s_kom) 
+	Server i_hstmt Bind Column 2 To s_sktr, am_stat
+	Server i_hstmt Fetch First
+
+		For n = 1 to i
+			ReDim arr_Sektori(n)		
+			arr_Sektori(n) = s_sktr
+			Server i_hstmt Fetch Next		
+		Next
+		
+	Server i_hstmt Close
+	
+	Exit Sub
+'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "DLG_sektori")
+	Call ERRShow()
+  	
+End Sub
+
+Sub DLG_Sluzbe_1
+
+	onerror goto Greska  
+	
+	Call DLG_Sluzbe(ReadControlValue(5))	
+		Alter Control 7 Title from Variable arr_Sluzbe() 
+		Alter Control 7 Value 1
+	
+	Call DLG_Odeljenja(ReadControlValue(7))
+		Alter Control 9 Title from Variable arr_Odeljenja() 
+		Alter Control 9 Value 1
+	
+	Exit Sub
+'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "DLG_Sluzbe_1")
+	Call ERRShow()
+  			
+End Sub
+
+Sub DLG_Odeljenja_1
+
+	onerror goto Greska  
+	
+	Call DLG_Odeljenja(ReadControlValue(7))	
+	Alter Control 9 Title from Variable arr_Odeljenja()	
+
+	Exit Sub
+'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "DLG_Odeljenja_1")
+	Call ERRShow()
+  				
+End Sub
+
+Sub DLG_Sluzbe(byVal s as string)
+
+	onerror goto Greska  
+
+	dim i as smallint
+	dim n as smallint
+	dim s_slzb as string
+	
+	sn_SEKTOR = s
+	
+	s_kom = "SELECT COUNT(DISTINCT sluzba_ID) AS COUNT FROM data.NAISSUS_ORG WHERE (sektor_ID = "+sn_SEKTOR+")"
+	i_hstmt = Server_Execute(i_hdbc,s_kom)
+		Server i_hstmt Bind Column 1 To i, am_stat
+		Server i_hstmt Fetch First
+		Server i_hstmt Close
+		
+' - Spisak sluzbi u niz
+	s_kom = "SELECT DISTINCT sluzba_ID, SLUZBA FROM data.NAISSUS_ORG WHERE (sektor_ID = "+sn_SEKTOR+")"
+	i_hstmt = Server_Execute(i_hdbc,s_kom) 
+	Server i_hstmt Bind Column 2 To s_slzb, am_stat
+	Server i_hstmt Fetch First
+
+		For n = 1 to i
+			ReDim arr_Sluzbe(n)		
+			arr_Sluzbe(n) = s_slzb
+			Server i_hstmt Fetch Next		
+		Next
+		
+	Server i_hstmt Close
+	
+	Exit Sub
+'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "Sluzbe")
+	Call ERRShow()
+  
+End Sub
+
+Sub DLG_Odeljenja(byVal s as string)
+	
+	onerror goto Greska
+	
+	dim i as smallint
+	dim n as smallint
+	dim s_odlnj as string
+
+	sn_SLUZBA = s
+	
+	s_kom = "SELECT COUNT(DISTINCT ODELJENJE) AS COUNT FROM data.NAISSUS_ORG WHERE (sektor_ID = "+sn_SEKTOR+") AND (sluzba_ID = "+sn_SLUZBA+")"
+	i_hstmt = Server_Execute(i_hdbc,s_kom)
+		Server i_hstmt Bind Column 1 To i, am_stat
+		Server i_hstmt Fetch First
+		Server i_hstmt Close
+		
+' - Spisak odeljenja u niz
+	s_kom = "SELECT DISTINCT ODELJENJE FROM data.NAISSUS_ORG WHERE (sektor_ID = "+sn_SEKTOR+") AND (sluzba_ID = "+sn_SLUZBA+")"
+	i_hstmt = Server_Execute(i_hdbc,s_kom) 
+	Server i_hstmt Bind Column 1 To s_odlnj, am_stat
+	Server i_hstmt Fetch First
+
+		For n = 1 to i
+			ReDim arr_Odeljenja(n)		
+			arr_Odeljenja(n) = s_odlnj
+			Server i_hstmt Fetch Next		
+		Next
+		
+	Server i_hstmt Close
+	
+	Exit Sub
+'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "DLG_Odeljenja")
+	Call ERRShow()
+	
+End Sub
+
+Sub DLG_NoviLogin_OK
+
+	onerror goto Greska 
+	
+	sn_IME = ReadControlValue(3)
+	sn_SEKTOR = arr_Sektori(ReadControlValue(5))
+	sn_SLUZBA = arr_Sluzbe(ReadControlValue(7))
+	sn_ODELJENJE = arr_Odeljenja(ReadControlValue(9))
+
+	sn_BAZA = arr_Baze(ReadControlValue(12))
+	sn_KLASA = arr_Klase(ReadControlValue(14))
+
+	sn_LOGIN = ReadControlValue(16)
+	sn_PASS = ReadControlValue(18)
+	sn_PASS2 = ReadControlValue(20)
+	
+		If sn_IME = "" or sn_LOGIN = "" or sn_PASS = ""
+		then
+			Note "Popunite sva polja!"
+			Goto izlaz
+		End If
+		
+		If sn_PASS <> sn_PASS2
+		then
+			Note "Password se ne slaze!"
+			Goto izlaz
+		End If
+	
+	' - Pokretanje SP za kreiranje korisnika
+		s_kom = "EXEC dbo.sp_GISLogin '"+sn_LOGIN+"','"+sn_PASS+"','"+sn_BAZA+"','"+sn_KLASA+"','"+sn_IME+"','"+sn_SEKTOR+"','"+sn_SLUZBA+"','"+sn_ODELJENJE+"'"
+		i_hstmt = Server_Execute(i_hdbc,s_kom) 	
+		
+		Call SQLINFO
+		If sqlInfoKod = 0
+		Then 
+			Dialog Preserve
+			Exit Sub			
+		Else 
+			Dialog Remove
+			Exit Sub			
+		End If
+		
+	izlaz:
+	Dialog Preserve
+		
+	Exit Sub
+	'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "DLG_NoviLogin_OK")
+	Call ERRShow()
+
+End Sub
+
+' ===================================================================================================================== 
+SUB SQLINFO
+	
+	OnError Goto Greska
+	
+	i_hstmt = Server_Execute(i_hdbc,"SELECT [ID],[INFO],[KOD] FROM [mbx].[INFO] ORDER BY [ID] DESC") 			
+	Server i_hstmt Bind Column 2 To sqlInfo, am_stat
+	Server i_hstmt Bind Column 3 To sqlInfoKod, am_stat
+	Server i_hstmt Fetch First
+	Note sqlInfo
+		
+	Exit Sub
+	'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "SQLINFO")
+	Call ERRShow()
+	
+End Sub
+
+' ===================================================================================================================== 
+Sub Server_Update
+
+	onerror goto Greska  
+
+' - Snimanje trenutno otvorenog WOR			
+	Save Workspace As "D:\GIS\_temp.wor"
+	Close All Interactive
+
+	l_Pitanje = Ask("Azuriranje tabela za MapInfo Viewer korisnike zahteva da se privremeno izlogujete sa SQL servera. Da li zelite da nastavite ?", "DA", "Odustani")
+
+	If l_Pitanje 
+	Then
+		Server i_hdbc Disconnect
+		Call MI_VIEWER_TAB_update
+		Call DLG_Login
+	Else
+		Print "Azuriranje odloženo!"
+	End If
+		
+	Run Application "D:\GIS\_temp.wor"
+	
+	Exit Sub
+'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "Server_Update")
+	Call ERRShow()
+  
+End sub    
+
+' =====================================================================================================================
+Sub MI_VIEWER_TAB_update
+	
+	Onerror goto greska
+
+	Print chr$(12)
+
+	Dim am_stat as Integer
+	Dim s_BAZA as string
+
+	dim n as integer
+	dim i as integer
+	dim t as smallint
+	dim k as integer
+	dim rep as integer
+	Dim i_tab_name as string 
+	
+	s_DSN = "naissus-gis"
+	s_USER = "MI_VIEWER"
+	s_PASS = "naissus"
+	s_BAZA = "GIS"
+	s_FOLDER_MVW = "\\APL-NAISSUS\GIS\SQL\"
+	
+' - konekcija ka bazi
+	i_hdbc = Server_Connect("ODBC",
+	"DSN="+s_DSN+					
+	";DATABASE="+s_BAZA+
+	";UID="+s_USER+
+	";PWD="+s_PASS+
+	";MARS_Connection=Yes"+
+	";")    
+
+' - podaci o konektovanom korisniku, bazi i DSN 
+	s_dbName=Server_ConnectInfo(i_hdbc, SRV_CONNECT_INFO_DB_NAME)
+	s_dbUser=Server_ConnectInfo(i_hdbc, SRV_CONNECT_INFO_SQL_USER_ID)
+	s_DSN=Server_ConnectInfo(i_hdbc, SRV_CONNECT_INFO_DS_NAME)
+	
+	Print "Korisnik ''"+s_dbUser+"'' uspesno ulogovan na "+s_dbName+chr$(13)+"ODBC: ["+s_DSN+"]"
+	
+	print "----------------------------------------------------------------------------------------"
+	print "Azuriranje SQL tabela za MapInfo Viewer v9.5 korisnike" 
+
+' - kreiranje BATCH fajla
+	Print "Priprema .bat fajla..."
+	Open File s_FOLDER_MVW+"MI_viewer_update.bat" For OUTPUT As #1
+		Print #1, "dir %~dp0*.TAB /s /o /b > %~dp0tab.list"
+		Print #1, "@erase %~dp0MI_viewer_update.bat"
+		Close File #1                                               
+	Print "Priprema .bat fajla zavrsena!"
+
+' - pokretanje BATCH
+	rep = ExecuteAndWait(s_FOLDER_MVW+"MI_viewer_update.bat")
+
+' - otvaranje SQL tabela sa servera 
+	print "Otvaranje SQL tabela na serveru..."
+	i = 1
+	Open File s_FOLDER_MVW+"tab.list" For INPUT As #1
+		Do While Not EOF(1)
+		Line INPUT #1, namLejer
+			If Not EOF(1) Then
+				Open Table namLejer Interactive
+				i = i+1
+	    		print i +"-"+ namlejer
+		  	else
+	   		End If 
+		Loop    
+	Close File #1 
+	
+	print "Broj otvorenih tabela za azuriranje: "+i
+
+' - azuriranje SQL tabela za MI Viewer korisnike     
+	Print "Azuriranje SQL tabela za MI Viewer korisnike..." 
+	For n = 1 to NumTables()
+		i_tab_name = TableInfo(n, TAB_INFO_NAME) 
+		Print n+" - Azuriranje lejera: "+i_tab_name+"..."
+		Server Refresh i_tab_name
+	Next    
+	print "MI Viewer tabele azurirane !"
+	print "--------------------------------------------------------------------------"
+
+' - zatvaranje svih konekcija ka SQL serveru
+	print "broj konekcija = "+i
+	For n = 1 to i
+		Server n Disconnect
+	Next
+	
+	Set Window Message title "Message"
+	Close window message
+	Close All Interactive   
+		
+' - izvestaj
+	print "Novi login na SQL Server u toku ... "
+	print "--------------------------------------------------------------------------"
+
+	Exit Sub
+'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "MI_VIEWER_TAB_update")
+	Call ERRShow()
+	
+ End Sub     
+ 
+' =====================================================================================================================
+' Ažuriranje sa NAVISION bazom
+'
+' KORISNICI-POTROŠAÈI
+'
+SUB NAV_imp_kor
+
+	OnError Goto Greska
+
+' - Brisanje 'message' prozora
+	Print CHR$(12)
+
+' - Naslov 	
+	Print "=============================================================" 
+	Print "       AZURIRANJE BAZE KORISNIKA NIVOS (MS Dynamics NAV)"
+	Print "=============================================================" 
+	Print ""
+	Print "Preuzimanje 'NAV_POTROSACI.xlsx' tabele sa servera..."
+	     
+' - Potvrda za nastavak        
+	l_Pitanje = Ask("Preuzimanje baze potrosaca iz MS Dynamics NAV. Da li zelite da nastavite ?", "DA", "Odustani")                         
+     
+	If l_Pitanje = false then 
+		Print "Azuriranje prekinuto" 
+		Exit Sub
+	End If
+  
+' - Otvaranje DYNAMICS .XLSX izvestaja sa NIVOS potrosacima (NAV_POTROSACI.xlsx) - READ ONLY tabela!   
+	Print "Otvaranje .XLSX sa NIVOS potrosacima (NAV_POTROSACI.xlsx)..."
+		
+	Register Table s_FOLDER_NET+"Baza_MNS\NAV_POTROSACI.xlsx" TYPE XLS 
+		Titles  Range "Kupci_potrosaci_vode"  
+		Into s_FOLDER_NET+"Baza_MNS\nav_potrosaci_temp.TAB"
+
+' - Snimanje XLSX tabele u TAB format da bi mogli da je editujemo
+	Print "Snimanje XLSX tabele u TAB format..."
+	
+	Open Table s_FOLDER_NET+"Baza_MNS\nav_potrosaci_temp.TAB" Hide
+		Commit Table nav_potrosaci_temp As s_FOLDER_NET+"Baza_MNS\NAV_POTROSACI.TAB"
+		Drop Table nav_potrosaci_temp
+
+' - Priprema XLS tabele za uvoz u GIS SQL. Modifikovanje polja u odgovarajuce tipove
+	Print "Priprema XLS tabele za uvoz u GIS SQL..."
+	
+	Open Table s_FOLDER_NET+"Baza_MNS\NAV_POTROSACI.TAB" Interactive
+	
+	Alter Table "NAV_POTROSACI" 
+		( modify sifra Integer,
+		 naziv Char (56),
+		 ulica Char (36),
+		 broj Char (19),
+		 mesto Char (20),
+		 status Char (12),
+		 gl_mer_mesto Integer,
+		 prcnt Float,
+		 marka Char (2),
+		 serijski_br Char (20),
+		 profil Char (9),
+		 q Char (5),
+		 datum_aktiv Date,
+		 Fakturisanje Char (11),
+		 Zona Smallint,
+		 Knjiga Smallint,
+		 RedBroj Smallint )
+	 Interactive
+
+	Create Map For NAV_POTROSACI CoordSys Earth Projection 8, 999, 10, 690, -198, 483, "m", 21, 0, 0.9999, 7500000, 0
+
+' - kreiranje BATCH fajla koji izvrava upload u SQL (batch komande za Easyloader)
+	Print "Priprema za upload u SQL..."
+
+	Open File "NAV2SQL_update.bat" For OUTPUT As #1
+		Print #1, "echo on rem Prenos NAV tabele na SQL server u toku..."
+		Print #1, "echo off"
+		Print #1, "easyloader.exe /B MAPINFO /C /E /F \\APL-NAISSUS\GIS_grupa\Baza_MNS\sql-up.txt /P R /S DSN=naissus-gis /T \\APL-NAISSUS\GIS_grupa\Baza_MNS\NAV_POTROSACI.TAB /R /Z /Q"
+	Close File #1                                               
+
+	Print "Priprema zavrsena!"
+	
+' - pokretanje BATCH fajla        
+	Print "Prenos NAV tabele na SQL server u toku..."   
+
+	mz = ExecuteAndWait("NAV2SQL_update.bat")         
+
+	Print "Kraj!"   
+	
+	Note "Prenos NAV tabele na SQL server zavrsen !"
+
+' - kreiranje log fajla sa datumom importa
+	i_hstmt = Server_Execute(1, "execute spWriteStringToFile 'NAV to sql import','D:\ImportNAV','sqlimp.txt'")
+	Server i_hstmt Close
+
+	exit sub
+
+	Exit Sub
+'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "NAV_imp_kor")
+	Call ERRShow()
+
+end sub
+
+' POTROŠNJA ZA AKTUELNU GODINU
+'
+sub NAV_imp_potr
+
+onerror goto kraj
+
+' Potvrda za nastavak 
+
+	l_Pitanje = Ask("Preuzimanje ocitane potrosnje korisnika NIVOS iz MS Dynamics NAV. Da li zelite da nastavite ?", "DA", "Odustani")                         
+     
+	If l_Pitanje = false then 
+		Print "Preuzimanje prekinuto" 
+		exit sub  
+	End If	
+
+
+' Brisanje 'message' prozora
+
+	Print CHR$(12)
+
+' Naslov 	
+
+	Print "============================================================"
+	Print "  AZURIRANJE POTROSNJI KORISNIKA NIVOS-a (MS Dynamics NAV)  "   
+	Print "============================================================"
+	Print ""
+	Print "Preuzimanje 'NAV_POTROSNJA_2012.xlsx' tabele sa servera..."
+        
+' Otvaranje DYNAMICS .XLSX izvestaja sa sredjenom potrosnjom (NAV_POTROSNJA_2012.xlsx) - READ ONLY tabela!
+	Print " Otvaranje .XLSX sa sredjenom potrosnjom (NAV_POTROSNJA_2012.xlsx)..."
+
+	Register Table "\\APL-NAISSUS\GIS_grupa\Baza_MNS\NAV_POTROSNJA_2012.xlsx" TYPE XLS 
+		Titles  Range "POTROSNJA"  
+		Into "\\APL-NAISSUS\GIS_grupa\Baza_MNS\Ptemp.TAB"
+
+' Snimanje XLSX tabele u TAB format da bi mogli da je editujemo
+	Print "Snimanje XLSX tabele u TAB format..."
+
+	Open Table "\\APL-NAISSUS\GIS_grupa\Baza_MNS\Ptemp.TAB" Hide
+	Commit Table Ptemp As "\\APL-NAISSUS\GIS_grupa\Baza_MNS\NAV_POTROSNJA_2012.TAB"
+	Close Table Ptemp
+
+' Priprema XLS tabele za uvoz u GIS SQL. Modifikovanje polja u odgovarajuce tipove
+  Print "Priprema za uvoz u GIS SQL..."
+
+	Open Table "\\APL-NAISSUS\GIS_grupa\Baza_MNS\NAV_POTROSNJA_2012.TAB"
+ 
+	Alter Table "NAV_POTROSNJA_2012" 
+	( modify 
+	Maticni_Broj Integer,
+	DATUM_1 Date,POTR_1 Float,
+	DATUM_2 Date,POTR_2 Float,
+	DATUM_3 Date,POTR_3 Float,
+	DATUM_4 Date,POTR_4 Float,	
+	DATUM_5 Date,POTR_5 Float,	
+	DATUM_6 Date,POTR_6 Float,
+	DATUM_7 Date,POTR_7 Float, 
+	DATUM_8 Date,POTR_8 Float,
+	DATUM_9 Date,POTR_9 Float,
+	DATUM_10 Date,POTR_10 Float,
+	DATUM_11 Date,POTR_11 Float,
+	DATUM_12 Date,POTR_12 Float ) 
+	Interactive
+
+	Create Map For NAV_POTROSNJA_2012 CoordSys Earth Projection 8, 999, 10, 690, -198, 483, "m", 21, 0, 0.9999, 7500000, 0
+
+' kreiranje BATCH fajla koji izvrava upload u SQL (batch komande za Easyloader)
+	Print "Priprema za upload u SQL..."
+
+	Open File "NAV2SQL_potr_update.bat" For OUTPUT As #1
+		Print #1, "Prenos NAV tabele na SQL server u toku..."
+		Print #1, "echo off"
+		Print #1, "easyloader.exe /B MAPINFO /C /E /F \\APL-NAISSUS\GIS_grupa\Baza_MNS\sql-up_potr.txt /P R /S DSN=naissus-gis /T \\APL-NAISSUS\GIS_grupa\Baza_MNS\NAV_POTROSNJA_2012.TAB /R /Z /Q"
+	Close File #1                                               
+
+	Print "Priprema zavrsena!"
+
+' pokretanje BATCH fajla        
+	Print "Prenos NAV tabele na SQL server u toku..."
+
+	mz = ExecuteAndWait("NAV2SQL_potr_update.bat")
+
+	Note "Prenos NAV tabele na SQL server zavrsen !"
+
+' kreiranje log fajla sa datumom importa
+	i_hstmt = Server_Execute(1, "execute spWriteStringToFile 'NAVpot to sql import','D:\ImportNAV','sqlpotrimp.txt'")
+	Server i_hstmt Close
+	exit sub
+
+kraj:
+	Print "Doslo je do greske! Prenos nije izvrsen"
+
+end sub
+  
+  ' ======================================================================================
+ SUB MREZA_KARATA   
+
+	onerror goto Greska  
+	
+	Dim tab_type As SmallInt
+	Dim L_mappable As Logical
+	Dim ime_lejera As String
+	Dim table_name As String
+	Dim table_path As String
+	Dim min_x, min_y, max_x, max_y As Float
+	Dim koord_sist_ime As String
+	Dim koord_sist_clause As String
+	Dim koord_sist_clause_granice As String
+	Dim i as integer  
+	Dim center_x as Float
+	Dim center_y as Float            
+	Dim win_id As Integer
+	Dim R as Integer
+	
+	If MapWinSTATUS(0) <> 1 then exit sub
+	End If	
+
+	Alter Button ID 20
+	Uncheck
+
+	NewFile = FileSaveAsDlg("", "", "TAB", "Create New Table")
+	print newfile
+	 
+	If NewFile = "" Then
+	    Exit Sub
+	Else
+	    NewTab = PathToTableName$(NewFile)
+	    print newtab
+	End If
+	 
+' - kreiraj tabelu\
+
+	s_kom = "Create Table "+ NewTab +" (KARTA Char(64),PUTANJA Char(64),Min_X Float,Min_Y Float,Max_X Float,Max_Y Float,KOORD_SISTEM Char(64)) File """+NewFile+""""
+	print s_kom
+	run command s_kom
+	
+' - kreiraj mapu sa tabelom 	
+	Create Map For NewTab CoordSys Earth Projection 8, 999, 10, 690, -198, 483, "m", 21, 0, 0.9999, 7500000, 0
+	Add Map Layer NewTab
+	Set Map Layer NewTab Editable On
+
+	win_id = frontwindow()
+	Set coordsys Earth Projection 8, 9999, 10, 690, -198, 483, 0, 0, 0, 0, 0, "m", 21, 0, 0.9999, 7500000, 0
+
+	Print CHR$(12)
+	Print "Spisak Lejera u Map prozoru:"
+	Print " "
+
+	R=0
+	For i = 1 to mapperinfo(frontwindow(),MAPPER_INFO_LAYERS)
+
+		ime_lejera = layerinfo(frontwindow(),i,LAYER_INFO_NAME)
+		table_name = TableInfo(ime_lejera, TAB_INFO_NAME)
+		table_path = TableInfo(ime_lejera, TAB_INFO_TABFILE)	
+		tab_type = TableInfo(ime_lejera, TAB_INFO_TYPE)
+
+		If tab_type = 4 then    
+			
+			Print i + " = " + layerinfo(frontwindow(),i,LAYER_INFO_NAME)
+			koord_sist_ime = mapperinfo(frontwindow(),MAPPER_INFO_COORDSYS_NAME)               
+			koord_sist_clause = mapperinfo(frontwindow(),MAPPER_INFO_COORDSYS_CLAUSE)
+			koord_sist_clause_granice = mapperinfo(frontwindow(),MAPPER_INFO_COORDSYS_CLAUSE_WITH_BOUNDS)
+			
+			min_x = TableInfo(ime_lejera, TAB_INFO_MINX)
+			min_y = TableInfo(ime_lejera, TAB_INFO_MINY)
+			max_x = TableInfo(ime_lejera, TAB_INFO_MAXX)
+			max_y = TableInfo(ime_lejera, TAB_INFO_MAXY)
+
+			center_x = (max_x - min_x)/2+min_x
+			center_y = (max_y - min_y)/2+min_y
+			
+			Create Region Into Window win_id 1 4 (min_x,min_y) (max_x,min_y) (max_x,max_y) (min_x,max_y) Center (center_x,center_y)
+			R=R+1
+			Update NewTab set COL1 = table_name, COL2 = table_path, COL3 = min_x, COL4 = min_y, COL5 = max_x, COL6 = max_y, COL7 = koord_sist_ime where rowid = R
+
+		else	
+		End If
+	Next        
+
+'	set map redraw off
+'	lejer = LayerID(NewTab)
+	Set Map Layer LayerID(NewTab) Label Font ("Arial",257,8,16711680,16777215) Auto On Overlap On PartialSegments On Duplicates Off Position Center
+	Set Map Layer LayerID(NewTab) Display Graphic Global Pen (1,2,16711680) Global Brush (1,12632319)
+'	set map redraw on
+
+' - Commit Table NewTab Interactive
+
+	Print "Mreza karata je kreirana!"
+	Print "----------------------------------------------" 
+	
+	Exit Sub
+'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "MREZA_KARATA")
+	Call ERRShow()
+
+END SUB             
+

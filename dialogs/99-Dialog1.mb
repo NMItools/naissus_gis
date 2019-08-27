@@ -1,0 +1,220 @@
+'include "mapbasic.def"
+'include "menu.def"
+'include "icons.def"
+include "..\..\Library\ERRORLib.def"
+include "..\NAISSUS-GIS.def"
+
+Sub DLG_Podesavanja
+
+	onerror goto Greska  
+	
+	Call POD_aktivni_folderi
+		
+'***** DIALOG DESIGNER GENERATED CODE. DO NOT EDIT OR REMOVE THIS LINE OR BELOW THIS LINE! *****
+Dialog
+	Title "Podesavanje radnih foldera"
+	Width 307 Height 246
+
+Control GroupBox
+	Id 1
+	Position 8, 7
+	Width 290 Height 32
+	Title "Lokalni:"
+	
+Control StaticText
+	Id 2
+	Position 18, 20
+	Width 48 Height 8
+	Title "Radni (WOR)"
+	
+Control EditText
+	Id 3
+	Position 73, 17
+	Width 154 Height 14
+	Value s_FOLDER_WOR
+	
+Control Button
+	Title "..."
+	Id 4
+	Position 239, 16
+	Width 51 Height 14
+	Calling Select_DIR_WOR
+	
+Control GroupBox
+	Id 8
+	Position 8, 61
+	Width 290 Height 162
+	Title AKTIVNA_LOKACIJA
+	
+Control StaticText
+	Id 9
+	Position 15, 76
+	Width 54 Height 8
+	Title "Izaberi lokaciju:"
+	Hide
+	
+Control PopupMenu
+	Id 10
+	Position 73, 74
+	Width 56
+	Title "Glavna;Backup;Dev"
+	Calling POD_citaj
+	Disable
+	Value AKTIV_LOK
+	
+Control GroupBox
+	Id 11
+	Position 15, 91
+	Width 279 Height 55
+	Title "Podloge"
+	
+Control StaticText
+	Id 12
+	Position 25, 109
+	Width 44 Height 8
+	Title "Katastar/OF"
+	
+Control EditText
+	Id 13
+	Position 73, 105
+	Width 154 Height 14
+	Disable
+	Value cit_FOLDER_POD
+	
+Control Button
+	Title "..."
+	Id 14
+	Position 239, 105
+	Width 51 Height 14
+	Calling Select_DIR_POD
+	Disable
+	
+Control StaticText
+	Id 15
+	Position 25, 123
+	Width 29 Height 8
+	Title "Planovi"
+	
+Control EditText
+	Id 16
+	Position 73, 123
+	Width 154 Height 14
+	Disable
+	Value cit_FOLDER_NET
+	
+Control Button
+	Title "..."
+	Id 17
+	Position 239, 123
+	Width 51 Height 14
+	Calling Select_DIR_NET
+	Disable
+	
+Control GroupBox
+	Id 18
+	Position 15, 149
+	Width 279 Height 70
+	Title "Azuriranje:"
+	
+Control StaticText
+	Id 19
+	Position 25, 164
+	Width 36 Height 8
+	Title "Projekcije"
+	
+Control EditText
+	Id 20
+	Position 73, 161
+	Width 154 Height 14
+	Disable
+	Value cit_Update_PRJ
+	
+Control Button
+	Title "..."
+	Id 21
+	Position 239, 161
+	Width 51 Height 14
+	Calling Select_DIR_UP_PRJ
+	Disable
+	
+Control StaticText
+	Id 22
+	Position 25, 182
+	Width 35 Height 8
+	Title "Aplikacija"
+	
+Control EditText
+	Id 23
+	Position 73, 179
+	Width 154 Height 14
+	Disable
+	Value cit_Update_MBX
+	
+Control Button
+	Title "..."
+	Id 24
+	Position 239, 180
+	Width 51 Height 14
+	Calling Select_DIR_UP_MBX
+	Disable
+	
+Control StaticText
+	Id 25
+	Position 25, 202
+	Width 28 Height 8
+	Title "*.WOR"
+	
+Control EditText
+	Id 26
+	Position 73, 198
+	Width 154 Height 14
+	Disable
+	Value cit_Update_WOR
+	
+Control Button
+	Title "..."
+	Id 27
+	Position 239, 198
+	Width 51 Height 14
+	Calling Select_DIR_UP_WOR
+	Disable
+	
+Control CancelButton
+	Title "Cancel"
+	Id 28
+	Position 15, 227
+	Width 51 Height 14
+	Calling POD_cancel
+	
+Control OKButton
+	Title "Azuriraj foldere"
+	Id 29
+	Position 168, 227
+	Width 59 Height 14
+	Calling POD_azuriraj
+	Disable
+	Hide
+	
+Control Button
+	Title "Aktiviraj !"
+	Id 30
+	Position 235, 227
+	Width 59 Height 14
+	Calling POD_aktiviraj
+	Disable
+	Hide
+	
+Control Button
+	Title "Admin"
+	Id 31
+	Position 133, 73
+	Width 51 Height 14
+	Calling POD_citaj
+
+	Exit Sub
+'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "DLG_Podesavanja")
+	Call ERRShow()
+
+END SUB	

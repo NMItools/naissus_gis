@@ -1,0 +1,437 @@
+include "mapbasic.def"
+include "menu.def"
+include "icons.def"
+include "..\Library\ERRORLib.def"
+include "..\nmiWin.def"
+include "..\nmiFunkcije.def"
+include "..\nmiDotNet.def"
+include "NAISSUS-GIS.def"
+
+'===================================================================================================================== 
+'	Objekti NIVOS
+
+SUB NIVOS_OBJEKTI
+
+	onerror goto Greska 
+	
+	Create Menu "NIVOS objekti" as
+		"Cevovod" calling cevovod,
+		"Prikljucci" calling prikljucak,
+		"Vodomeri" calling vodomer,
+		"Zatvaraci" calling zatvarac,
+		"Hidranti" calling hidrant,
+		"Cevovodne Sahte" calling cevovodnisaht,
+		"Vodomerne Sahte" calling vodomernisaht,
+		"Vazdusni ventili" calling vazdusniventil,
+		"Nepovratni ventili" calling nepovratniventil,
+		"Muljni ispusti" calling muljniispust,
+		"Meraci protoka" calling meracprotoka,
+		"Regulatori pritiska" calling regulatorpritiska,
+		"Pumpe" calling pumpa,
+		"(-",
+		"Pumpne stanice" calling crpnastanica,
+		"Rezervoari" calling rezervoar,
+		"Prekidne komore" calling prekidnakomora,
+		"Kaptaze" calling kaptaza  
+
+	Alter Menu "JKP Naissus" Add 
+		"NIVOS objekti" As "NIVOS objekti"
+'		, "NIVOS Zone i Sistemi" As "NIVOS Zone i Sistemi"
+
+'---
+
+	Create ButtonPad "NIVOS objekti" As
+	
+		ToggleButton
+			Icon 8001 File "nmiIcons.dll"
+			Calling cevovod
+			ID 401
+			Uncheck
+			Enable
+			HelpMsg "Cevi vodovodne mreze \nVodovodna mreza"   
+		ToggleButton
+			Icon 8003 File "nmiIcons.dll"
+			Calling prikljucak
+			ID 402
+			Uncheck
+			Enable
+			HelpMsg "Prikljucne veze na vodovodnu mrezu \nPrikljucci"
+		ToggleButton
+			Icon 8005 File "nmiIcons.dll"
+			Calling cevovodnisaht
+			ID 403
+			Uncheck
+			Enable
+			HelpMsg "Sahte na vodovodnoj mrezi \nCevovodne sahte"
+		ToggleButton
+			Icon 8007 File "nmiIcons.dll"
+			Calling vodomernisaht
+			ID 404
+			Uncheck
+			Enable
+			HelpMsg "Vodomerne sahte \nVodomerske sahte"
+		ToggleButton
+			Icon 8009 File "nmiIcons.dll"
+			Calling hidrant
+			ID 405
+			Uncheck
+			Enable
+			HelpMsg "Hidranti \nHidranti"
+		ToggleButton
+			Icon 8011 File "nmiIcons.dll"
+			Calling zatvarac
+			ID 406
+			Uncheck
+			Enable
+			HelpMsg "Zatvaraci \nZatvaraci"
+		ToggleButton
+			Icon 8013 File "nmiIcons.dll"
+			Calling vodomer
+			ID 407
+			Uncheck
+			Enable
+			HelpMsg "Vodomeri \nVodomeri"
+		ToggleButton
+			Icon 8015 File "nmiIcons.dll"
+			Calling nepovratniventil
+			ID 408
+			Uncheck
+			Enable
+			HelpMsg "Nepovratni ventil \nNepovratni ventili"
+		ToggleButton
+			Icon 8017 File "nmiIcons.dll"
+			Calling vazdusniventil
+			ID 409
+			Uncheck
+			Enable
+			HelpMsg "Vazdusni ventili \nVazdusni ventili"
+		ToggleButton
+			Icon 8019 File "nmiIcons.dll"
+			Calling muljniispust
+			ID 410
+			Uncheck
+			Enable
+			HelpMsg "Muljni ispusti \nMuljni ispusti"
+		ToggleButton
+			Icon 8021 File "nmiIcons.dll"
+			Calling pumpa
+			ID 411
+			Uncheck
+			Enable
+			HelpMsg "Pumpe u crpnim stanicama \nPumpe"
+		ToggleButton
+			Icon 8023 File "nmiIcons.dll"
+			Calling regulatorpritiska
+			ID 412
+			Uncheck
+			Enable
+			HelpMsg "Regulatori pritiska \nRegulatori pritiska"
+		ToggleButton
+			Icon 8025 File "nmiIcons.dll"
+			Calling meracprotoka
+			ID 413
+			Uncheck
+			Enable
+			HelpMsg "Meraci protoka \nMeraci protoka"
+		ToggleButton
+			Icon 8027 File "nmiIcons.dll"
+			Calling crpnastanica
+			ID 414
+			Uncheck
+			Enable
+			HelpMsg "Crpne stanice \nCrpne stanice"
+		ToggleButton
+			Icon 8029 File "nmiIcons.dll"
+			Calling rezervoar
+			ID 415
+			Uncheck
+			Enable
+			HelpMsg "Rezervoari \nRezervoari"
+		ToggleButton
+			Icon 8031 File "nmiIcons.dll"
+			Calling prekidnakomora
+			ID 416
+			Uncheck
+			Enable
+			HelpMsg "Prekidne komore \nPrekidne komore"
+		ToggleButton
+			Icon 8033 File "nmiIcons.dll"
+			Calling kaptaza
+			ID 417
+			Uncheck
+			Enable
+			HelpMsg "Kaptaze i izvorista \nKaptaze"
+	
+	'---
+	
+	Alter ButtonPad "NIVOS objekti" 
+		'Position(9.0,2.8) Units "cm"
+		ToolbarPosition (2,0)
+		Fixed            
+		Title "NIVOS objekti"
+		Width 30
+		Show
+
+	Exit Sub
+	'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "NIVOS_Objekti")
+	Call ERRShow()
+	
+END SUB               
+
+'======================================================
+SUB cevovod
+ 
+ 	onerror goto Greska 
+ 	
+	namLejer=setTabSQL("CEVOVOD",401)
+
+	Exit Sub
+	'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "Cevovod")
+	Call ERRShow()
+	
+
+END SUB
+
+'======================================================
+SUB prikljucak
+	
+	onerror goto Greska
+	
+	namLejer=setTabSQL("PRIKLJUCCI",402)
+
+	Exit Sub
+	'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "prikljucak")
+	Call ERRShow()
+
+END SUB
+
+'======================================================
+SUB cevovodnisaht
+	
+	onerror goto Greska 
+	
+	namLejer=setTabSQL("CEVOVODNI_SAHT",403)
+
+	Exit Sub
+	'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "cevovodnisaht")
+	Call ERRShow()
+	
+END SUB
+
+'======================================================
+SUB vodomernisaht
+	
+	onerror goto Greska 
+	
+	namLejer=setTabSQL("VODOMERNI_SAHT",404)
+
+	Exit Sub
+	'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "vodomernisaht")
+	Call ERRShow()
+	
+END SUB
+
+'======================================================
+SUB hidrant
+	
+	onerror goto Greska 
+	
+	namLejer=setTabSQL("HIDRANT",405)
+
+	Exit Sub
+	'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "hidrant")
+	Call ERRShow()
+	
+END SUB
+
+'======================================================
+SUB zatvarac
+	
+	onerror goto Greska 
+	
+	namLejer=setTabSQL("ZATVARAC",406)
+
+	Exit Sub
+	'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "zatvarac")
+	Call ERRShow()
+	
+END SUB
+
+'======================================================
+SUB vodomer        
+
+	onerror goto Greska 
+	
+	namLejer=setTabSQL("VODOMERI",407)
+
+	Exit Sub
+	'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "vodomer")
+	Call ERRShow()
+	
+END SUB
+
+'======================================================
+SUB nepovratniventil
+
+	onerror goto Greska 
+	
+	namLejer=setTabSQL("NEPOVRATNI_VENTIL",408)
+
+	Exit Sub
+	'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "nepovratniventil")
+	Call ERRShow()
+	
+END SUB
+
+'======================================================
+SUB vazdusniventil                
+	
+	onerror goto Greska 
+	
+	namLejer=setTabSQL("VAZD_VENTIL",409)
+
+	Exit Sub
+	'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "vazdusniventil")
+	Call ERRShow()
+	
+END SUB
+
+'======================================================
+SUB muljniispust
+
+	onerror goto Greska 
+	
+	namLejer=setTabSQL("MULJ_ISPUST",410)
+
+	Exit Sub
+	'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "muljniispust")
+	Call ERRShow()
+	
+END SUB
+
+'======================================================
+SUB pumpa
+
+	onerror goto Greska 
+	
+	namLejer=setTabSQL("PUMPE",411)
+
+	Exit Sub
+	'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "pumpa")
+	Call ERRShow()
+	
+END SUB
+
+'======================================================
+SUB regulatorpritiska
+	
+	onerror goto Greska 
+	
+	namLejer=setTabSQL("REGULATORI_PRITISKA",412)
+
+	Exit Sub
+	'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "regulatorpritiska")
+	Call ERRShow()
+	
+END SUB
+
+'======================================================
+SUB meracprotoka
+
+	onerror goto Greska 
+	
+	namLejer=setTabSQL("MERACI_PROTOKA",413)
+
+	Exit Sub
+	'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "meracprotoka")
+	Call ERRShow()
+	
+END SUB
+
+'======================================================
+SUB crpnastanica
+
+	onerror goto Greska 
+	
+	namLejer=setTabSQL("CRPNA_STANICA",414)
+
+	Exit Sub
+	'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "crpnastanica")
+	Call ERRShow()
+	
+END SUB
+
+'======================================================
+SUB rezervoar
+	
+	onerror goto Greska
+	
+	namLejer=setTabSQL("REZERVOARI",415)
+
+	Exit Sub
+	'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "rezervoar")
+	Call ERRShow()
+	
+END SUB
+
+'======================================================
+SUB prekidnakomora
+
+	onerror goto Greska 
+	
+	namLejer=setTabSQL("PREKIDNE_KOMORE",416)
+
+	Exit Sub
+	'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "prekidnakomora")
+	Call ERRShow()
+	
+END SUB
+
+'======================================================
+SUB kaptaza 
+
+	onerror goto Greska 
+	
+	namLejer=setTabSQL("KAPTAZE",417)
+
+	Exit Sub
+	'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "kaptaza")
+	Call ERRShow()
+	
+END SUB

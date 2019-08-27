@@ -1,0 +1,281 @@
+include "mapbasic.def"
+include "menu.def"
+include "icons.def"
+include "..\Library\ERRORLib.def"
+include "..\nmiWin.def"
+include "..\nmiFunkcije.def"
+include "..\nmiDotNet.def"
+include "NAISSUS-GIS.def"
+
+'===================================================================================================================== 
+'	Geodetski snimljeni objekti NIVOS-a
+
+SUB NIVOS_GEODETSKI
+	
+	onerror goto Greska 
+	
+	Create Menu "NIVOS Geodetski" as
+		"Koordinate" calling Koordinate,
+		"(-",
+		"Kote cevovoda - KC" calling KotaCevi,
+		"Kote terena - KT" calling KotaTerena,
+		"KC + KT" calling KCiKT,	
+		"Dubina cevi" calling DubinaCevi
+	
+
+	Alter Menu "JKP Naissus" Add 
+		"NIVOS Geodetski" As "NIVOS Geodetski"	
+		
+	'---
+	  
+	Create ButtonPad "NIVOS Geodetski" As
+	
+		ToolButton 
+			Calling Koordinate
+			ID 991
+			Icon MI_ICON_CROSSHAIR
+			Cursor MI_CURSOR_ARROW
+			DrawMode DM_CUSTOM_POINT
+			HelpMsg "Ocitavanje koordinata\nKoordinate"	
+			
+		SEPARATOR
+		
+		ToggleButton Calling KotaTerena
+			ID 501
+			Icon 8479 File "nmiIcons.dll"
+			HelpMsg "Prikaz kota terena\nKota terena"
+			Uncheck
+			Enable 	
+		ToggleButton Calling KotaCevi 
+			ID 502
+			Icon 8481 File "nmiIcons.dll"
+			HelpMsg "Prikaz kota cevovoda\nKota Cevovoda"
+			Uncheck
+			Enable 	 
+		ToggleButton Calling KCiKT
+			ID 503
+			Icon 8109 File "nmiIcons.dll"
+			HelpMsg "Prikaz kota terena i kota cevi\nKota terena i kota cevi"
+			Uncheck
+			Enable 
+		
+		SEPARATOR
+		
+		ToggleButton Calling DubinaCevi
+			ID 504
+			Icon 8483 File "nmiIcons.dll"
+			HelpMsg "Prikaz dubine cevovoda\nDubina cevi"
+			Uncheck
+			Enable 		
+	
+	'---
+		
+	Alter ButtonPad "NIVOS Geodetski" 
+	'	Position(8,5.5) Units "cm"
+		ToolbarPosition (1,5)
+		Fixed
+		Title "NIVOS Geodetski"
+		Width 21
+		Show        
+
+	Exit Sub
+	'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "NIVOS_GEODETSKI")
+	Call ERRShow()	               
+
+End SUB   
+
+'===================================================================================================================== 
+' .....
+
+SUB KotaCevi
+
+	onerror goto Greska 
+	
+	Alter Button ID 592 Uncheck
+	Alter Button ID 593 Uncheck
+	Alter Button ID 594 Uncheck
+	
+	namLejer=setTabSQL("SNIMLJENO_KOTE",501)
+	
+	Set Map redraw off
+	Set Map Layer LayerID("SNIMLJENO_KOTE") Label Font ("Arial",258,8,61680,0) With Left$(Str$(Kota_cevi), Int(Kota_cevi>0)*Len(Str$(Kota_cevi))) Position Below Right Visibility Zoom (0,250) Units "m" Overlap Off  Auto Retry On Auto On 
+	Set Map redraw on
+
+	Exit Sub
+	'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "KotaCevi")
+	Call ERRShow()	               
+
+End Sub
+
+'===================================================================================================================== 
+' .....
+
+sub KotaTerena
+
+	onerror goto Greska 
+	
+	Alter Button ID 591 Uncheck
+	Alter Button ID 593 Uncheck
+	Alter Button ID 594 Uncheck
+
+	namLejer=setTabSQL("SNIMLJENO_KOTE",502)
+	
+	Set Map redraw off
+	Set Map Layer LayerID("SNIMLJENO_KOTE") Label Font ("Arial",258,8,12648288,0) With Left$(Str$(Kota_terena), Int(Kota_terena>0)*Len(Str$(Kota_terena))) Position Above Right Visibility Zoom (0,249) Units "m" Overlap Off  Auto Retry On Auto On
+	Set Map redraw on
+
+	Exit Sub
+	'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "KotaTerena")
+	Call ERRShow()	               
+
+End Sub
+ 
+'===================================================================================================================== 
+' .....
+
+sub KCiKT
+
+	onerror goto Greska 
+
+	Alter Button ID 591 Uncheck
+	Alter Button ID 592 Uncheck
+	Alter Button ID 594 Uncheck
+	
+	namLejer=setTabSQL("SNIMLJENO_KOTE",503)
+	
+	set map redraw off
+	Set Map Layer LayerID("SNIMLJENO_KOTE") Label Font ("Arial",258,8,0,16777215) With Left$(Str$(Kota_terena), Int(Kota_terena>0)*Len(Str$(Kota_terena)))+Chr$(13)+Left$(Str$(Kota_cevi), Int(Kota_cevi>0)*Len(Str$(Kota_cevi))) Position Right Visibility Zoom (0,249) Units "m" Overlap Off  Auto Retry On Auto On
+	set map redraw on
+
+	Exit Sub
+	'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "KCiKT")
+	Call ERRShow()	               
+
+End Sub
+
+'===================================================================================================================== 
+' .....
+
+sub DubinaCevi
+	
+	onerror goto Greska
+
+	Alter Button ID 591 Uncheck
+	Alter Button ID 592 Uncheck
+	Alter Button ID 593 Uncheck
+	
+	namLejer=setTabSQL("SNIMLJENO_KOTE",504)
+	
+	set map redraw off
+	Set Map Layer LayerID("SNIMLJENO_KOTE") Label Font ("Arial",2,8,13658112,16777215) With Left$(Str$(Dubina_cevi), Int(Dubina_cevi<0)*Len(Str$(Dubina_cevi))) Position Right Visibility Zoom (0,249) Units "m" Overlap Off  Auto Retry On Auto On
+	set map redraw on
+
+	Exit Sub
+	'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "DubinaCevi")
+	Call ERRShow()	               
+
+End Sub
+
+'===================================================================================================================== 
+' .....
+
+Sub Koordinate
+	
+	onerror goto Greska	
+	
+	Dim x,y as float
+	Dim objTmp As Object
+	Dim CosmName as String
+ 		
+' - Postavljanje WGS84	koordinatnog sistema kao poèetnog
+	Set CoordSys Earth Projection 1, 104 Bounds (21.579058000, 42.928281000) (22.602521000, 43.522997000)
+		
+' - Oèitavanje koordinata na mesto klika
+
+	x = CommandInfo(CMD_INFO_X)
+	y = CommandInfo(CMD_INFO_Y)	
+	
+	objTmp = CreatePoint (x,y)
+	
+' - unos u Cosmetic lejer
+	CosmName = CosmeticIme("c")
+	Insert Into CosmName (Obj) Values (objTmp)
+	
+' - Ispisivanje koordinata srpskih koordinatnih zona
+
+'	"Longitude / Latitude (WGS 84) - EPSG: 4326"	
+	Print "================================================================="
+	Print CoordSysName$("CoordSys Earth Projection 1, 104 Bounds (21.579058000, 42.928281000) (22.602521000, 43.522997000)")
+	Print "x = " & CentroidX(objTmp) & " / " & DMS(CentroidX(objTmp))
+	Print "y = " & CentroidY(objTmp) & " / " & DMS(CentroidY(objTmp))
+
+'	"UTM Zone 34, Northern Hemisphere (WGS 84) - EPSG: 32634"	
+	Set CoordSys Earth Projection 8, 104, 7, 21, 0, 0.9996, 500000, 0
+	Print "------------------------------------"
+	Print CoordSysName$("CoordSys Earth Projection 8, 104, 7, 21, 0, 0.9996, 500000, 0")
+	Print "x = " & CentroidX(objTmp)
+	Print "y = " & CentroidY(objTmp)
+
+'	"Web mercator (Google/Bing/OSM) - EPSG: 3857"	
+	Set CoordSys Earth Projection 10, 157, 7, 0
+	Print "------------------------------------"
+	Print CoordSysName$("CoordSys Earth Projection 10, 157, 7, 0")
+	Print "x = " & CentroidX(objTmp)
+	Print "y = " & CentroidY(objTmp)
+	
+'	"Web GK7 (geomreze.rgz.gov.rs) - EPSG: 32805"	
+'	Set CoordSys Earth Projection 8, 9999, 10, 578.8172, 165.104, 390.20938, -4.91963, 0.98852, 13.038, -7.80238, 0, 7, 21, 0, 0.9999, 7500000, 0
+'	Print "------------------------------------"
+'	Print CoordSysName$("CoordSys Earth Projection 8, 9999, 10, 578.8172, 165.104, 390.20938, -4.91963, 0.98852, 13.038, -7.80238, 0, 7, 21, 0, 0.9999, 7500000, 0")
+'	Print "x = " & CentroidX(objTmp)
+'	Print "y = " & CentroidY(objTmp)
+'	
+'	"Drzavni Koordinatni Sistem - Gauss Krüger 7. zona (JKP ''Naissus'' tr.) - EPSG: 31277"	
+    Run Command CRS
+	Print "------------------------------------"
+	Print CoordSysName$(s_CRS)
+	Print "x = " & CentroidX(objTmp)
+	Print "y = " & CentroidY(objTmp)
+
+
+'	"Longitude / Latitude (EUREF89) - EPSG: 4258"	
+'	Set CoordSys Earth Projection  1, 115
+'	Print "EPSG 4326 DMS Lon: "+CentroidX(objTmp)
+'	Print "EPSG 4326 DMS Lat: "+CentroidY(objTmp)
+'	Update s_filespec_1 Set ETRS89_4258_Lon = CentroidX(obj) DropIndex Auto
+'	Update s_filespec_1 Set ETRS89_4258_Lat = CentroidY(obj) DropIndex Auto
+
+'	"ETRS-TM34 - EPSG: 25834"	
+'	Set CoordSys Earth Projection 2024, 115, 7, 21, 0, 0.9996, 500000, 0, 0, 0, 1500000, 8000000
+'	Print "EPSG 25834 Lon: "+CentroidX(objTmp)
+'	Print "EPSG 25834 Lat: "+CentroidY(objTmp)
+'	Update s_filespec_1 Set UTM34_ETRS89_25834_x = CentroidX(obj) DropIndex Auto
+'	Update s_filespec_1 Set UTM34_ETRS89_25834_y = CentroidY(obj) DropIndex Auto
+
+'	"ETRS TM Zone 34, Northern Hemisphere (ETRS89) - EPSG: 3046"	
+'	Set CoordSys Earth Projection 8, 115, 7, 21, 0, 0.9996, 500000, 0
+'	Print "EPSG 3046 Lon: "+CentroidX(objTmp)
+'	Print "EPSG 3046 Lat: "+CentroidY(objTmp)
+'	Update s_filespec_1 Set ETRS_TM34_3046_X = CentroidX(obj) DropIndex Auto
+'	Update s_filespec_1 Set ETRS_TM34_3046_Y = CentroidY(obj) DropIndex Auto
+   
+	Exit Sub
+	
+	'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "Koordinate")
+	Call ERRShow()	    	
+
+End Sub
+
+

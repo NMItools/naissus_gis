@@ -1,0 +1,86 @@
+'include "mapbasic.def"
+'include "menu.def"
+'include "icons.def"
+include "..\..\Library\ERRORLib.def"
+include "..\NAISSUS-GIS.def"
+
+'===================================================================================================================== 
+' .....
+
+Sub DLG_Izohipse_2
+
+	onerror goto Greska  
+	
+'	Dialog
+'		Title "Prikaz izohipsi u datoj oblasti"
+'		Width 154 Height 45
+'	
+'	Control GroupBox
+'		Id 5
+'		Position 5, 4
+'		Width 87 Height 33
+'		Title "Interval"
+'		
+'	Control StaticText
+'		Id 6
+'		Position 76, 21
+'		Width 10 Height 8
+'		Title "m"
+'		
+'	Control CancelButton
+'		Title "Cancel"
+'		Id 7
+'		Position 97, 5
+'		Width 51 Height 14
+'		Calling IZO_Dialog_2_CANCELBUTT
+'		
+'	Control OKButton
+'		Title "Iscrtaj oblast"
+'		Id 8
+'		Position 97, 23
+'		Width 51 Height 14
+''		Calling IZO_Dialog_2_OKBUTT
+'		
+'	Control PopupMenu
+'		Id 9
+'		Position 46, 16
+'		Width 27
+'		Title "1;2;5;10"
+'		Into interval
+'
+'
+'If CommandInfo(CMD_INFO_DLG_OK) Then
+'	
+'	Do Case interval
+'		Case "1"
+'			ekv = 1
+'		Case "2" 
+'			ekv = 2
+'		Case "3"
+'			ekv = 5
+'		Case "4"
+'			ekv = 10					
+'	End Case
+		
+'	print ekv
+
+'	Call DLG_Izohipse_2_OK
+	
+'***** DIALOG DESIGNER GENERATED CODE. DO NOT EDIT OR REMOVE THIS LINE OR BELOW THIS LINE! *****
+Dialog
+	Title "Dialog"
+	Width 199 Height 169
+
+Control GroupBox
+	Id 0
+	Position 27, 46
+	Width 136 Height 62
+	Title "GroupBox1"
+	
+	Exit Sub
+	'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "DLG_Izohipse_2")
+	Call ERRShow()
+
+End Sub

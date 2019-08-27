@@ -1,0 +1,1106 @@
+include "mapbasic.def"
+include "menu.def"
+include "icons.def"
+include "..\Library\ERRORLib.def"
+include "..\nmiWin.def"
+include "..\nmiFunkcije.def"
+include "..\nmiDotNet.def"
+include "NAISSUS-GIS.def"
+
+'===================================================================================================================== 
+' 
+SUB LABELE
+
+	Create Menu "Atmosferska sahta" As
+		"KT + KD" HelpMsg "Submenu Item" Calling lab_atm_saht_KTiKD,
+		"(-",
+		"MI_PRINX"  HelpMsg "Submenu Item" Calling lab_atm_saht_miprinx
+	
+	Create Menu "Atmosferska" As
+'		"Ime ulice" HelpMsg "Submenu Item" Calling lab_fekalna_ulice,
+		"Materijal i Precnik" HelpMsg "Submenu Item" Calling lab_atmosferska_mat_prec,
+'		"Duzina" HelpMsg "Submenu Item" Calling lab_fekalna_duz,
+		"(-",
+'		"Ulica + Materijal i Precnik" HelpMsg "Submenu Item" Calling lab_fekalna_ul_mat_prec,
+'		"Materijal i Precnik + Duzina" HelpMsg "Submenu Item" Calling lab_fekalna_mat_prec_duz,
+'		"Ulica + Duzina" HelpMsg "Submenu Item" Calling lab_fekalna_ul_duz,
+'		"(-",
+		"MI_PRINX"  HelpMsg "Submenu Item" Calling lab_atmosferska_miprinx
+
+	Create Menu "Fekalna sahta" As
+		"KT + KD" HelpMsg "Submenu Item" Calling lab_fek_kan_saht_KTiKD,
+		"(-",
+		"MI_PRINX"  HelpMsg "Submenu Item" Calling lab_fek_kan_saht_miprinx
+	
+	Create Menu "Fekalna" As
+		"Ime ulice" HelpMsg "Submenu Item" Calling lab_fekalna_ulice,
+		"Materijal i Precnik" HelpMsg "Submenu Item" Calling lab_fekalna_mat_prec,
+		"Duzina" HelpMsg "Submenu Item" Calling lab_fekalna_duz,
+		"(-",
+		"Ulica + Materijal i Precnik" HelpMsg "Submenu Item" Calling lab_fekalna_ul_mat_prec,
+		"Materijal i Precnik + Duzina" HelpMsg "Submenu Item" Calling lab_fekalna_mat_prec_duz,
+		"Ulica + Duzina" HelpMsg "Submenu Item" Calling lab_fekalna_ul_duz,
+		"(-",
+		"MI_PRINX"  HelpMsg "Submenu Item" Calling lab_fekalna_miprinx
+		
+	Create Menu "Kaptaze" As
+		"Naziv" HelpMsg "Submenu Item" Calling lab_kap_ime,
+		"(-",
+		"Naziv + Kapaciteti" HelpMsg "Submenu Item" Calling lab_kap_ime_kpc,
+		"Naziv + Kote" HelpMsg "Submenu Item" Calling lab_kap_ime_kote,
+		"Naziv + Kote + Kapaciteti" HelpMsg "Submenu Item" Calling lab_kap_ime_kote_kpc
+		
+	Create Menu "Rezervoari" As
+		"Naziv" HelpMsg "Submenu Item" Calling lab_rez_ime,
+		"(-",
+		"Naziv + Zapremina" HelpMsg "Submenu Item" Calling lab_rez_ime_zapr,
+		"Naziv + Zapremina + Kote" HelpMsg "Submenu Item" Calling lab_rez_ime_zapr_kote
+	
+	Create Menu "Prekidne Komore" As
+		"Naziv" HelpMsg "Submenu Item" Calling lab_pk_ime,
+		"(-",
+		"Naziv + Kapacitet" HelpMsg "Submenu Item" Calling lab_pk_ime_kpc,
+		"Naziv + Kapacitet + Kota Preliva i Dna" HelpMsg "Submenu Item" Calling lab_pk_ime_kpc_kprl_kdna
+	
+	Create Menu "Pumpne Stanice" As
+		"Naziv" HelpMsg "Submenu Item" Calling lab_ps_ime
+	
+	Create Menu "Pumpe" As
+		"Tip, Naziv" HelpMsg "Submenu Item" Calling lab_pump_ime,
+		"(-",
+		"Karakteristike (Q,h,N)" HelpMsg "Submenu Item" Calling lab_pump_karakt	
+	
+	Create Menu "Meraci Protoka" As
+		"Naziv" HelpMsg "Submenu Item" Calling lab_merprot_ime
+		
+	Create Menu "Vodomeri" As
+		"Reon" HelpMsg "Submenu Item" Calling lab_vod_ink_reon,
+		"Knjiga" HelpMsg "Submenu Item" Calling lab_vod_ink_knjiga,
+		"Redni Broj" HelpMsg "Submenu Item" Calling lab_vod_ink_knrbr,
+		"Merna zona" HelpMsg "Submenu Item" Calling lab_vod_zona,	
+		"Serijski Broj" HelpMsg "Submenu Item" Calling lab_vod_serbr,	
+		"Maticni Broj Potrosaca" HelpMsg "Submenu Item" Calling lab_vod_matbr,
+		"Potrosac" HelpMsg "Submenu Item" Calling lab_vod_imepotrosaca,       
+		"Kucni Broj" HelpMsg "Submenu Item" Calling lab_vod_kucbroj,
+		"Radni Nalog" HelpMsg "Submenu Item" Calling lab_vod_rn,
+		"(-",                                                                            
+		"Reon + Knjiga" HelpMsg "Submenu Item" Calling lab_vod_reon_knjiga,
+		"Knjiga + Redni broj" HelpMsg "Submenu Item" Calling lab_vod_rbr_knjiga,
+		"Radni Nalog + Potrosac" HelpMsg "Submenu Item" Calling lab_vod_rn_imepotrosaca,
+		"Potrosac + Maticni Broj" HelpMsg "Submenu Item" Calling lab_vod_imepotrosaca_matbr,
+		"Potrosac + Kucni Broj" HelpMsg "Submenu Item" Calling lab_vod_imepotrosaca_kucbroj,
+		"Potrosac + Serijski Broj" HelpMsg "Submenu Item" Calling lab_vod_imepotrosaca_serbr
+	
+	Create Menu "Zatvaraci" As
+		"Broj Zatvaraca" HelpMsg "Submenu Item" Calling lab_zat_rb,
+		"Precnik" HelpMsg "Submenu Item" Calling lab_zat_prec,
+		"(-",
+		"Broj + Precnik" HelpMsg "Submenu Item" Calling lab_zat_rb_prec
+	
+	Create Menu "Hidranti" As
+		"Broj Hidranta" HelpMsg "Submenu Item" Calling lab_hid_rb,
+		"Precnik" HelpMsg "Submenu Item" Calling lab_hid_prec,
+		"(-",
+		"Broj + Precnik" HelpMsg "Submenu Item" Calling lab_hid_rb_prec
+	
+	Create Menu "Prikljucci" As
+		"Radni Nalog" HelpMsg "Submenu Item" Calling lab_prik_rn,
+		"Materijal i Precnik Glavnog cevovoda" HelpMsg "Submenu Item" Calling lab_prik_mat_prec_gl,
+		"Materijal i Precnik Prikljucka" HelpMsg "Submenu Item" Calling lab_prik_mat_prec_pr,
+		"Duzina" HelpMsg "Submenu Item" Calling lab_prik_duz,
+		"(-",
+		"Radni Nalog + Materijal i Precnik Glavnog cevovoda" HelpMsg "Submenu Item" Calling lab_prik_rn_mat_prec_gl,
+		"Radni Nalog + Materijal i Precnik Prikljucka" HelpMsg "Submenu Item" Calling lab_prik_rn_mat_prec_pr
+	
+	Create Menu "Cevovod" As
+		"Ime ulice" HelpMsg "Submenu Item" Calling lab_cev_ulice,
+		"Materijal i Precnik" HelpMsg "Submenu Item" Calling lab_cev_mat_prec,
+		"Duzina" HelpMsg "Submenu Item" Calling lab_cev_duz,
+		"(-",
+		"Ulica + Materijal i Precnik" HelpMsg "Submenu Item" Calling lab_cev_ul_mat_prec,
+		"Materijal i Precnik + Duzina" HelpMsg "Submenu Item" Calling lab_cev_mat_prec_duz,
+		"Ulica + Duzina" HelpMsg "Submenu Item" Calling lab_cev_ul_duz
+	
+	Create Menu "Labele" As
+		"Podesavanje ..." HelpMsg "Submenu Item" Calling lab_podesavanje,
+		"(-",
+		"Cevovod" As "Cevovod",
+		"Prikljucci" As "Prikljucci",
+		"Hidranti" As "Hidranti",
+		"Zatvaraci" As "Zatvaraci",
+		"Vodomeri" As "Vodomeri",
+		"Meraci Protoka" As "Meraci Protoka",
+		"Pumpe" As "Pumpe",
+		"Pumpne Stanice" As "Pumpne Stanice",
+		"Prekidne Komore" As "Prekidne Komore",
+		"Rezervoari" As "Rezervoari",
+		"Kaptaze" As "Kaptaze",
+		"(-",		
+		"Fekalna" As "Fekalna",
+		"Fekalna sahta" As "Fekalna sahta",
+		"Atmosferska" As "Atmosferska",
+		"Atmosferska sahta" As "Atmosferska sahta"
+		
+	Alter Menu "JKP Naissus" Add 
+		"(-",
+		"Labele" As "Labele"
+  
+END SUB  
+
+'===================================================================================================================== 
+' 
+Sub lab_podesavanje
+End Sub
+
+'===================================================================================================================== 
+' labele za CEVOVOD 
+
+Sub lab_cev_ulice
+
+	OnError Goto Greska
+	
+	If MapWinSTATUS(0) <> 1 
+	Then 
+		Exit Sub
+	End If
+	
+	Set Map Redraw Off
+
+	Set Map Layer LayerID("CEVOVOD") Label 
+		Auto On
+		Font ("Arial",256,8,255,16777215) 
+		With ULICA 
+			Position Center 
+			Visibility Zoom (0,1000) 
+			Units "m"  
+			Auto Retry On 
+			PartialSegments On
+			Position Center
+								
+	Set Map Redraw On
+	
+	Exit Sub
+	'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "lab_cev_ulice")
+	Call ERRShow()
+	
+End Sub
+'
+Sub lab_cev_mat_prec
+
+	OnError Goto Greska
+	
+	If MapWinSTATUS(0) <> 1 
+	Then 
+		Exit Sub
+	End If
+
+	set map redraw off
+	
+	Set Map Layer LayerID("CEVOVOD") Label
+		Font ("Arial",256,8,255,16777215)
+		With MATERIJAL+DN_MM 
+			Auto On 
+			Overlap On 
+			Duplicates On 
+			PartialSegments On 
+			Position Center
+			
+	set map redraw on
+
+	Exit Sub
+	'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "lab_cev_mat_prec")
+	Call ERRShow()	
+
+End Sub
+'
+Sub lab_cev_duz
+
+	OnError Goto Greska
+	
+	If MapWinSTATUS(0) <> 1 
+	Then 
+		Exit Sub
+	End If
+
+	Set Map Redraw Off
+	
+	Set Map Layer LayerID("CEVOVOD") Label 
+	Font ("Arial",256,8,255,16777215) 
+	With Round(ObjectLen(obj, "m"),0.01) 
+		Auto On 
+		Overlap On 
+		Duplicates On 
+		PartialSegments On 
+		Position Center
+	
+	Set Map Redraw On
+
+	Exit Sub
+	'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "lab_cev_ulice")
+	Call ERRShow()
+	
+End Sub
+'
+Sub lab_cev_ul_mat_prec
+	
+	OnError Goto Greska
+	
+	If MapWinSTATUS(0) <> 1 
+	Then 
+		Exit Sub
+	End If
+
+	set map redraw off
+	
+	Set Map Layer LayerID("CEVOVOD") Label 
+		Font ("Arial",256,8,255,16777215) 
+		With ULICA+Chr$(13)+MATERIJAL+DN_MM 
+		Auto On 
+		Overlap On 
+		Duplicates On 
+		PartialSegments On Position Center
+	
+	Set Map Redraw On
+	
+	Exit Sub
+	'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "lab_cev_ulice")
+	Call ERRShow()
+
+End Sub
+'
+Sub lab_cev_mat_prec_duz
+
+	OnError Goto Greska
+	
+	If MapWinSTATUS(0) <> 1 
+	Then 
+		Exit Sub
+	End If
+
+	Set Map Redraw Off
+	
+	Set Map Layer LayerID("CEVOVOD") Label 
+		Font ("Arial",256,8,255,16777215) 
+		With Label With MATERIJAL+DN_MM+Chr$(13)+Round(ObjectLen(obj, "m"),0.01) 
+		Auto On 
+		Overlap On 
+		Duplicates On 
+		PartialSegments On 
+		Position Center
+
+	Set Map Redraw On
+	
+	Exit Sub
+	'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "lab_cev_ulice")
+	Call ERRShow()
+	
+End Sub
+'
+Sub lab_cev_ul_duz
+
+	OnError Goto Greska
+	
+	If MapWinSTATUS(0) <> 1 
+	Then 
+		Exit Sub
+	End If
+
+	Set Map Redraw Off
+	
+	Set Map Layer LayerID("CEVOVOD") Label 
+	Font ("Arial",256,8,255,16777215) 
+		With Label With ULICA+Chr$(13)+Round(ObjectLen(obj, "m"),0.01) 
+		Auto On 
+		Overlap On 
+		Duplicates On 
+		PartialSegments On 
+		Position Center
+
+	Set Map Redraw On
+	
+	Exit Sub
+	'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "lab_cev_ulice")
+	Call ERRShow()
+	
+End Sub
+
+'===================================================================================================================== 
+' labele za PRIKLJUCCI
+
+Sub lab_prik_rn
+	
+	OnError Goto Greska
+	
+	If MapWinSTATUS(0) <> 1 
+	Then 
+		Exit Sub
+	End If
+
+	set map redraw off
+	
+	Set Map Layer LayerID("PRIKLJUCCI") Label Font ("Arial",256,7,22015,16777215) With Redni_Br Auto On Overlap On Duplicates On
+	
+	set map redraw on
+
+	Exit Sub
+	'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "lab_cev_ulice")
+	Call ERRShow()
+	
+End Sub
+'
+Sub lab_prik_mat_prec_gl
+
+	OnError Goto Greska
+	
+	If MapWinSTATUS(0) <> 1 
+	Then 
+		Exit Sub
+	End If
+
+	set map redraw off
+	
+	Set Map Layer LayerID("PRIKLJUCCI") Label Font ("Arial",256,7,22015,16777215) With MATERIJAL_GL_CEV+PRECNIK_GL_CEV Auto On Overlap On Duplicates On
+	
+	set map redraw on
+
+	Exit Sub
+	'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "lab_cev_ulice")
+	Call ERRShow()
+	
+End Sub
+'
+Sub lab_prik_mat_prec_pr
+
+	OnError Goto Greska
+	
+	If MapWinSTATUS(0) <> 1 
+	Then 
+		Exit Sub
+	End If
+
+	set map redraw off
+	
+	Set Map Layer LayerID("PRIKLJUCCI") Label Font ("Arial",256,7,22015,16777215) With MATERIJAL_PRIK_CEV+PRECNIK_PRIK_CEV Auto On Overlap On Duplicates On
+	
+	set map redraw on
+
+	Exit Sub
+	'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "lab_cev_ulice")
+	Call ERRShow()
+	
+End Sub
+'
+Sub lab_prik_duz
+
+	OnError Goto Greska
+	
+	If MapWinSTATUS(0) <> 1 
+	Then 
+		Exit Sub
+	End If
+
+	set map redraw off
+	
+	Set Map Layer LayerID("PRIKLJUCCI") Label Font ("Arial",256,7,22015,16777215) With DUZINA_m Auto On Overlap On Duplicates On
+	
+	set map redraw on
+
+	Exit Sub
+	'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "lab_cev_ulice")
+	Call ERRShow()
+	
+End Sub
+'
+Sub lab_prik_rn_mat_prec_gl
+
+	OnError Goto Greska
+	
+	If MapWinSTATUS(0) <> 1 
+	Then 
+		Exit Sub
+	End If
+
+	set map redraw off
+	
+	Set Map Layer LayerID("PRIKLJUCCI") Label Font ("Arial",256,7,22015,16777215) With Redni_Br+Chr$(13)+MATERIJAL_GL_CEV+PRECNIK_GL_CEV Auto On Overlap On Duplicates On
+	
+	set map redraw on
+
+	Exit Sub
+	'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "lab_cev_ulice")
+	Call ERRShow()
+	
+End Sub        
+'
+Sub lab_prik_rn_mat_prec_pr
+
+	OnError Goto Greska
+	
+	If MapWinSTATUS(0) <> 1 
+	Then 
+		Exit Sub
+	End If
+
+	set map redraw off
+	
+	Set Map Layer LayerID("PRIKLJUCCI") Label Font ("Arial",256,7,22015,16777215) With Redni_Br+Chr$(13)+MATERIJAL_PRIK_CEV+PRECNIK_PRIK_CEV Auto On Overlap On Duplicates On
+	
+	set map redraw on
+
+	Exit Sub
+	'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "lab_cev_ulice")
+	Call ERRShow()
+	
+End Sub
+
+' ========== labele za HIDRANTI ============================
+
+Sub lab_hid_rb
+
+	OnError Goto Greska
+	
+	If MapWinSTATUS(0) <> 1 
+	Then 
+		Exit Sub
+	End If
+	
+	set map redraw off
+	
+	Set Map Layer LayerID("HIDRANT") Label Font ("Arial",256,7,255,16777215) With "H"+MI_PRINX Auto On Overlap On Duplicates On
+	
+	set map redraw on
+
+	Exit Sub
+	'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "lab_hid_rb")
+	Call ERRShow()
+	
+End Sub
+
+Sub lab_hid_prec
+End Sub
+
+Sub lab_hid_rb_prec
+End Sub
+
+' ========== labele za ZATVARAC ============================
+
+Sub lab_zat_rb
+End Sub
+
+Sub lab_zat_prec
+End Sub
+
+Sub lab_zat_rb_prec
+End Sub      
+
+' ========== labele za vodomer ============================
+
+Sub lab_vod_rn
+
+set map redraw off
+
+Set Map Layer LayerID("VODOMERI") Label Font ("Arial",256,8,255,16777215) With Broj_RN  Overlap On Duplicates On
+
+set map redraw on
+
+End Sub
+
+Sub lab_vod_matbr
+
+set map redraw off
+
+Set Map Layer LayerID("VODOMERI") Label Font ("Arial",256,8,255,16777215) With SIFRA Overlap On
+
+set map redraw on
+
+End Sub
+
+Sub lab_vod_imepotrosaca
+
+set map redraw off
+
+Set Map Layer LayerID("VODOMERI") Label Font ("Arial",256,7,255,16777215) With NAZIV Duplicates On
+
+set map redraw on
+
+End Sub
+
+Sub lab_vod_kucbroj
+
+set map redraw off
+
+Set Map Layer LayerID("VODOMERI") Label Font ("Arial",256,8,255,16777215) With KUCNI_BROJ Overlap On Offset 4
+ 
+set map redraw on
+
+End Sub
+
+Sub lab_vod_serbr
+
+set map redraw off
+
+Set Map Layer LayerID("VODOMERI") Label Font ("Arial",256,7,255,16777215) With SERIJSKI_BROJ Overlap On Duplicates On
+
+set map redraw on
+
+End Sub
+
+Sub lab_vod_imepotrosaca_matbr
+
+set map redraw off
+
+Set Map Layer LayerID("VODOMERI") Label Font ("Arial",256,7,255,16777215) With NAZIV+chr$(13)+SIFRA Overlap On Duplicates On
+
+set map redraw on
+
+End Sub
+
+Sub lab_vod_imepotrosaca_kucbroj
+
+set map redraw off
+
+Set Map Layer LayerID("VODOMERI") Label Font ("Arial",256,7,255,16777215) With NAZIV+Chr$(13)+KUCNI_BROJ Overlap On Duplicates On
+
+set map redraw on
+
+End Sub
+
+Sub lab_vod_imepotrosaca_serbr
+
+set map redraw off
+
+Set Map Layer LayerID("VODOMERI") Label Font ("Arial",256,7,255,16777215) With NAZIV+Chr$(13)+SERIJSKI_BROJ Overlap On Duplicates On
+
+set map redraw on
+
+End Sub
+
+Sub lab_vod_rn_imepotrosaca
+
+set map redraw off
+
+Set Map Layer LayerID("VODOMERI") Label Font ("Arial",256,7,255,16777215) With Broj_RN+Chr$(13)+POTROSAC Overlap On Duplicates On
+
+set map redraw on
+
+End Sub
+ 
+Sub lab_vod_zona
+
+set map redraw off                    
+
+Set Map Layer LayerID("VODOMERI") Label Font ("Arial",256,8,255,16777215) With MERNA_ZONA Overlap On Duplicates On
+
+set map redraw on
+
+End Sub
+
+Sub lab_vod_ink_reon
+
+set map redraw off
+
+Set Map Layer LayerID("VODOMERI") Label Font ("Arial",258,8,65535,0) With INKASO_REON Overlap On Duplicates On
+
+set map redraw on
+
+End Sub
+
+sub lab_vod_ink_knjiga      
+
+set map redraw off   
+
+Set Map Layer LayerID("VODOMERI") Label Font ("Arial",258,8,65535,0) With INKASO_KNJIGA Overlap On Duplicates On
+
+set map redraw on
+
+End Sub
+
+sub lab_vod_ink_knrbr 
+
+set map redraw off   
+Set Map Layer LayerID("VODOMERI") Label Font ("Arial",258,8,16711935,16777215) With REDNI_BROJ Overlap On Duplicates On
+set map redraw on
+
+End Sub
+
+sub lab_vod_reon_knjiga 
+
+set map redraw off   
+Set Map Layer LayerID("VODOMERI") Label Font ("Arial",258,8,65535,0) With INKASO_REON+"-"+INKASO_KNJIGA Overlap On Duplicates On
+set map redraw on
+
+End Sub
+
+sub lab_vod_rbr_knjiga  
+
+set map redraw off   
+Set Map Layer LayerID("VODOMERI") Label Font ("Arial",258,8,16711935,16777215) With INKASO_KNJIGA+"/ "+REDNI_BROJ Overlap On Duplicates On
+set map redraw on
+
+End Sub
+
+' ========== labele za pumpe ============================
+
+Sub lab_pump_ime
+End Sub
+
+Sub lab_pump_karakt
+End Sub
+
+' ========== labele za pumpne stanice ============================
+
+Sub lab_ps_ime
+End Sub              
+
+' ========== labele za merace protoka ============================
+
+Sub lab_merprot_ime
+End Sub
+
+' ========== labele za prekidne komore ============================
+
+Sub lab_pk_ime
+End Sub
+
+Sub lab_pk_ime_kpc
+End Sub
+
+Sub lab_pk_ime_kpc_kprl_kdna
+End Sub
+
+' ========== labele za rezervoare ============================
+
+Sub lab_rez_ime
+End Sub
+
+Sub lab_rez_ime_zapr
+End Sub
+
+Sub lab_rez_ime_zapr_kote
+End Sub
+                    
+' ========== labele za kaptaze ============================
+
+Sub lab_kap_ime
+
+set map redraw off
+
+Set Map Layer LayerID("KAPTAZE") Label Font ("Arial",257,12,65535,0) Auto On Overlap On
+
+set map redraw on
+
+End Sub
+
+Sub lab_kap_ime_kpc
+End Sub
+
+Sub lab_kap_ime_kote
+End Sub
+
+Sub lab_kap_ime_kote_kpc
+End Sub
+
+' ======================================================================================================================
+'	NIKAS fek
+' ======================================================================================================================
+
+SUB lab_fekalna_miprinx
+	
+	OnError Goto Greska
+	
+	If MapWinSTATUS(0) <> 1 
+	Then 
+		Exit Sub
+	End If
+
+	Set Map Redraw Off
+	
+	Set Map Layer LayerID("FEKALNA")
+    Label Line Arrow Position Center Auto Retry On Font ("Arial Narrow",257,9,12595200,16777215) Pen (1,2,0) 
+      With MI_PRINX+"   ("+Round(DUZINA_m, 0.2)+"m)"
+      Parallel On Auto On Overlap Off Duplicates Off PartialSegments On Offset 2
+      Visibility Zoom (0, 850) Units "m"
+      
+	Set Map Redraw On
+	
+	Exit Sub
+	'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "lab_fekalna_miprinx")
+	Call ERRShow()
+		
+End Sub
+
+' -------------------------------
+
+SUB lab_fekalna_ulice
+	
+	OnError Goto Greska
+	
+	If MapWinSTATUS(0) <> 1 
+	Then 
+		Exit Sub
+	End If
+
+	Set Map Redraw Off
+	
+	Set Map Layer LayerID("FEKALNA")
+    Label Line Arrow Position Center Font ("Arial",259,8,16777215,0) Pen (1,2,0) 
+      With ULICA
+      Parallel On Auto On Overlap On Duplicates Off Offset 2
+      Visibility Zoom (0, 2000) Units "m"
+									
+	Set Map Redraw On
+	
+	Exit Sub
+	'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "lab_fekalna_ulice")
+	Call ERRShow()
+			
+End Sub
+
+' -------------------------------
+
+SUB lab_fekalna_mat_prec
+	
+	OnError Goto Greska
+	
+	If MapWinSTATUS(0) <> 1 
+	Then 
+		Exit Sub
+	End If
+
+	Set Map Redraw Off
+	
+	Set Map Layer LayerID("FEKALNA")
+    Label Line Arrow Position Center Font ("Arial Narrow",257,9,12595200,16777215) Pen (1,2,0) 
+      With MATERIJAL+PRECNIK
+      Parallel On Auto On Overlap On Duplicates On Offset 2
+      Visibility Zoom (0, 1000) Units "m"
+									
+	Set Map Redraw On
+	
+	Exit Sub
+	'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "lab_fekalna_mat_prec")
+	Call ERRShow()
+			
+End Sub
+
+' -------------------------------
+
+SUB lab_fekalna_duz
+	
+	OnError Goto Greska
+	
+	If MapWinSTATUS(0) <> 1 
+	Then 
+		Exit Sub
+	End If
+
+	Set Map Redraw Off
+	
+	Set Map Layer LayerID("FEKALNA")
+    Label Line Arrow Position Center Font ("Arial",259,8,16777215,0) Pen (1,2,0) 
+      With Round(DUZINA_m, 0.2)+" m"
+      Parallel On Auto On Overlap On Duplicates On Offset 2
+      Visibility Zoom (0, 1000) Units "m"
+									
+	Set Map Redraw On
+	
+	Exit Sub
+	'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "lab_fek_kan_saht_miprinx")
+	Call ERRShow()
+			
+End Sub
+
+' -------------------------------
+
+SUB lab_fekalna_ul_mat_prec
+	
+	OnError Goto Greska
+	
+	If MapWinSTATUS(0) <> 1 
+	Then 
+		Exit Sub
+	End If
+
+	Set Map Redraw Off
+	
+	Set Map Layer LayerID("FEKALNA")
+    Label Line Arrow Position Center Font ("Arial Narrow",257,9,12595200,16777215) Pen (1,2,0) 
+      With ULICA + Chr$(13) + MATERIJAL+PRECNIK
+      Parallel On Auto On Overlap On Duplicates On Offset 2
+      Visibility Zoom (0, 1000) Units "m"
+									
+	Set Map Redraw On
+	
+	Exit Sub
+	'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "lab_fek_kan_saht_miprinx")
+	Call ERRShow()
+			
+End Sub
+
+' -------------------------------
+
+SUB lab_fekalna_ul_duz
+	
+	OnError Goto Greska
+	
+	If MapWinSTATUS(0) <> 1 
+	Then 
+		Exit Sub
+	End If
+
+	Set Map Redraw Off
+	
+	Set Map Layer LayerID("FEKALNA")
+    Label Line Arrow Position Center Font ("Arial",259,8,16777215,0) Pen (1,2,0) 
+      With ULICA + Chr$(13) + Round(DUZINA_m, 0.2)+" m"
+      Parallel On Auto On Overlap On Duplicates On Offset 2
+      Visibility Zoom (0, 1000) Units "m"
+									
+	Set Map Redraw On
+	
+	Exit Sub
+	'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "lab_fek_kan_saht_miprinx")
+	Call ERRShow()
+			
+End Sub
+
+' -------------------------------
+
+SUB lab_fekalna_mat_prec_duz
+	
+	OnError Goto Greska
+	
+	If MapWinSTATUS(0) <> 1 
+	Then 
+		Exit Sub
+	End If
+
+	Set Map Redraw Off
+	
+	Set Map Layer LayerID("FEKALNA")
+    Label Line Arrow Position Center Font ("Arial Narrow",257,9,12595200,16777215) Pen (1,2,0) 
+      With MATERIJAL+PRECNIK + Chr$(13) + Round(DUZINA_m, 0.2)+" m"
+      Parallel On Auto On Overlap On Duplicates On Offset 2
+      Visibility Zoom (0, 1000) Units "m"
+									
+	Set Map Redraw On
+	
+	Exit Sub
+	'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "lab_fek_kan_saht_miprinx")
+	Call ERRShow()
+			
+End Sub
+
+' -------------------------------
+
+SUB lab_fek_kan_saht_miprinx
+	
+	OnError Goto Greska
+	
+	If MapWinSTATUS(0) <> 1 
+	Then 
+		Exit Sub
+	End If
+
+	Set Map Redraw Off
+	
+	Set Map Layer LayerID("FEK_KAN_SAHT")
+    Label Line Arrow Position Above Right Font ("Arial",259,8,16760960,0) Pen (1,2,0) 
+      With MI_PRINX
+      Parallel On Auto On Overlap On Duplicates On Offset 2
+      Visibility Zoom (0, 1000) Units "m"
+									
+	Set Map Redraw On
+	
+	Exit Sub
+	'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "lab_fek_kan_saht_miprinx")
+	Call ERRShow()
+		
+End Sub
+
+' -------------------------------
+SUB lab_fek_kan_saht_KTiKD
+
+	
+	OnError Goto Greska
+	
+	If MapWinSTATUS(0) <> 1 
+	Then 
+		Exit Sub
+	End If
+
+	Set Map Redraw Off
+	
+	Set Map Layer LayerID("FEK_KAN_SAHT")
+    Label Line Arrow Position Right Font ("Arial",257,8,12595200,16777215) Pen (1,2,0) 
+      With LABELA
+      Parallel On Auto On Overlap On Duplicates On PartialSegments On Offset 2
+      Visibility Zoom (0, 500) Units "m"
+									
+	Set Map Redraw On
+	
+	Exit Sub
+	'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "lab_fek_kan_saht_KTiKD")
+	Call ERRShow()
+	
+	
+End SUB	
+
+' ======================================================================================================================
+'	NIKAS ATM
+' ======================================================================================================================
+
+SUB lab_atmosferska_miprinx
+	
+	OnError Goto Greska
+	
+	If MapWinSTATUS(0) <> 1 
+	Then 
+		Exit Sub
+	End If
+
+	Set Map Redraw Off
+	
+	Set Map Layer LayerID("ATMOSFERSKA")
+    Label Line Arrow Position Center Auto Retry On Font ("Arial Narrow",257,9,5079040,16777215) Pen (1,2,0) 
+      With MI_PRINX+"   ("+Round(DUZINA_m, 0.2)+"m)"
+      Parallel On Auto On Overlap On Duplicates On PartialSegments On Offset 2
+      Visibility Zoom (0, 850) Units "m"
+      
+	Set Map Redraw On
+	
+	Exit Sub
+	'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "lab_atmosferska_miprinx")
+	Call ERRShow()
+		
+End Sub
+' -------------------------------
+SUB lab_atm_saht_miprinx
+	
+	OnError Goto Greska
+	
+	If MapWinSTATUS(0) <> 1 
+	Then 
+		Exit Sub
+	End If
+
+	Set Map Redraw Off
+	
+	Set Map Layer LayerID("ATM_SAHT")
+    Label Line Arrow Position Above Right Font ("Arial Narrow",259,8,5079040,16777215) Pen (1,2,0) 
+      With MI_PRINX
+      Parallel On Auto On Overlap On Duplicates On Offset 2
+      Visibility Zoom (0, 1000) Units "m"
+									
+	Set Map Redraw On
+	
+	Exit Sub
+	'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "lab_atm_saht_miprinx")
+	Call ERRShow()
+			
+	
+End Sub
+' -------------------------------
+SUB lab_atmosferska_mat_prec
+	
+	OnError Goto Greska
+	
+	If MapWinSTATUS(0) <> 1 
+	Then 
+		Exit Sub
+	End If
+
+	Set Map Redraw Off
+	
+	Set Map Layer LayerID("ATMOSFERSKA")
+    Label Line Arrow Position Center Font ("Arial Narrow",257,9,5079040,16777215) Pen (1,2,0) 
+      With MATERIJAL+PRECNIK
+      Parallel On Auto On Overlap On Duplicates On PartialSegments On Offset 2
+      Visibility Zoom (0, 1000) Units "m"
+									
+	Set Map Redraw On
+	
+	Exit Sub
+	'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "lab_fekalna_mat_prec")
+	Call ERRShow()
+			
+End Sub
+' -------------------------------
+SUB lab_atm_saht_KTiKD
+
+	
+	OnError Goto Greska
+	
+	If MapWinSTATUS(0) <> 1 
+	Then 
+		Exit Sub
+	End If
+
+	Set Map Redraw Off
+	
+	Set Map Layer LayerID("ATM_SAHT")
+    Label Line Arrow Position Right Font ("Arial Narrow",259,8,5079040,16777215) Pen (1,2,0) 
+      With LABELA
+      Parallel On Auto On Overlap On Duplicates On PartialSegments On Offset 2
+      Visibility Zoom (0, 500) Units "m"
+									
+	Set Map Redraw On
+	
+	Exit Sub
+	'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "lab_fek_kan_saht_KTiKD")
+	Call ERRShow()
+	
+	
+End SUB	

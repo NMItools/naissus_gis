@@ -1,0 +1,1001 @@
+include "mapbasic.def"
+include "menu.def"
+include "icons.def"
+include "..\nmiWin.def"
+include "..\nmiFunkcije.def"
+include "..\nmiDotNet.def"
+include "NAISSUS-GIS.def"
+'include "C:\Program Files (x86)\MapInfo\MapBasic12\Samples\MAPBASIC\DATABASE\ODBCPLUS.DEF"
+include "C:\Program Files (x86)\MapInfo\MapBasic\Samples\MAPBASIC\DATABASE\ODBCPLUS.DEF"
+
+' =====================================================================================================================
+'		[MapWinID] ID aktivnog Map prozora
+' =====================================================================================================================
+Function MapWinID(byVal Win as Integer) As Integer
+	
+	Dim n as Integer
+	
+	For n = 1 to NumWindows()
+		
+'		Print WindowInfo(WindowID(n), WIN_INFO_TYPE)
+		If WindowInfo(WindowID(n), WIN_INFO_TYPE) = 1 Then
+			MapWinID = WindowID(n)
+			Exit For
+		Else
+			MapWinID = 0
+			
+		End If
+		
+	Next
+	
+End Function	
+' =====================================================================================================================
+'		[MapWinIme] ID Map prozora sa imenom "Ime"
+' =====================================================================================================================
+Function MapWinIme(byVal Ime as String) As Integer
+	
+	Dim n as Integer
+	
+	For n = 1 to NumWindows()
+		If WindowInfo(WindowID(n), WIN_INFO_NAME) = Ime Then
+			MapWinIme = WindowID(n)
+			Exit For
+		Else
+			MapWinIme = 0
+		End If
+		
+	Next
+	
+End Function
+
+' =====================================================================================================================
+'		[MapWinIme] ID Map prozora sa imenom "Ime"
+' =====================================================================================================================
+Function CosmeticIme(byVal Ime as String) As String
+	
+	CosmeticIme = WindowInfo(FrontWindow(), WIN_INFO_TABLE)
+	
+End Function
+
+' =====================================================================================================================
+'		[MapWinSTATUS] Status Map prozora
+' =====================================================================================================================
+Function MapWinSTATUS(byVal W as Integer) as Integer
+	
+	If MapWinID(0) <> 0 Then 
+		
+		If FrontWindow() <> MapWinID(0) Then 
+			MapWinSTATUS = 2
+'			Print "Map prozor nije aktivan!"
+		else
+			MapWinSTATUS = 1      
+'			print "Aktivan je Map prozor sa ID = "+FrontWindow()
+		End If
+	
+	Else
+		MapWinSTATUS = 0
+		Note "Nema otvorenog Map prozora!"	
+	End If
+
+End Function
+
+' =====================================================================================================================
+'		[GroupLayer_ID] - ID grupe lejera na osnovu imena grupe u WOR
+' =====================================================================================================================
+Function GroupLayer_ID(byVal GrupaLejera as String) as Integer
+	
+	Dim n as Integer
+	
+	If MapWinSTATUS(0) <> 1 
+	then
+		GroupLayer_ID=9999
+		exit sub
+	End If	
+
+	For n = 0 to MapperInfo(FrontWindow(), MAPPER_INFO_GROUPLAYERS )
+		If GroupLayerInfo (FrontWindow(), n, GROUPLAYER_INFO_NAME) = GrupaLejera
+		Then
+			GroupLayer_ID = n
+			Exit Function
+		Else
+			GroupLayer_ID=9999
+		End If
+	Next
+	
+	Print "Grupa lejera " + GrupaLejera + " ne postoji u radnom prostoru."
+
+	Exit Function
+	
+End Function
+
+' =====================================================================================================================
+'		[GroupLayerInfo_ID] - ON/OFF grupe lejera na osnovu imena grupe u WOR
+' =====================================================================================================================
+Function GroupLayerInfo_ID(byVal GrupaLejera as String, ByVal ButtID as SmallInt) as Integer
+	
+	Dim n as Integer
+
+	If GroupLayer_ID(GrupaLejera) = 9999
+		Then
+		Exit Function		
+	Else 
+		n = GroupLayer_ID(GrupaLejera)
+	End If
+	
+	If GroupLayerInfo (FrontWindow(), n, GROUPLAYER_INFO_DISPLAY) = true
+	Then
+		Set Map Window FrontWindow() GroupLayer n Display Off
+		Alter Button ID ButtID Uncheck
+		l_Tools = False
+	Else
+		Set Map Window FrontWindow() GroupLayer n Display On
+		Alter Button ID ButtID Check
+		l_Tools = True				
+	End If
+
+End Function
+
+' =====================================================================================================================
+'       [LayerID]  Odredjivanje Layer ID broja               						
+' =====================================================================================================================
+Function LayerID(ByVal ImeTabele as String) As Integer
+
+	Dim i as integer
+
+	If MapWinSTATUS(0) <> 0 Then
+		
+		For i = 1 to mapperinfo(MapWinID(0), MAPPER_INFO_LAYERS)
+			If layerinfo(MapWinID(0), i, LAYER_INFO_NAME) = ImeTabele then
+				LayerID = i
+				Exit for
+			Else
+				LayerID = 999
+			End If	
+		Next
+
+	End If
+	
+end function
+
+ =====================================================================================================================
+'       [TemLayerID]  Odredjivanje Layer ID broja               						
+' =====================================================================================================================
+Function TemLayerID(ByVal ImeTabele as String) As Integer
+
+	Dim i as integer
+	dim imeTabeleN as smallint
+	
+	imeTabeleN = Len(ImeTabele)
+	
+	For i = 1 to mapperinfo(MapWinID(0), MAPPER_INFO_LAYERS)
+		If Left$(layerinfo(MapWinID(0), i, LAYER_INFO_NAME), imeTabeleN + 1) = imeTabele+"(" then
+			TemLayerID = i
+'			Print imeTabele & " - " & i
+			Exit for
+		Else
+			TemLayerID = 999
+		End If	
+	Next
+	
+	
+end function
+
+' =====================================================================================================================
+'       [vidLejer] Provera da li je Lejer vidljiv.                      
+' =====================================================================================================================
+Function VidLejer(ByVal LayerID As Integer) As Integer
+	
+	Dim i_TipLejera as SmallInt
+	
+	If LayerID = 999 or LayerID = 0 then 
+		Exit Function
+	End If
+
+	i_TipLejera = LayerInfo(MapWinID(0),LayerID,LAYER_INFO_DISPLAY)  
+	
+	Do Case i_TipLejera
+		
+		Case 1
+		vidLejer = i_TipLejera
+'		Print "GRAPHIC - 1"
+		
+		Case 2
+		vidLejer = i_TipLejera
+'		Print "GLOBAL - 2"
+		
+		Case 3
+		vidLejer = i_TipLejera
+'		Print "VALUE - 3"
+
+		Case 0
+		vidLejer = i_TipLejera
+'		Print "OFF - 0"
+
+	End Case
+                		
+End Function
+
+' =====================================================================================================================
+'		[vidToolbar]  Vidljivost tulbar-a/buttonpad-a                   
+' =====================================================================================================================
+Function vidToolbar (ByVal imeToolbar as string) As Logical
+
+	Dim i As SmallInt
+
+'	Petlja sa brojanjem unazad radi brzeg pronalazenja imena toolbar prozora (jer su trazeni toolbarovi uglavnom na kraju)
+	For i = NumAllWindows() To 1 Step -1
+
+'		Trazimo iskljucivo toolbar prozor, sve ostalo se preskace
+		If WindowInfo(WindowID(-i),WIN_INFO_TYPE) <> WIN_TOOLBAR Then
+			goto sledeci
+		Else
+			If imeToolbar <> WindowInfo(WindowID(-i),WIN_INFO_NAME) Then
+				Goto sledeci
+			Else
+				If WindowInfo(WindowID(-i),WIN_INFO_OPEN) = True 
+				Then
+'					Print "BUTTONPAD sa imenom = " + imeToolbar + " je Vidljiv"
+					vidToolbar = True
+				else 										 					
+'					Print "BUTTONPAD sa imenom = " + imeToolbar + " je Nevidljiv"
+					vidToolbar = False
+				End If
+				Exit For
+			End If 
+		End If   
+
+	sledeci:
+	Next
+
+	' WIN_TOOLBAR  
+	' WIN_BUTTONPAD
+	' If ButtonPadInfo(imeToolbar, BTNPAD_INFO_FLOATING) Then... else...end if
+
+End Function
+
+' =====================================================================================================================
+'       [OtvorenTAB]  Da li je otvorena tabela ?
+' =====================================================================================================================
+Function OtvorenTAB (Byval ImeTabele as String) As Logical
+
+	Dim i_Reda as Integer
+	Dim s_TabIme as String
+	
+	Onerror goto not_open
+	
+'	Ako je kompletna putanja sa imenom tabele (*.tab)
+	If (FileExists(ImeTabele)) then
+		s_TabIme = PathToTableName$(ImeTabele)
+	Else
+'	Ime tabele bez putanje
+		s_TabIme = ImeTabele
+	End If
+	
+'	Broj redova u tabeli (ako tabela nije otvorena izbacice gresku)
+	i_Reda = TableInfo(s_TabIme, TAB_INFO_NROWS)
+	OtvorenTAB = TRUE
+	Exit Function
+	
+	not_open:
+	OtvorenTAB = FALSE
+	Exit Function	
+
+End Function
+
+' =====================================================================================================================
+'		[OtvoriTabSQL] Otvori tabelu sa aliasom
+' =====================================================================================================================
+Function OtvoriTabSQL(ByVal ImeTabele as String, ByVal sAlias as String) As Logical
+
+	OnError Goto NotOpen  
+	
+	Open Table s_FOLDER_TAB+ImeTabele+".TAB" As sAlias Interactive
+	Print "Zahtev za tabelom:" + sAlias
+	OtvoriTabSQL = TRUE
+	Exit Function
+	
+	NotOpen:
+	OtvoriTabSQL = FALSE
+	print "----------------------------"
+	print "Otvaranje tabele "+ImeTabele+" nije moguce!"
+	print "Proverite da li tabela postoji na lokaciji: "+s_FOLDER_TAB
+	print "Ako ne postoji, da bi ste je kreirali pokrenite ponovo MapInfo"
+	print "i izaberite opciju 'Kreiraj standardni GIS radni prostor'"
+	print "----------------------------"
+	
+End Function
+
+' =====================================================================================================================
+'		[OtvoriRaster] Otvaranje rasterske podloge    
+' =====================================================================================================================
+Function OtvoriRaster(ByVal FoldPut, ByVal ImeTabele as String, ByVal sAlias as String) As Logical
+
+	Dim Putanja as String
+	Dim R as Logical
+
+	OnError Goto nema_rastera
+	
+	Print "Zahtev za podlogom:" + sAlias
+	R = TableInfo(ImeTabele, TAB_INFO_READONLY)
+	OtvoriRaster = TRUE
+	Exit Function
+
+	nema_rastera:
+		print "Podloga nije otvorena!"
+	Resume otvori_raster
+					
+	otvori_raster:
+	OnError goto trazi
+		Putanja = FoldPut + ImeTabele+".TAB"
+		Print "Otvaranje podloge: "+ sAlias
+		Open Table Putanja as sAlias
+		OtvoriRaster = TRUE
+	Exit Function 
+	
+	trazi:
+		Print "Ne mogu da pronadjem TAB na lokaciji "+ FoldPut
+		Putanja = FileOpenDLG(FoldPut, ImeTabele, "TAB", "Locirajte podlogu: " + sAlias + " (" + FoldPut + ImeTabele + ")" )		
+	
+	If Putanja = "" Then 
+		OtvoriRaster = FALSE
+		Exit Function
+	End If
+
+End Function
+
+' =====================================================================================================================
+Function setTabGroup(ByVal imeGrupe as string, ByVal imeLejera as string) As String
+' =====================================================================================================================	
+
+	If GroupLayer_ID(imeGrupe) = 9999 Then
+		Print "Kreirana grupa lejera '"+imeGrupe+"'!"
+		Add Map Window FrontWindow() GroupLayer(imeGrupe) DestGroupLayer 0 
+	End If
+
+'	Prebaci lejer u grupu ImeGrupe
+	Set Map Window FrontWindow() Order Layers LayerID(imeLejera) DestGroupLayer GroupLayer_ID(imeGrupe)
+
+'	Ukljuèi grupu ako je OFF
+	Set Map Window FrontWindow() GroupLayer GroupLayer_ID(imeGrupe) Display On	
+	
+End Function
+
+' =====================================================================================================================
+'       [setTabSQL] Ukljucuje i iskljucuje lejer (sa tematikom)       
+' =====================================================================================================================
+Function setTabSQL(ByVal ImeTabele as string, ByVal ButtonID As Integer) As String
+
+	dim i_LayerID As SmallInt
+	dim vidise as integer
+	dim tematski as integer
+	
+	onerror goto kraj
+	
+	i_LayerID = LayerID(ImeTabele)
+	vidise = vidLejer(i_LayerID)
+
+	Do Case i_LayerID
+		Case 0
+'			print "i_LayerID = 0 !"
+			Exit Function
+			
+		Case 999
+			If OtvoriTabSQL(ImeTabele, ImeTabele) Then
+				Set Event Processing off 
+				Add Map Layer ImeTabele
+				Set Map Layer LayerID(ImeTabele) Editable On
+
+				' ---------------------------------------------------------
+				' NOVA FUNKCIJA za smestanje lejera u odgovorajacu grupu
+				' ---------------------------------------------------------		
+			
+			Alter Button ID ButtonID Check
+				Goto kraj
+			Else
+				Exit Function
+			End If
+	End Case
+	
+	Do Case vidise
+		Case 0
+			Set Map Layer i_LayerID Display Graphic Editable On
+			tematski = temLejerOn(ImeTabele)
+			Alter Button ID ButtonID Check
+			Print "Ukljucen lejer: "+ImeTabele '+" [ID: "+Lejer+"]" 
+		Case Else
+			Set Map Layer i_LayerID Display Off Editable Off
+			tematski = temLejerOff(ImeTabele)
+			Alter Button ID ButtonID Uncheck
+			Print "Iskljucen lejer: "+ImeTabele '+" [ID: "+Lejer+"]" 
+	End Case
+	
+	kraj:
+	setTabSQL=ImeTabele   
+	Set Event Processing on
+
+kraj:
+End Function
+
+' =====================================================================================================================
+'		[setRaster] Ukljuci/iskljuci rastersku podlogu
+' =====================================================================================================================
+Function setRaster(ByVal FoldPut as String, ByVal ImeTabele as string, ByVal ButtonID As Integer) As String
+        
+	dim i_LayerID As SmallInt
+	dim vidise as integer
+	dim tematski as integer
+	
+	onerror goto kraj
+	
+	i_LayerID = LayerID(ImeTabele)
+	vidise = vidLejer(i_LayerID)
+
+	Do Case i_LayerID
+		Case 0
+'			print "i_LayerID = 0 !"
+			Exit Function
+		Case 999
+			If OtvoriRaster(FoldPut, ImeTabele, ImeTabele) Then
+				Set Event Processing off 
+				Add Map Layer ImeTabele
+				Alter Button ID ButtonID Check
+				Goto kraj
+			Else
+				Exit Function
+			End If
+	End Case
+
+	Do Case vidise
+		Case 0
+			Set Map Layer i_LayerID Display Graphic
+			Alter Button ID ButtonID Check
+			Print "Ukljucen raster: "+ImeTabele '+" [ID: "+i_LayerID+"]" 
+		Case Else
+			Set Map Layer i_LayerID Display Off
+			Alter Button ID ButtonID Uncheck
+			Print "Iskljucen raster: "+ImeTabele '+" [ID: "+i_LayerID+"]" 
+	End Case
+ 
+	setRaster=ImeTabele 
+
+	kraj:  	
+	Set Event Processing on            
+
+END Function
+
+' =====================================================================================================================
+'       [temLejerOff] Provera da li Lejer ima tematiku i da je iskljuci 
+' =====================================================================================================================
+Function temLejerOff(ByVal osnovniLejer as String) As Integer
+
+	Dim i As integer
+	Dim br_karaktera_o As SmallInt
+	Dim tematskiLejer As string
+	Dim TemaR As string 
+	Dim TemaL As string
+	Dim A As string 
+	Dim B As string 
+	
+	br_karaktera_o = Len(osnovniLejer)
+	
+	For i = 1 to mapperinfo(MapWinID(0),MAPPER_INFO_LAYERS)
+
+		tematskiLejer = layerinfo(MapWinID(0),i,LAYER_INFO_NAME)
+		TemaR = Right$(tematskiLejer, 1)
+
+		If TemaR = ")" then  	                                  	
+		'	Print "lejer sa brojem "+i+" je tematski"
+			TemaL = Left$(tematskiLejer, br_karaktera_o)
+			If TemaL = osnovniLejer Then
+				A = Left$(tematskiLejer,br_karaktera_o+1)
+				B = Right$(A,1)
+				If B = "(" then
+					Set Map Layer i Display Off
+				'	Print "Iskljucen lejer:"+tematskiLejer
+					temLejerOff = 0
+				End If
+			End If
+		End If
+
+	Next 
+
+END FUNCTION    
+
+' =====================================================================================================================
+'       [temLejerOn] Provera da li Lejer ima tematiku i da je ukljuci   
+' =====================================================================================================================
+Function temLejerOn(ByVal osnovniLejer as String) As Integer
+
+	Dim i As integer
+	Dim br_karaktera_o As SmallInt
+	Dim tematskiLejer As string
+	Dim TemaR As string 
+	Dim TemaL As string
+	Dim A As string 
+	Dim B As string 
+
+	br_karaktera_o = Len(osnovniLejer)
+	
+	For i = 1 to mapperinfo(MapWinID(0),MAPPER_INFO_LAYERS)
+		
+		tematskiLejer = layerinfo(MapWinID(0),i,LAYER_INFO_NAME)
+		TemaR = Right$(tematskiLejer, 1)
+	
+		If TemaR = ")" then  	                                  	
+		'	Print "lejer sa brojem "+i+" je tematski"
+			TemaL = Left$(tematskiLejer, br_karaktera_o)
+			If TemaL = osnovniLejer Then
+				A = Left$(tematskiLejer,br_karaktera_o+1)
+				B = Right$(A,1)
+				If B = "(" then
+					Set Map Layer i Display Value
+				'	Print "Ukljucen lejer:"+tematskiLejer
+					temLejerOn = 0
+				End If
+			End If
+	  	End If            
+	  	
+	Next 
+
+END FUNCTION    
+
+' =====================================================================================================================
+'       [Replace]  Zamena karaktera u stringu
+' =====================================================================================================================
+Function Replace(ByVal _full_string As String, ByVal _remove_string As String, ByVal _replacement_string As String) As String
+
+	Dim _remove_string_pos As Integer
+	Dim _start_string As String
+	Dim _end_string As String
+
+	'OnError Goto ErrorOccured
+
+	Search_For_Replace:
+	_remove_string_pos = InStr(1, LCase$(_full_string), LCase$(_remove_string))
+
+	If (_remove_string_pos > 0) 
+	Then
+		If (_remove_string_pos = 1) 
+		Then
+			_full_string = _replacement_string + Mid$(_full_string, Len(_remove_string)+1, Len(_full_string) - Len(_remove_string))
+		Else 
+	
+			If ((_remove_string_pos + Len(_remove_string) - 1) = Len(_full_string)) Then
+				_full_string = Left$(_full_string, _remove_string_pos-1) + _replacement_string
+	  		Else 
+				_start_string = Left$(_full_string, _remove_string_pos-1)
+				_end_string = Mid$(_full_string, _remove_string_pos + Len(_remove_string), Len(_full_string) - (_remove_string_pos + Len(_remove_string) - 1))
+				_full_string = _start_string + _replacement_string + _end_string
+			End If
+			
+		Goto Search_For_Replace
+		End If
+	End If
+
+	Replace = _full_string
+	Exit Function
+
+	'ErrorOccured:
+	Replace = ""
+
+End Function 
+
+' ======================================================================
+'       [ProveriString]  Provera da li ima nedozvoljenih  karaktera u stringu
+' ======================================================================
+Function ProveriString(byval str as string) as Logical
+    
+    Dim k, OKchars as String
+    Dim i, l, n, cr, zr as Integer
+
+    OKchars = "0123456789,-"
+    
+    l = Len(str)
+	
+	cr = 0
+	zr = 0
+	
+    For i = 1 to l
+        k = Mid$(str, i, 1)
+		
+		If InStr(1, OKchars, k) = 0
+        	Then
+        		Note "Nedozvoljeni karakteri!"
+        		ProveriString = false
+        		exit function
+        	else
+        		Do case k
+
+					Case "-"
+						cr = cr+1
+						kota_min = left$(s_Kote,i-1)
+						kota_max = right$(s_Kote,i-1)
+						Exit For
+	
+					Case ","
+		        		zr = zr+1
+				
+				End Case
+     	End If
+	Next
+    
+
+    If (zr+cr = 0) or (zr > 0 and cr = 0)
+    	then izotip = 1
+			ProveriString = true
+			Exit Function
+		Else 
+		    If (zr = 0 and cr = 1) 
+		    then izotip = 2
+				ProveriString = true
+				Exit Function
+			Else
+				goto greska
+			End If
+    End If
+
+
+greska:
+Note "Nepravilan unos ! (vidi uputstvo u prozoru za poruke)"
+ProveriString = false
+	    
+End Function
+
+' =====================================================================================================================
+'		[Get Path ]  Putanje sistemskih foldera                         
+' =====================================================================================================================
+
+Function GetTempDir () As String   
+GetTempDir = pathtodirectory$(tempfilename$(""))
+End Function
+
+Function GetWinDir () As String   
+GetWinDir = HomeDirectory$()
+End Function
+
+Function GetMBAppDir () As String
+GetMBAppDir = ApplicationDirectory$()
+End Function
+
+Function GetMIAppDir () As String
+GetMIAppDir = ProgramDirectory$()
+End Function
+
+'	s_Mi_App_Data = GetFolderPath$(FOLDER_MI_APPDATA)
+'	s_Mi_Loc_App_Data = GetFolderPath$(FOLDER_MI_LOCAL_APPDATA)
+'	s_Mi_Prf_File = GetFolderPath$(FOLDER_MI_PREFERENCE)
+'	s_Mi_Comm_Data = GetFolderPath$(FOLDER_MI_COMMON_APPDATA)
+
+'	s_Fold_Data = GetFolderPath$(FOLDER_APPDATA)
+'	s_Loc_Data = GetFolderPath$(FOLDER_LOCAL_APPDATA)
+'	s_Comm_Data = GetFolderPath$(FOLDER_COMMON_APPDATA)
+'	s_Comm_Docs = GetFolderPath$(FOLDER_COMMON_DOCS)
+'	s_My_Docs = GetFolderPath$(FOLDER_MYDOCS)
+'	s_My_Pics = GetFolderPath$(FOLDER_MYPICS)
+
+' =====================================================================================================================
+'		[GetIniVal ]  Citaj vrednost u INI fajlu
+' =====================================================================================================================
+Function GetIniVal(ByVal iniFile as string, ByVal iniSection as string, ByVal iniKey as string) as string
+	
+	Ret_Def="?"
+	Val_Ret=String$(255,"X")
+	
+	iniRead = GetPrivateProfileString32 (iniSection, iniKey, Ret_Def, Val_Ret, Len(Val_Ret), iniFile)
+	
+	if Val_Ret="?" then 
+		Print "Citanje fajla "+PathToFileName$(iniFile)+" nije moguce ?"
+		GetIniVal=""
+		Exit Function
+	else 
+		GetIniVal=Val_Ret 
+	end if
+	
+End Function
+
+' =====================================================================================================================
+'		[SetIniVal ]  Upisi vrednost u INI fajlu
+' =====================================================================================================================
+Function SetIniVal(ByVal iniFile as string, ByVal iniSection as string, ByVal iniKey as string, ByVal iniVal as string) as string
+	
+	iniWrite = WritePrivateProfileString32 (iniSection, iniKey,"""" + iniVal + """", inifile)
+	
+	if iniWrite=0 then 
+		Print "Upis u "+PathToFileName$(iniFile)+" nije moguc ?"
+		SetIniVal=iniWrite
+		Exit Function
+	else 
+		SetIniVal=iniWrite
+	end if
+	
+End Function
+
+' =====================================================================================================================
+'		[GetRegVal] Citaj vrednost iz REGISTRY
+' =====================================================================================================================
+Function GetRegVal(ByVal regHive as integer, ByVal regKljuc As String, ByVal regString as string) As String
+
+	Dim sPath As String
+	Dim iReturn As Integer
+	Dim hRegKey As Integer
+      
+	iReturn = RegOpenKeyEx(regHive, regKljuc, 0, KEY_READ, hRegKey) 
+	sPath = GetRegistryString(hRegKey,regString)
+	iReturn = RegCloseKey(hRegKey)
+
+	GetRegVal = sPath
+
+End Function
+
+' =====================================================================================================================
+'		[GetRegistryString] Citaj vrednost iz REGISTRY
+' =====================================================================================================================
+Function GetRegistryString(ByVal hKey As Integer, ByVal sEntry As String) As String 
+
+	Dim EntryType, EntryLen As Integer
+	Dim EntryVal As String*PS_SIZE
+	Dim NumVal As Integer
+	
+	If RegQueryValueType(hKey, sEntry, 0, EntryType, 0, EntryLen) <> 0 Then
+		Goto HandleError
+	End If
+	
+	Do Case EntryType
+	
+		Case REG_SZ
+		
+		If RegQueryValueEx(hKey, sEntry, 0, EntryType, EntryVal, EntryLen) <> 0 Then
+			Goto HandleError
+		End If
+		GetRegistryString = EntryVal
+		
+		Case REG_DWORD
+		
+		If RegQueryNumberEx(hKey, sEntry, 0, EntryType, NumVal, EntryLen) <> 0 Then 
+			Goto HandleError
+		End If
+		GetRegistryString = Str$(NumVal)
+		
+		Case Else
+		Goto HandleError
+		
+	End Case
+	
+	Exit Function
+	
+	HandleError:
+	GetRegistryString = ""
+
+End Function
+
+' =====================================================================================================================
+'       [ExecuteAndWait]  Pokretanje spoljnog programa i cekanje da se izvrsi         
+' =====================================================================================================================
+Function ExecuteAndWait(ByVal cmdLine as string) as integer
+
+	ONERROR GOTO ErrorHandle
+	
+	Dim nRetVal as integer
+	Dim NameOfProc as Process_Information, NameStart as StartUpInfo
+	
+	NameStart.cb = 256
+	NameStart.dwFlags = 1
+	NameStart.wShowWindow = 0
+	nRetVal = CreateProcessA(0, cmdLine, 0, 0, 1, NORMAL_PRIORITY_CLASS, 0, 0, NameStart, NameOfProc)
+	
+	nRetVal = NameOfProc.hProcess
+	nRetVal = WaitForSingleObject(NameOfProc.hProcess, INFINITE)
+	nRetVal = CloseHandle(NameOfProc.hProcess)
+	ExecuteAndWait = TRUE
+	
+	EXIT FUNCTION
+	ErrorHandle:
+	ExecuteAndWait = FALSE
+	Print "Greska kod izvrsavanja spoljnog programa: " + str$(Err()) + ": " + Error$()
+	exit function
+END FUNCTION
+
+' =====================================================================================================================
+'		[vremeFajla] Citanje vremenskih atributa fajla                        
+' =====================================================================================================================
+Function vremeFajla(byVal afile as string) as DateTime
+
+	Dim hFile As Integer ' handle to the opened file
+	Dim ctime As FILETIME ' receives time of creation
+	Dim atime As FILETIME ' receives time of last access
+	Dim mtime As FILETIME ' receives time of last modification
+	Dim thetime As SYSTEMTIME ' used to manipulate the time
+	Dim retval As Integer ' return value
+	Dim a_sec as Security_Attributes 'required for the createfile function
+	'Dim afile as string 'to hold the file path/name
+	
+	Dim Godina as smallint
+	Dim Mesec as string
+	Dim Dan as string
+
+	Dim Cas as string
+	Dim Minut as string
+	Dim Sekund as string	
+		
+	' Get the handle for the file
+	'afile=fileopendlg("","","","File to query")
+
+	If afile="" then 
+		exit sub 
+	end if
+	
+	hFile = CreateFile(afile, &H80000000, &H1, a_sec, 3, &H20, 0)
+	
+	If hFile = -1 Then Print "Ne mogu da otvorim fajl -- prekid rada !"
+		Exit sub 
+	End If
+	
+	' Get the creation, last-access, and last-modification times.
+	retval = GetFileTime(hFile, ctime, atime, mtime)
+	' Convert the creation time to the local time zone. To get last-access, last-modification, repeat the conversion for each time'
+	retval = FileTimeToLocalFileTime (mtime, mtime)
+	' Convert the FILETIME format to the SYSTEMTIME format.
+	retval = FileTimeToSystemTime (mtime, thetime)
+	
+	' Display the date and time of creation of the file
+	Godina = thetime.wYear
+
+	If thetime.wMonth < 10 then Mesec = "0"+thetime.wMonth
+		else Mesec = thetime.wMonth
+	End If
+	
+	If thetime.wDay < 10 then Dan = "0"+thetime.wDay
+		else Dan = thetime.wDay
+	End If
+	
+	If thetime.wHour < 10 then Cas = "0"+thetime.wHour
+		else Cas = thetime.wHour
+	End If
+
+	If thetime.wMinute < 10 then Minut = "0"+thetime.wMinute
+		else Minut = thetime.wMinute
+	End If
+
+	If thetime.wSecond < 10 then Sekund = "0"+thetime.wSecond
+		else Sekund = thetime.wSecond
+	End If
+	
+	vremeFajla = NumbertoDateTime(val(Godina+Mesec+Dan+Cas+Minut+Sekund+"000"))
+	
+	' Close the file to free up resources.
+	retval = CloseHandle(hFile)
+
+End Function
+
+' =====================================================================================================================
+'		Call the ODBC SQLGetInfo function to get the Database
+' =====================================================================================================================
+FUNCTION GetDB(BYVAL hdbc AS INTEGER) AS STRING
+	
+	DIM odbchdbc AS INTEGER
+	DIM rc, outlen AS SMALLINT
+	DIM DB AS STRING
+	
+	If hdbc=0 
+	Then
+		GetDB="offline"
+	Else
+		odbchdbc = Server_GetODBCHConn(hdbc)
+		DB= Space$(128)
+		IF SystemInfo(SYS_INFO_MIPLATFORM) = MIPLATFORM_WIN16 THEN
+			rc = SQLGetInfo(odbchdbc, 16 , DB, 128, outlen)
+		ELSE
+			rc = SQLGetInfo32(odbchdbc, 16 , DB, 128, outlen)
+		END IF 
+	
+		GetDB= DB	
+		
+	End If
+	
+END FUNCTION
+
+' =====================================================================================================================
+'		SQL Server Spatial - kreiranje WKT stringova za objekata u MapInfo                      
+' =====================================================================================================================
+
+Function WKT_Tacka(ByVal X as Float, ByVal Y as Float) As String
+
+' - Formatiranje decimalnog zapisa i kreiranje koordinata za taèku na SQL Server-u
+	WKT_Tacka = "POINT("+format$(x, "0.000000000")+" "+format$(y, "0.000000000")+")"
+	
+End Function
+
+Function WKT_Poligon(ByVal pgObj as Object) As String
+	
+	Dim s_PoligonWKT as String
+	Dim i, c, c2 as integer
+	Dim x,y as Float
+
+	s_PoligonWKT = ""		
+	
+' - broj sekcija u poligonu (treba biti 1, jer je direktno ucrtavamo)
+	c = ObjectInfo(pgObj , OBJ_INFO_NPOLYGONS)
+'	Print "c="+c
+
+' - broj vertexa u poliliniji
+	c2 = ObjectInfo(pgObj , OBJ_INFO_NPOLYGONS+c)
+'	Print "c2="+c2
+	
+' - Izvuci koordinate za svako teme poligona 
+ 	For i = 1 to c2
+	 		
+		x = ObjectNodeX(pgObj,c,i)
+		y = ObjectNodeY(pgObj,c,i)
+
+		If s_PoligonWKT = "" 
+		Then
+			s_PoligonWKT = x+" "+y
+		Else
+			s_PoligonWKT = s_PoligonWKT+","+x+" "+y
+		End if
+		
+	Next
+	WKT_Poligon = "POLYGON(("+s_PoligonWKT +"))"
+		
+End Function
+
+' =====================================================================================================================
+'		[GIS_ID] - Ocitavanje MI_PRINX polja za MapInfo objekte 
+' =====================================================================================================================
+Function GIS_ID(ByVal s_lejer as string, ByVal i_row_id as integer) as string
+
+	dim s_table as alias
+	dim GIS_ID as integer
+	dim cv As Alias
+
+	s_table = s_lejer
+'	Print s_table
+'	Koji je to MI_PRINX ?
+	Fetch rec i_row_id From s_table
+	cv = s_table+".MI_PRINX"
+	GIS_ID = cv
+'	Print "Postojeci GIS_ID: "+cv			
+
+End Function
+
+' =====================================================================================================================
+'		[FILEAttributeIsDirectory] - 
+' =====================================================================================================================
+
+Function FILEAttributeIsDirectory(ByVal nFileAttributes As Integer) As Logical
+
+	OnError GoTo ErrorOccured
+	
+	FILEAttributeIsDirectory = FALSE
+	
+	   If (nFileAttributes /  2 ^ FILE_ATTRIBUTE_DIRECTORY_BIT) Mod 2 
+	   Then
+	      FILEAttributeIsDirectory = TRUE
+	   End If
+	   Exit Function
+
+'	-------------------------
+	ErrorOccured:
+	
+	   Note Err() + " " + Error$() + " FILEAttributeIsDirectory"
+
+End Function
+
+' =====================================================================================================================
+'		Konverzija decimalnog zapisa stepena u Stepene Minute i Sekunde
+' =====================================================================================================================
+
+Function DMS(ByVal DD as Float) As String
+
+Dim DEG as SmallInt
+Dim MINS as Float
+Dim SECS as Float
+
+' - 
+	DEG = Fix(DD)
+	MINS = ABS(Fix((DD-Fix(DD)) * 60))
+	SECS = (ABS(((DD-Fix(DD)) * 60)) - ABS(Fix((DD-Fix(DD)) * 60)))*60
+
+	DMS = DEG & "° " & MINS & "' " & SECS & "''"
+	
+End Function

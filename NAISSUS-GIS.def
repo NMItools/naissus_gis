@@ -1,0 +1,703 @@
+' ======================================================================
+' Custom promenljive
+' ======================================================================	
+	Type Tacka
+		x As Float
+		y As Float
+	End Type
+	
+' ======================================================================
+' Definicije Potprograma po modulima
+' ======================================================================
+
+	Declare Sub Main	
+	
+'	A-APP_START.MB ===========================================================================
+
+	Declare Sub Login_Param_Check
+	Declare Sub Login_mssql	
+	Declare Sub MRUWor
+	Declare Sub SPLASH
+	Declare Sub Login_post
+	Declare Sub Open_WOR	
+	Declare Sub DLG_Login
+	Declare Sub Login_CANCEL
+	Declare Sub Login_HELP
+	Declare Sub gisUpdate
+	Declare Sub Pomoc
+
+	Declare Sub WinCan_instalacija
+	
+		Declare Sub DLG_MRUWor
+		
+		DEFINE s_USER_ID 1
+		DEFINE s_PASS_ID 2
+		DEFINE s_DSN_ID 3
+		DEFINE Login_OK_ID 4
+		DEFINE Login_Cancel_ID 5
+		DEFINE Login_Help_ID 6
+		DEFINE Login_RG_1_ID 7
+	
+		Global l_Tools as logical
+		Global s_verzija as String
+		Global iniFile as String
+		Global iniRead as SmallInt
+		Global iniWrite as SmallInt
+		Global f_setIni as String
+		Global fajlLokal as string
+		Global vremeLokal as DateTime
+		Global am_stat as integer
+		Global Val_Ret, Ret_Def, Get_Val as string	
+
+		Global s_MIPRO_Dir As String
+		Global s_MBApp_Dir As String
+		Global s_TEMP_Dir as String
+		Global s_MBX_VER As String
+		Global s_MBX_IME as String
+		Global s_CRS As String
+		Global CRS As String
+		
+		Global s_FOLDER_WOR as String
+		Global s_FOLDER_TAB as String
+		Global s_FOLDER_RAD as String
+		Global s_FOLDER_PRN as String
+		
+		'mrezne lokacije dostupne svim korisnicima aplikacije (za read/write fajlova i update aplikacije)
+		Global s_FOLDER_POD as string	
+		Global s_FOLDER_NET as string
+		Global s_FOLDER_MVW as String
+		Global s_Update_PRJ as string
+		Global s_Update_MBX as string
+		Global s_Update_WOR as string	
+		Global s_FOLDER_CCTV as string
+		Global s_WINCAN_PROG as string
+		Global s_BROWSER_WWW as string
+		Global s_FOLDER_EXP as String
+		Global s_FOLDER_WWW as String
+		
+		Global cit_FOLDER_WOR as string
+		Global cit_FOLDER_TAB as string
+		'mrezne lokacije dostupne svim korisnicima aplikacije (za read/write fajlova i update aplikacije)
+		Global cit_FOLDER_POD as string	
+		Global cit_FOLDER_NET as string
+		Global cit_FOLDER_MVW as String
+		Global cit_Update_PRJ as string
+		Global cit_Update_MBX as string
+		Global cit_Update_WOR as string		
+		Global cit_FOLDER_CCTV as string
+	
+
+		Global s_USER AS STRING
+		Global s_PASS AS STRING
+		Global s_SERVER AS Integer
+		Global s_db AS STRING
+		Global s_DSN as String 
+		Global s_WSID as String 
+		Global i_Login_RG_1 AS Integer
+
+		Global s_appmod as String
+		Global s_IME as String
+		Global s_SEKTOR as String
+		Global s_SLUZBA as String
+		Global s_ODELJENJE  as String
+		Global s_Obavestenje  as SmallInt
+		Global s_OS  as String
+		
+		
+		Global WorArr() as String		
+		Global s_DefWOR as string
+		Global s_OpenDLG as string
+		
+		Global i_hdbc As Integer
+		Global i_hstmt As Integer
+		Global s_dbName As String
+		Global s_dbUser As String
+		
+		Global iMapWindowID as Integer
+		Global iBrowserWindowID as Integer
+		Global iLayoutWindowID as Integer
+		Global iLegendWindowID as Integer
+		Global iLogoWindowID as Integer
+		
+		Global i_LejerID As Integer		
+		Global i_GrupaLejera as Integer
+		Global s_ImeLejera As String  
+		global namLejer As String  
+		
+		Global i_TabInfoRows as Integer
+		Global i_SelInfoRows as Integer
+		
+		Global s_kom as string
+		Global l_Pitanje As Logical
+
+		
+		global vremeF as string
+		global vremeZ as string
+		global Mesec as string
+		global Dan as smallint
+	'	global i_Godina as smallint
+		global Cas as string
+		global Minut as string
+		global Sekund as string
+	
+		Global zameni as string	
+		
+		Global grupaLejera as string
+		
+		global cctvTemF as smallint
+		global cctvTemA as smallint
+		
+' B-APP_TOOLBAR.MB ===========================================================================
+
+'	Declare Sub Meni_GLAVNI
+	Declare Sub Toolbar_GLAVNI
+	Declare Sub WOR_default	
+	Declare Sub WOR_default_kreiranje
+	Declare Sub Toolbar_NIVOS
+	Declare Sub Toolbar_NIKAS
+	Declare Sub Toolbar_PODLOGE
+	Declare Sub Toolbar_PLANOVI
+	Declare Sub Toolbar_MREZE
+	Declare Sub Toolbar_KN
+	Declare Sub geoSrbija_URL
+'	Declare Sub Toolbar_DTM
+	Declare Sub Toolbar_GEO	
+	Declare Sub Toolbar_NIVOS_POTROSACI	
+	Declare Sub Kraj_Rada
+
+'   00-NAISSUS_WOR.MB ===========================================================================
+
+	Declare Sub MSSQL_tabele
+	Declare Sub MSSQL_tabele_DL
+	Declare Sub WOR_naissus
+	Declare Sub WOR_naissus_2
+	Declare Sub WOR_naissus_GIS
+	Declare Sub WOR_naissus_GIS_2
+	
+		Global i_Start as smallint
+		Global i_pres as smallint
+		Global i_RID as SmallInt
+		Global i_preuz as smallint
+		Global s_PresTAB as string		
+	
+'   01-PODLOGE ===========================================================================
+
+	Declare Sub PODLOGE
+	Declare Sub MrezePodloga
+	
+	Declare Sub OF_2006
+	Declare Sub KAT_1989_1000
+	Declare Sub KAT_1989_5000
+	Declare Sub KAT_1963_1000
+	Declare Sub KAT_1963_2500
+	Declare Sub KAT_1955_500
+	Declare Sub KAT_1955_1000
+	Declare Sub KAT_1939_1000
+	Declare Sub KAT_1939_2500
+	Declare Sub VT_25000
+	Declare Sub VT_50000
+
+	Declare Sub OF_2006_MREZA
+	Declare Sub KAT_1989_1000_MREZA
+	Declare Sub KAT_1989_5000_MREZA
+	Declare Sub KAT_1963_1000_MREZA
+	Declare Sub KAT_1963_2500_MREZA
+	Declare Sub KAT_1955_500_MREZA
+	Declare Sub KAT_1955_1000_MREZA
+	Declare Sub KAT_1939_1000_MREZA
+	Declare Sub KAT_1939_2500_MREZA
+	Declare Sub VT_25000_MREZA
+	Declare Sub VT_50000_MREZA
+
+'	02-PLANOVI.MB ===========================================================================
+
+	Declare Sub PLANOVI
+	Declare Sub MrezePlanova
+	
+	Declare Sub PLANOVI_1
+	Declare Sub PLANOVI_2
+	Declare Sub PLANOVI_55_500
+	Declare Sub PLANOVI_55_1000
+	Declare Sub PLANOVI_55_2500
+	Declare Sub STARI_PLAN_2500
+	Declare Sub STARI_SKEN_Radmila
+                                   
+	Declare Sub PLANOVI_1_mreza
+	Declare Sub PLANOVI_2_mreza
+	Declare Sub PLANOVI_55_500_mreza
+	Declare Sub PLANOVI_55_1000_mreza
+	Declare Sub PLANOVI_55_2500_mreza
+	Declare Sub STARI_PLAN_2500_mreza
+	Declare Sub STARI_SKEN_Radmila_mreza
+
+'   03-katastar ===========================================================================
+
+	Declare Sub KATASTAR
+	Declare Sub KN_PARCELE
+	Declare Sub KN_OBJEKTI
+	Declare Sub KN_ADMJ
+	Declare Sub DLG_Izohipse_1_OK
+	Declare Sub DLG_Izohipse_2_OK
+	Declare Sub DLG_Izohipse_1_CANCEL
+	Declare Sub DLG_Izohipse_2_CANCEL
+
+	Declare Sub IZOHIPSE_OF
+	
+	Declare Sub GridInfoToolHandler
+	Declare Sub GridInfo
+	Declare Sub GRID
+
+	'   03-Dialog1.MB
+
+		Declare Sub DLG_Izohipse_1
+		Declare Sub DLG_Izohipse_2
+'		Declare Sub DTM
+
+			Global BrushPG as Brush
+			Global PenPG as Pen
+			Global s_Kote as string
+			global pg As Alias
+			global polig as string
+			global izotip as smallint
+			global imtab as string
+			global imtab_f as string
+			global kota_min as string
+			global kota_max as string
+			global gsPath As String
+
+'	04-NIVOS ===========================================================================
+	
+	Declare Sub NIVOS_Objekti
+	
+	declare sub cevovod          
+	declare sub prikljucak       
+	declare sub cevovodnisaht    
+	declare sub vodomernisaht    
+	declare sub hidrant          
+	declare sub zatvarac         
+	declare sub vodomer          
+	declare sub nepovratniventil 
+	declare sub vazdusniventil   
+	declare sub muljniispust     
+	declare sub pumpa            
+	declare sub regulatorpritiska
+	declare sub meracprotoka     
+	declare sub crpnastanica     
+	declare sub rezervoar        
+	declare sub prekidnakomora   
+	declare sub kaptaza   
+
+' 	05-NIVOS_GEODETSKI ===========================================================================
+
+	Declare Sub Koordinate
+	Declare Sub NIVOS_GEODETSKI
+	declare sub KotaCevi
+	declare sub KotaTerena
+	declare sub KCiKT
+	declare sub DubinaCevi
+
+'   06-NIVOS_KORISNICI.MB ===========================================================================
+	
+	Declare Sub NIVOS_KORISNICI
+	Declare Sub Zone
+	
+	Declare Sub DLG_ReonKnjigaRbr
+		Declare Sub arrZone
+		Declare Sub arrKnjige1
+		Declare Sub arrKnjige2(byVal s as string)
+		Declare Sub arrRedniBrojevi1
+		Declare Sub arrRedniBrojevi2(byVal s as string)
+	Declare Sub DLG_ReonKnjigaRbr_OK
+	Declare Sub DLG_ReonKnjigaRbr_CANCEL
+	Declare Sub Map_ReonKnjigaRbr
+	Declare Sub ReonKnjigaRbr	
+	Declare Sub PrethodniVodomer
+	Declare Sub SledeciVodomer
+	Declare Sub InfoVodomer
+
+	Declare Sub UparivanjeNAV_Priprema
+	Declare Sub UparivanjeNAV_SQL
+	Declare Sub CentSelVodomer
+	Declare Sub PrethodniNoviVodomer
+	Declare Sub SledeciNoviVodomer
+	Declare Sub VODOMER_OK
+	Declare Sub Odlozi_unos
+	Declare Sub Unesi_NV_u_GIS
+	
+	Declare Sub kor_knjige_unos
+	Declare Sub IrIkRbr_upis
+
+		Global arr_Zone() as string
+		Global arr_Knjige() as string
+		Global arr_RedniBrojevi() as string
+		
+		Global Mod_ReonKnjigaRbr As smallint 
+		
+		Global smbl_Marker as Symbol
+		Global pos as Object
+		
+		Global as_pos as Alias
+		
+		Global as_KupciGeoref as Alias
+		
+		Global as_edit_reon AS Alias
+		Global as_edit_knjiga AS Alias
+		Global as_edit_rbr AS Alias
+
+		Global as_RB AS Alias
+		Global as_MiPrinx as Alias
+		Global as_ImeTabele as Alias
+		Global as_RID As Alias
+		Global as_sifraRow As Alias		
+		
+		Global s_sifra as string
+		Global s_postoji as smallint
+		Global s_Reon AS smallint
+		Global sn_ZONA AS smallint
+		
+		Global s_Knjiga AS smallint
+		Global sn_KNJIGA as string
+		
+		Global s_Rbr AS smallint
+		Global sn_REDBROJ as string
+	
+		Global s1_reon AS string
+		Global s1_knjiga AS string
+		Global s1_rbr AS string    	
+
+		Global RID as SmallInt
+		Global MIPrinx as Integer
+		Global i_BrReda As SmallInt		
+		
+			DEFINE reon 12001
+			DEFINE knjig 12002
+			DEFINE rbr 12003
+			DEFINE Static12001ID 12004
+			DEFINE Static12002ID 12005
+			DEFINE Static12003ID 12006
+			DEFINE postavi_knjigu 12007
+			DEFINE Group12001ID 12008
+	
+'   07-NIVOS_POTROSNJA.MB ===========================================================================
+
+	Declare Sub NIVOS_POTROSNJA
+	Declare Sub SnapOn
+	declare sub IzborPotrosaca
+	declare sub IzborPotrosaca_MZ
+	declare sub IzborSistema
+	declare sub IzborPotrosaca_Sifra
+	Declare Sub DLG_PotrosnjaOK
+	Declare Sub DLG_PotrosnjaCANCEL
+	Declare Sub SQL_Potrosnja
+	Declare SUB GrafikStatistika
+	declare sub GrafikPotrosnje
+	
+	'	07-Dialog1.MB	
+		Declare Sub DLG_Potrosnja	
+		
+		Global s_Godine as String
+		Global i_TipGraf as Smallint
+		Global s_ImeTabele As String
+		Global s_ImeTabeleFull As String
+		
+		Global s_MatBroj as String		
+		Global s_MZ as SmallInt
+		Global s_System as String
+		
+		Global stat1 as Float
+		Global stat2 as Float
+		Global s_GrafNaslov as string
+		Global s_GrafPodnaslov As String
+		Global graf_setup as string
+
+		' Global s_sifra as string
+		' Global s_naziv as string 
+		' Global i_kategorija as SmallInt
+		' Global s_ulica as string
+		' Global s_broj as string 
+		' Global s_mesto as string 
+		' Global s_zona as string 
+		' Global i_knjiga as SmallInt 
+		' Global i_redbroj as SmallInt 
+		' Global s_status as string 	
+			
+		Global rs_MatBrPotr() as String
+		Global rs_MatBr() as String
+		Global rs_MatBrOdabrani() As String
+		Global rs_GodPotr() as String
+		Global rs_GodPotrOdabrani() as String
+	
+'	08-NIKAS.MB ===========================================================================
+	
+	Declare SUB NIKAS_OBJEKTI
+	
+	declare sub fekalna          
+	declare sub fek_kan_prikljucak
+	declare sub fek_kan_saht
+	declare sub fek_kan_izliv
+	declare sub atmosferska
+	declare sub atm_prikljucak
+	declare sub atm_saht
+	declare sub atm_izliv
+	declare sub slivnik
+	declare sub slivnik_prikljucak
+	declare sub korisnicki_saht
+	declare sub zastit_kanal_cevi
+	declare sub preliv
+	declare sub sifon
+	declare sub cs_otpad_voda
+	declare sub postr_za_prec
+
+'	09-LABELE ===========================================================================	
+
+	DECLARE SUB LABELE
+	
+	Declare Sub lab_podesavanje
+	Declare Sub lab_cev_ulice
+	Declare Sub lab_cev_mat_prec
+	Declare Sub lab_cev_duz
+	Declare Sub lab_cev_ul_mat_prec
+	Declare Sub lab_cev_mat_prec_duz
+	Declare Sub lab_cev_ul_duz
+	Declare Sub lab_prik_rn
+	Declare Sub lab_prik_mat_prec_gl
+	Declare Sub lab_prik_mat_prec_pr
+	Declare Sub lab_prik_duz
+	Declare Sub lab_prik_rn_mat_prec_gl
+	Declare Sub lab_prik_rn_mat_prec_pr
+	Declare Sub lab_hid_rb
+	Declare Sub lab_hid_prec
+	Declare Sub lab_hid_rb_prec
+	Declare Sub lab_zat_rb
+	Declare Sub lab_zat_prec
+	Declare Sub lab_zat_rb_prec
+	Declare Sub lab_vod_rn
+	Declare Sub lab_vod_matbr
+	Declare Sub lab_vod_imepotrosaca
+	Declare Sub lab_vod_kucbroj
+	Declare Sub lab_vod_serbr
+	Declare Sub lab_vod_imepotrosaca_matbr
+	Declare Sub lab_vod_imepotrosaca_kucbroj
+	Declare Sub lab_vod_imepotrosaca_serbr
+	Declare Sub lab_vod_rn_imepotrosaca
+
+	declare sub lab_vod_ink_reon
+	declare sub lab_vod_ink_knjiga
+	declare sub lab_vod_ink_knrbr
+	declare sub lab_vod_zona	
+	declare sub lab_vod_reon_knjiga
+	declare sub lab_vod_rbr_knjiga
+
+	Declare Sub lab_pump_ime
+	Declare Sub lab_pump_karakt
+	Declare Sub lab_ps_ime
+	Declare Sub lab_merprot_ime
+	Declare Sub lab_pk_ime
+	Declare Sub lab_pk_ime_kpc
+	Declare Sub lab_pk_ime_kpc_kprl_kdna
+	Declare Sub lab_rez_ime
+	Declare Sub lab_rez_ime_zapr
+	Declare Sub lab_rez_ime_zapr_kote
+	Declare Sub lab_kap_ime
+	Declare Sub lab_kap_ime_kpc
+	Declare Sub lab_kap_ime_kote
+	Declare Sub lab_kap_ime_kote_kpc
+
+	Declare SUB lab_fekalna_ulice
+	Declare SUB lab_fekalna_mat_prec
+	Declare SUB lab_fekalna_duz
+	Declare SUB lab_fekalna_ul_mat_prec
+	Declare SUB lab_fekalna_ul_duz
+	Declare SUB lab_fekalna_mat_prec_duz
+	Declare SUB lab_fekalna_miprinx
+		
+	Declare SUB lab_fek_kan_saht_KTiKD
+	Declare SUB lab_fek_kan_saht_miprinx
+	
+	Declare SUB lab_atmosferska_miprinx
+	Declare SUB lab_atmosferska_mat_prec
+
+	Declare SUB lab_atm_saht_miprinx
+	Declare SUB lab_atm_saht_KTiKD
+	
+'	10 - tematske ===========================================================================
+
+	Declare SUB TEMATIKE
+	
+	Declare Sub TEM_vod_materijal
+	Declare Sub TEM_vod_precnici
+	Declare Sub TEM_vod_vis_zon
+	Declare Sub TEM_vod_sistem
+	Declare Sub TEM_vod_MZ    
+
+	Declare Sub TEM_fek_precnici
+	Declare Sub TEM_fek_materijal
+	Declare Sub TEM_fek_CCTV
+
+	Declare Sub TEM_atm_precnici
+	Declare Sub TEM_atm_materijal
+	Declare Sub TEM_atm_CCTV
+
+	Declare Sub TEM_prikljucci_info
+	Declare Sub TEM_CEVOVOD_info
+	Declare Sub TEM_HIDRANT_info
+	Declare Sub TEM_ZATVARAC_info
+	Declare Sub TEM_vodomeri_info
+
+	Declare Sub TEM_vodomeri_reon
+	Declare Sub TEM_vodomeri_reon_knjiga
+
+'	12-STAMPA.MB ===========================================================================
+
+	declare sub STAMPA
+	Declare Sub Printers
+	Declare Sub MapperPriprema
+	Declare Sub DLG_printFormati
+	Declare Sub DLG_printPolozaj
+'	Declare Sub DLG_printMargine
+	Declare Sub PapInfo(byVal i as Integer)
+	Declare Sub DLG_printOK
+
+	Declare Sub Legenda_checkbox
+	Declare Sub JPEG_checkbox
+	
+	Declare Sub DLG_print
+	Declare Sub DLG_print_2
+			
+		Global printerList() as String
+		Global sPrinterName as String
+		Global nPrinter as smallint
+		Global n_Papir as smallint
+		Global s_Papir as string
+		Global s_Polozaj as string
+		Global n_Polozaj as smallint
+		Global i_Papir as smallint
+		
+		Global l_Sever as logical
+		Global l_Upozorenje as logical
+		Global l_Okvir as logical
+		Global l_Legenda as logical
+		Global l_PrintSlika as logical
+		Global l_Markeri as logical
+		
+		Global i_Dpi as Smallint
+		
+		Global rs_TipLegende() as String
+		Global s_TipLgd As String
+		
+		Global s_Naslov as string
+		Global s_PrintNaslov As String
+		Global mapScale as Float
+		Global s_mapScale as string
+		Global map_R as integer
+		Global print_R as integer
+
+		Global l_Admin as logical
+		Global sPrintDate as string
+		Global centerX, centerY, mapZoom, minX, maxX, minY, maxY, dX, dY, LmaxY, LminY, LmaxX, LminX as Float
+		Global mr, h_Pap, h_Pap2, w_Pap, w_MapFrame, h_MapFrame, w_Tablica, h_Tablica, w_Logo as Float
+		Global a, b, b1, b2, Yp as Float	
+		Global pT, f1, f2, f3, f4, t1, t2, t3, t4, Lgd as Tacka	
+		Global iniPapir as string
+
+'	13-LEGENDA.MB ===========================================================================			
+
+	Declare Sub Legenda(ByVal TipLegende as SmallInt)
+	Declare Sub Legenda_provera_lejera
+
+'	14-POMOCNI
+
+	Declare Sub Pomocni
+	Declare Sub PrviNaDno
+	Declare Sub LayerIDLista
+	Declare Sub TackaWKT
+	Declare Sub MIPodesavanja
+	Declare Sub SysWindows
+	Declare Sub VisinaObjekta
+	Declare Sub MZ_u_KML
+	Declare Sub Select_DIR_ZSExp
+	Declare Sub Dialog_MZ_u_KML_CANCEL
+	Declare Sub Dialog_MZ_u_KML_OK
+	Declare Sub Dialog_MZ_u_KML
+
+			Global s_ExpFolder as string
+			
+'	15-CCTV
+	
+	Declare Sub CCTV
+	Declare Sub CCTV_Tematska
+	Declare Sub CCTV_TematskaOFF
+	Declare Sub CCTV_NadjiDeonicu
+
+		Global s_cctv_ID as String
+		
+		
+'	99-ADMIN.MB ===========================================================================
+	
+	Declare Sub GIS_admin
+	Declare Sub POD_aktivni_folderi
+	Declare Sub POD_citaj
+	Declare Sub POD_azuriraj
+	Declare Sub POD_aktiviraj
+	Declare Sub POD_cancel
+	Declare Sub Select_DIR_WOR
+	Declare Sub Select_DIR_TAB
+	Declare Sub Select_DIR_POD
+	Declare Sub Select_DIR_NET
+	Declare Sub Select_DIR_UP_WOR
+	Declare Sub Select_DIR_UP_MBX
+	Declare Sub Select_DIR_UP_PRJ
+	
+	Declare Sub DLG_Podesavanja
+	Declare Sub DLG_NoviLogin
+	Declare Sub DLG_NoviLogin_OK
+	Declare Sub DLG_Sektori
+	Declare Sub DLG_Sluzbe_1
+	Declare Sub DLG_Odeljenja_1
+
+	Declare Sub DLG_Sluzbe(byVal s as string)
+	Declare Sub DLG_Odeljenja(byVal s as string)
+
+	declare sub SQLINFO
+	
+	Declare Sub Server_Update
+	Declare Sub MI_VIEWER_TAB_update
+	declare sub layorder
+	declare sub test_1
+	declare sub test_2
+	Declare Sub MREZA_KARATA
+	
+	declare sub NAV_imp_kor
+	declare sub NAV_imp_potr
+
+		Global sqlInfo as string
+		Global sqlInfoKod as smallint
+		
+		Global arr_Baze() as string
+		Global arr_Klase() as string
+		Global arr_Sektori() as string
+		Global arr_Sluzbe() as string
+		Global arr_Odeljenja() as string
+	
+		Global sn_IME as string
+		Global sn_SEKTOR as string
+		Global sn_SLUZBA as string
+		Global sn_ODELJENJE as string
+
+		Global sn_BAZA as string
+		Global sn_KLASA as string
+		Global sn_LOGIN as string
+		Global sn_PASS as string
+		Global sn_PASS2 as string		
+		
+		Global aktivna_lokacija as string
+		Global aktiv_lok as smallint		
+	
+		global NewTab as string
+		global NewFile as string		
+		
+		global mz as integer		
+	
+
+	Declare SUB MSSQL_tabele_2  
+	Declare SUB MSSQL_tabele_DL_2

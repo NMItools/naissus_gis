@@ -1,0 +1,69 @@
+'include "mapbasic.def"
+'include "menu.def"
+'include "icons.def"
+include "..\..\Library\ERRORLib.def"
+include "..\NAISSUS-GIS.def"
+
+'===================================================================================================================== 
+' .....
+Sub DLG_Izohipse_1
+
+	onerror goto Greska  
+	
+	Print "=========================================================="
+	Print "PRIKAZ ORTOFOTO IZOHIPSA (za celu povrsinu Grada Nisa)"
+	print "min kota:  167 m"
+	print "max kota: 1486 m"
+	print "Unesite kote izohipsi koje zelite."
+	print "Nakon toga dobicete generisane izohipse u lejeru ''IZOHIPSA''" 		
+	Print "---------------------------------------------------------------------------------"
+	Print "Za sve izohipse u odredjenom intervalu (npr. od kote 206 do kote 360)" 
+	print "format unosa je: "
+	print "260-360"
+	print "(od minimalne do maksimalne kote)"
+	print ""
+	Print "Za grupu pojedinih izohipsa format unosa je:"
+	Print "260,300,500"
+	print "(redosled kota je nebitan)"
+	Print "---------------------------------------------------------------------------------"
+
+'***** DIALOG DESIGNER GENERATED CODE. DO NOT EDIT OR REMOVE THIS LINE OR BELOW THIS LINE! *****
+Dialog
+	Title "Prikaz pojedinih izohipsi"
+	Width 192 Height 45
+
+Control GroupBox
+	Id 1
+	Position 8, 7
+	Width 121 Height 32
+	Title "Kota izohipse (ili vise njih)"
+	
+Control EditText
+	Id 2
+	Position 12, 19
+	Width 113 Height 12
+	Value "185,230,280,330,380"
+	Into s_Kote
+	
+Control CancelButton
+	Title "Cancel"
+	Id 3
+	Position 134, 7
+	Width 51 Height 14
+	Calling DLG_Izohipse_1_CANCEL
+	
+Control OKButton
+	Title "OK"
+	Id 4
+	Position 134, 25
+	Width 51 Height 14
+	Calling DLG_Izohipse_1_OK
+	
+
+	Exit Sub
+	'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "DLG_Izohipse_1")
+	Call ERRShow()
+
+End Sub	

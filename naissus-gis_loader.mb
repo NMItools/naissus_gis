@@ -1,0 +1,29 @@
+include "mapbasic.def"
+include "menu.def"
+include "icons.def"
+
+declare sub main
+declare sub start
+
+Sub Main
+
+	Create Menu "JKP Naissus" As 
+		"Prijava korisnika..." ID 1 Calling Start,
+		"(-"		
+		
+	Alter Menu Bar Add "JKP Naissus"  			
+			
+End Sub
+
+Sub Start
+
+	OnError goto Greska
+
+	Run Application ApplicationDirectory$()+"naissus-gis.mbx"
+
+	Exit Sub
+'	-------------------------
+	Greska:
+	Note "Aplikacija naissus-GIS je aktivna!"
+				
+End Sub

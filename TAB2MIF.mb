@@ -1,0 +1,126 @@
+include "mapbasic.def"
+include "menu.def"
+include "icons.def"
+include "..\Library\ERRORLib.def"
+include "..\nmiWin.def"
+include "..\nmiFunkcije.def"
+include "..\nmiDotNet.def"
+include "NAISSUS-GIS.def"
+
+SUB MSSQL_tabele_2  
+
+	onerror goto Greska  
+	
+	Dim i_Start_vremena As Integer           
+	Dim i_Vremena_proteklo As Integer   
+	Dim s_PresTAB_f As String 
+	Dim i_PresTAB_duz As SmallInt
+
+	l_Pitanje = Ask("Izvoz aktuelnih GIS tabela u MIF format ?", "DA", "Odustani")                         
+	     
+	If l_Pitanje = false 
+	Then 
+		Print "Izvoz odlozen"
+		Exit Sub
+	else
+		Save Workspace As s_FOLDER_WOR+"_temp.wor"                        
+		Close All Interactive
+
+	s_FOLDER_EXP = "\\verdi\GIS\EXPORT\mid-mif\"
+	
+		Server i_hdbc link table "SELECT TABLENAME, OWNERNAME From ""MI_"+s_appmod+"""."""+s_appmod+"""" Toolkit "ODBC" Into "x_mapcatalog" File s_FOLDER_TAB+"x_mapcatalog.tab"
+'								  SELECT TABLENAME, OWNERNAME From [MI_user].[User]
+		i_preuz=0
+		i_pres=0
+		s_PresTAB=""
+		i_RID=1      
+				
+		i_Start_vremena = Timer( )
+
+		ProgressBar "Izvoz GIS tabela sa SQL Servera u MIF format u ("+s_FOLDER_EXP+")..." Calling MSSQL_tabele_DL_2 Range TableInfo(x_mapcatalog, TAB_INFO_NROWS)
+
+		If CommandInfo(CMD_INFO_STATUS) 
+		Then                            
+			i_Vremena_proteklo = Timer( ) - i_Start_vremena
+			i_PresTAB_duz = Len(s_PresTAB)         
+			s_PresTAB_f = Right$(s_PresTAB, i_PresTAB_duz-1)
+			Print "Izvoz gotov!"
+			Print "Broj izvezenih tabela: "+i_preuz+" (od "+i_RID+")"
+			Print "Broj (ne)usaglasenih tabela :"+i_pres+" ("+s_PresTAB_f+")"
+			Print "Vreme izvozenja: "+i_Vremena_proteklo+" sec"
+			Note "Izvoz tabela zavrsen! Mozete nastaviti sa radom."
+		Else 
+			Print "Izvozenje prekinuto! Broj izvezenih tabela: "+(i_RID-1-i_pres)
+			Print "Tabele koje nisu azurirane :"+i_pres+" ("+s_PresTAB_f+")"
+			Print "Vreme izvoza: "+i_Vremena_proteklo+" sec"
+			Note "Izvoz prekinut!"
+		End If 
+
+		Drop Table x_mapcatalog
+		Close All Interactive
+		Run Application s_FOLDER_WOR+"_temp.wor"
+	
+	End If
+	
+	Exit Sub
+'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "MSSQL_tabele")
+	Call ERRShow()
+	
+End Sub
+
+' =====================================================================================================================
+
+SUB MSSQL_tabele_DL_2
+	
+	onerror goto Greska
+	
+	Dim s_SQL_tab as string
+	Dim s_SQL_schema as string
+	Dim s_SQL_edit_info as string
+	
+	Fetch Rec i_RID from x_mapcatalog
+	s_SQL_tab = x_mapcatalog.COL1
+	s_SQL_schema = x_mapcatalog.COL2
+
+'	provera da li postoje nesmiljene izmene za server
+	If FileExists(s_FOLDER_EXP+s_SQL_tab+".MIF") 
+	Then
+
+'		Print "MIF postoji"
+		If s_SQL_tab = "IZOHIPSE"
+			or s_SQL_tab = "KATASTAR_PARCELE"
+			or s_SQL_tab = "IZO"
+		then 
+			goto progres_bar
+		else	
+		End If
+	Else
+	Print "Fajl "+s_SQL_tab+".MIF ne postoji u EXPORT folderu !"
+	End If
+	
+	Print "Izvoz: "+s_SQL_tab+"..."
+	
+	Open Table s_FOLDER_TAB+s_SQL_tab+".TAB" Interactive
+	Export s_SQL_tab Into s_FOLDER_EXP+s_SQL_tab+".MIF" Type "MIF" Overwrite
+	
+'	Server i_hdbc link table "Select * From """+s_SQL_schema+"""."""+s_SQL_tab+"""" Toolkit "ODBC" Into ""+s_SQL_tab+"" File s_FOLDER_TAB+s_SQL_tab+".tab"
+	i_preuz=i_preuz+1
+	
+	progres_bar:
+	If i_RID = TableInfo(x_mapcatalog, TAB_INFO_NROWS) 
+	Then
+		ProgressBar = -1 'gotovo!
+	Else  
+		i_RID = i_RID + 1
+		ProgressBar = i_RID  'jos nije gotovo...
+	End If   
+	
+	Exit Sub
+'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "MSSQL_tabele_DL")
+	Call ERRShow()
+
+End Sub

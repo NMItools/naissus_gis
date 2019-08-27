@@ -1,0 +1,270 @@
+Include "MAPBASIC.DEF"
+Include "ICONS.DEF"
+Include "MENU.DEF"
+include "..\..\Library\ERRORLib.def"
+include "..\..\nmiFunkcije.def"
+include "..\..\nmiDotNet.def"
+include "..\..\nmiWin.def"
+include "..\NAISSUS-GIS.def"
+
+Sub DLG_print
+
+	onerror goto Greska  
+
+	Call Printers
+
+	Redim rs_TipLegende(9)
+		rs_TipLegende(9) = "VOD(komplet)"
+		rs_TipLegende(8) = "VOD(pregled)"
+		rs_TipLegende(7) = "VOD(detalji)"
+		rs_TipLegende(6) = "KAN(komplet)"
+		rs_TipLegende(5) = "KAN(pregled)"
+		rs_TipLegende(4) = "KAN(detalji)"
+		rs_TipLegende(3) = "ViK(komplet)"
+		rs_TipLegende(2) = "ViK(pregled)"
+		rs_TipLegende(1) = "ViK(detalji)"
+		
+		
+	nPrinter = GetIniVal(iniFile, "STAMPA", "nPrinter")
+	s_Naslov = GetIniVal(iniFile, "STAMPA", "NASLOV")
+	s_TipLgd = GetIniVal(iniFile, "STAMPA", "LEGENDA")
+	i_Dpi = GetIniVal(iniFile, "STAMPA", "DPI")
+	
+	Call PapInfo(1)
+
+'***** DIALOG DESIGNER GENERATED CODE. DO NOT EDIT OR REMOVE THIS LINE OR BELOW THIS LINE! *****
+Dialog
+	Title "Priprema za štampu"
+	Width 269 Height 224
+
+Control StaticText
+	Id 1
+	Position 8, 16
+	Width 27 Height 8
+	Title "Printer:"
+	
+Control PopupMenu
+	Id 2
+	Position 39, 14
+	Width 220
+	Title From Variable printerList
+	Value nPrinter
+	Into sPrinterName
+	
+Control GroupBox
+	Id 3
+	Position 8, 30
+	Width 252 Height 96
+	Title "Podešavanje papira i layout-a"
+	
+Control StaticText
+	Id 4
+	Position 16, 48
+	Width 29 Height 8
+	Title "Format:"
+	
+Control RadioGroup
+	Id 5
+	Position 49, 48
+	Title "A4;A3;A2;A1;A0;"
+	Calling DLG_printFormati
+	Value 1
+	Into n_Papir
+	
+Control StaticText
+	Id 6
+	Position 141, 48
+	Width 30 Height 8
+	Title "Položaj:"
+	
+Control RadioGroup
+	Id 7
+	Position 177, 48
+	Title "Landscape;Portrait"
+	Calling DLG_printPolozaj
+	Value n_Polozaj
+	Into n_Polozaj
+	
+Control GroupBox
+	Id 8
+	Position 126, 79
+	Width 124 Height 43
+	Title "Margine i tablica (cm) + Font"
+	
+Control StaticText
+	Id 9
+	Position 131, 93
+	Width 48 Height 8
+	Title "margine - hor:"
+	
+Control EditText
+	Id 10
+	Position 183, 90
+	Width 20 Height 12
+	Value pT.x
+	Into pT.x
+	
+Control StaticText
+	Id 11
+	Position 205, 93
+	Width 17 Height 8
+	Title "ver:"
+	
+Control EditText
+	Id 12
+	Position 226, 91
+	Width 20 Height 12
+	Value pT.y
+	Into pT.y
+	
+Control StaticText
+	Id 13
+	Position 131, 109
+	Width 48 Height 8
+	Title "visina tablice:"
+	
+Control EditText
+	Id 14
+	Position 183, 106
+	Width 20 Height 12
+	Value h_Tablica
+	Into h_Tablica
+	
+Control StaticText
+	Id 15
+	Position 207, 109
+	Width 14 Height 8
+	Title "xF:"
+	
+Control EditText
+	Id 16
+	Position 226, 107
+	Width 20 Height 12
+	Value mr
+	Into mr
+	
+Control GroupBox
+	Id 17
+	Position 8, 130
+	Width 252 Height 74
+	Title "Opcije"
+	
+Control StaticText
+	Id 18
+	Position 16, 141
+	Width 29 Height 8
+	Title "R = 1 : "
+	
+Control EditText
+	Id 19
+	Position 46, 140
+	Width 56 Height 12
+	Value s_mapScale
+	
+Control CheckBox
+	Id 20
+	Position 116, 142
+	Width 52
+	Title "Upozorenje"
+	Value True
+	Into l_Upozorenje
+	
+Control CheckBox
+	Id 21
+	Position 204, 142
+	Width 50
+	Title "Print okvir"
+	Value False
+	Into l_Okvir
+	
+Control CheckBox
+	Id 22
+	Position 46, 156
+	Width 66
+	Title "Pravac Severa"
+	Value True
+	Into l_Sever
+	
+Control CheckBox
+	Id 23
+	Position 116, 156
+	Width 46
+	Title "Legenda"
+	Calling Legenda_checkbox
+	Value False
+	Into l_Legenda
+	
+Control CheckBox
+	Id 24
+	Position 204, 156
+	Width 36
+	Title "JPEG"
+	Calling JPEG_checkbox
+	Value False
+	Into l_PrintSlika
+	
+Control CheckBox
+	Id 25
+	Position 46, 169
+	Width 64
+	Title "Koord. markeri"
+	Value True
+	Into l_Markeri
+	
+Control PopupMenu
+	Id 26
+	Position 126, 168
+	Width 73
+	Title From Variable rs_TipLegende
+	Disable
+	Value s_TipLgd
+	Into s_TipLgd
+	
+Control EditText
+	Id 27
+	Position 215, 169
+	Width 25 Height 12
+	Disable
+	Value i_Dpi
+	Into i_Dpi
+	
+Control StaticText
+	Id 28
+	Position 243, 170
+	Width 14 Height 8
+	Title "dpi"
+	
+Control StaticText
+	Id 29
+	Position 12, 190
+	Width 29 Height 8
+	Title "Naslov:"
+	
+Control EditText
+	Id 30
+	Position 46, 188
+	Width 210 Height 12
+	Value s_Naslov
+	Into s_Naslov
+	
+Control CancelButton
+	Title "Cancel"
+	Id 31
+	Position 8, 208
+	Width 51 Height 14
+	
+Control OKButton
+	Title "OK"
+	Id 32
+	Position 209, 208
+	Width 51 Height 14
+	Calling DLG_printOK
+
+	Exit Sub
+'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "DLG_print")
+	Call ERRShow()
+		
+End Sub			
+		

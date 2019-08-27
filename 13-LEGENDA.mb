@@ -1,0 +1,299 @@
+include "mapbasic.def"
+include "menu.def"
+include "icons.def"
+include "..\Library\ERRORLib.def"
+include "..\nmiWin.def"
+include "..\nmiFunkcije.def"
+include "..\nmiDotNet.def"
+include "NAISSUS-GIS.def"
+
+Sub Legenda(ByVal TipLegende as SmallInt)
+
+	OnError Goto Greska
+	
+	Do Case TipLegende
+
+		Case 9
+		Print "NIVOS(kompletna)"
+		Create Designer Legend 
+			From Window MapWinID(0)
+			Position (0,0) Units "cm"
+			Window Title "Legenda NIVOS" 
+			Custom		
+			Default Frame Line Width 36 Units "pt"
+			Default Frame Region Width 32 Units "pt"
+			Default Frame Region Height 14 Units "pt"
+			Frame From Layer LayerID(KAPTAZE) 				Position (0,0.00) Units "in" Style Font ("Tahoma",0,8,0) Text "Kaptaža" 			Symbol (39,6343679,10,"MapInfo Cartographic",256,0)
+			Frame From Layer LayerID(PREKIDNE_KOMORE) 		Position (0,0.26) Units "in" Style Font ("Tahoma",0,8,0) Text "Prekidna komora" 	Symbol (33,65280,10,"MapInfo Cartographic",48,0) 
+			Frame From Layer LayerID(REZERVOARI) 			Position (0,0.43) Units "in" Style Font ("Tahoma",0,8,0) Text "Rezervoar" 			Symbol (44,255,12) 
+			Frame From Layer LayerID(CRPNA_STANICA) 		Position (0,0.67) Units "in" Style Font ("Tahoma",0,8,0) Text "Crpna stanica" 		Symbol (59,255,12) 
+			Frame From Layer LayerID(REGULATORI_PRITISKA) 	Position (0,0.85) Units "in" Style Font ("Tahoma",0,8,0) Text "Regulator pritiska" 	Symbol (42,45056,14,"MapInfo Oil&Gas",257,0)
+			Frame From Layer LayerID(VAZD_VENTIL) 			Position (0,1.05) Units "in" Style Font ("Tahoma",0,8,0) Text "Vazdušni ventil" 	Symbol (49,255,14,"MapInfo Oil&Gas",257,0) 
+			Frame From Layer LayerID(MULJ_ISPUST) 			Position (0,1.30) Units "in" Style Font ("Tahoma",0,8,0) Text "Muljni ispust" 		Symbol (43,4243711,14,"MapInfo Oil&Gas",257,0) 		
+			Frame From Layer LayerID(NEPOVRATNI_VENTIL) 	Position (0,1.52) Units "in" Style Font ("Tahoma",0,8,0) Text "Nepovratni ventil" 	Symbol (39,65535,14,"MapInfo Oil&Gas",17,0) 
+			Frame From Layer LayerID(VELIKI_VODOMERI) 		Position (0,1.73) Units "in" Style Font ("Tahoma",0,8,0) Text "Zonski vodomer" 		Symbol (47,65535,10,"MapInfo Cartographic",17,0)
+			Frame From Layer LayerID(MERACI_PROTOKA) 		Position (0,1.94) Units "in" Style Font ("Tahoma",0,8,0) Text "Meraè protoka" 		Symbol (45,8443391,14) 
+			Frame From Layer LayerID(MERNE_ZONE_ZATVARACI) 	Position (0,2.56) Units "in" Style Font ("Tahoma",0,8,0) Text "Zonski zatvaraè" 	Symbol (63,8454143,12,"MapInfo Weather",16,0) 		
+			Frame From Layer LayerID(CEVOVODNI_SAHT) 		Position (0,2.74) Units "in" Style Font ("Tahoma",0,8,0) Text "Šaht" 				Symbol (37,255,10,"MapInfo Cartographic",256,0) 		
+			Frame From Layer LayerID(ZATVARAC) 				Position (0,2.96) Units "in" Style Font ("Tahoma",0,8,0) Text "Zatvaraè" 			Symbol (63,255,12,"MapInfo Weather",257,0)
+			Frame From Layer LayerID(HIDRANT) 				Position (0,3.19) Units "in" Style Font ("Tahoma",0,8,0) Text "Hidrant" 			Symbol (60,255,12,"MapInfo Weather",256,0) 
+			Frame From Layer LayerID(VODOMERI) 				Position (0,3.40) Units "in" Style Font ("Tahoma",0,8,0 ) Text "Vodomer" 			Symbol (59,5278719,12)
+			Frame From Layer LayerID(PRIKLJUCCI) 			Position (0.2,3.60) Units "in" Style Font ("Tahoma",0,8,0) Text "Prikljuèak" 		Line Pen (20,2,3175935)
+			Frame From Layer LayerID(CEVOVOD) 				Position (0.2,3.80) Units "in" Style Font ("Tahoma",0,8,0) Text "Vodovod" 			Line Pen (2,2,38368)
+			Frame From Layer LayerID(INTERNI_CEVOVOD) 		Position (0.2,4.00) Units "in" Style Font ("Tahoma",0,8,0) Text "(interno)" 		Line Pen (1,6,15790080)
+				
+		Case 8 
+		Print "NIVOS(pregledna)"
+
+		Create Designer Legend 
+			From Window MapWinID(0) 
+			Position (0,0) Units "cm"
+			Window Title "Legenda NIVOS" 
+			Custom		
+			Default Frame Line Width 36 Units "pt"
+			Default Frame Region Width 32 Units "pt"
+			Default Frame Region Height 14 Units "pt"
+			Frame From Layer LayerID(KAPTAZE) 				Position (0,0.04) Units "in" Style Font ("Tahoma",0,8,0) Text "Kaptaža" 			Symbol (39,6343679,10,"MapInfo Cartographic",256,0)
+			Frame From Layer LayerID(PREKIDNE_KOMORE) 		Position (0,0.24) Units "in" Style Font ("Tahoma",0,8,0) Text "Prekidna komora" 	Symbol (33,65280,10,"MapInfo Cartographic",48,0) 
+			Frame From Layer LayerID(REZERVOARI) 			Position (0,0.47) Units "in" Style Font ("Tahoma",0,8,0) Text "Rezervoar" 			Symbol (44,255,12) 
+			Frame From Layer LayerID(CRPNA_STANICA) 		Position (0,0.67) Units "in" Style Font ("Tahoma",0,8,0) Text "Crpna stanica" 		Symbol (59,255,12) 
+			Frame From Layer LayerID(REGULATORI_PRITISKA) 	Position (0,0.85) Units "in" Style Font ("Tahoma",0,8,0) Text "Regulator pritiska" 	Symbol (42,45056,14,"MapInfo Oil&Gas",257,0)
+			Frame From Layer LayerID(VAZD_VENTIL) 			Position (0,1.06) Units "in" Style Font ("Tahoma",0,8,0) Text "Vazdušni ventil" 	Symbol (49,255,14,"MapInfo Oil&Gas",257,0) 
+			Frame From Layer LayerID(MULJ_ISPUST) 			Position (0,1.27) Units "in" Style Font ("Tahoma",0,8,0) Text "Muljni ispust" 		Symbol (43,4243711,14,"MapInfo Oil&Gas",257,0) 		
+			Frame From Layer LayerID(NEPOVRATNI_VENTIL) 	Position (0,1.47) Units "in" Style Font ("Tahoma",0,8,0) Text "Nepovratni ventil" 	Symbol (39,65535,14,"MapInfo Oil&Gas",17,0) 
+			Frame From Layer LayerID(VELIKI_VODOMERI) 		Position (0,1.70) Units "in" Style Font ("Tahoma",0,8,0) Text "Zonski vodomer" 		Symbol (47,65535,10,"MapInfo Cartographic",17,0)
+			Frame From Layer LayerID(MERACI_PROTOKA) 		Position (0,1.93) Units "in" Style Font ("Tahoma",0,8,0) Text "Meraè protoka" 		Symbol (45,8443391,12) 
+			Frame From Layer LayerID(MERNE_ZONE_ZATVARACI) 	Position (0,2.09) Units "in" Style Font ("Tahoma",0,8,0) Text "Zonski zatvaraè" 	Symbol (63,8454143,12,"MapInfo Weather",16,0) 		
+			Frame From Layer LayerID(CEVOVOD) 				Position (0.2,2.35) Units "in" Style Font ("Tahoma",0,8,0) Text "Vodovod" 			Line Pen (2,2,38368)    
+	
+		Case 7 
+		Print "NIVOS(detaljna)"
+
+		Create Designer Legend 
+			From Window MapWinID(0) 
+			Position (0,0) Units "cm"
+			Window Title "Legenda NIVOS" 
+			Custom		
+			Default Frame Line Width 36 Units "pt"
+			Default Frame Region Width 32 Units "pt"
+			Default Frame Region Height 14 Units "pt"
+			Frame From Layer LayerID(MERACI_PROTOKA) 		Position (0,0.05) Units "in" Style Font ("Tahoma",0,8,0) Text "Meraè protoka" 		Symbol (45,8443391,12) 
+			Frame From Layer LayerID(MERNE_ZONE_ZATVARACI) 	Position (0,0.22) Units "in" Style Font ("Tahoma",0,8,0) Text "Zonski zatvaraè" Symbol (63,8454143,12,"MapInfo Weather",16,0) 		
+			Frame From Layer LayerID(CEVOVODNI_SAHT) 		Position (0,0.46) Units "in" Style Font ("Tahoma",0,8,0) Text "Šaht" 			Symbol (37,255,10,"MapInfo Cartographic",256,0) 		
+			Frame From Layer LayerID(ZATVARAC) 				Position (0,0.62) Units "in" Style Font ("Tahoma",0,8,0) Text "Zatvaraè" 		Symbol (63,255,12,"MapInfo Weather",257,0)
+			Frame From Layer LayerID(HIDRANT) 				Position (0,0.84) Units "in" Style Font ("Tahoma",0,8,0) Text "Hidrant" 		Symbol (60,255,12,"MapInfo Weather",256,0) 
+			Frame From Layer LayerID(VODOMERI) 				Position (0,1.09) Units "in" Style Font ("Tahoma",0,8,0 ) Text "Vodomer" 		Symbol (59,5278719,12) 
+			Frame From Layer LayerID(PRIKLJUCCI) 			Position (0.2,1.27) Units "in" Style Font ("Tahoma",0,8,0) Text "Prikljuèak" 	Line Pen (20,2,3175935) 
+			Frame From Layer LayerID(CEVOVOD) 				Position (0.2,1.47) Units "in" Style Font ("Tahoma",0,8,0) Text "Vodovod" 		Line Pen (2,2,38368)    
+			Frame From Layer LayerID(INTERNI_CEVOVOD) 		Position (0.2,1.66) Units "in" Style Font ("Tahoma",0,8,0) Text "(interno)" 	Line Pen (1,6,15790080) 	
+	
+		Case 6 
+		Print "NIKAS(kompletna)"
+	
+		Create Designer Legend
+			From Window MapWinID(0)
+			Position (1.17708,0.260417) Units "in"
+			Width 2.40625 Units "in" Height 3.83333 Units "in" 
+			Window Title "Legenda NIKAS"
+			Custom
+			Default Frame Line Width 36 Units "pt"
+			Default Frame Region Width 32 Units "pt"
+			Default Frame Region Height 14 Units "pt"
+			Frame From Layer LayerID(POSTR_ZA_PREC) 	Position (0,0.04) Units "in" Style Font ("Tahoma",0,8,0) Text "Postrojenje" 	Symbol (44,14694400,18)
+			Frame From Layer LayerID(CS_OTPAD_VODA) 	Position (0,0.25) Units "in" Style Font ("Tahoma",0,8,0) Text "Crpna stanica" 	Symbol (45,13658112,18) 
+			Frame From Layer LayerID(ZASTIT_KANAL_CEVI) Position (0.2,0.48) Units "in" Style Font ("Tahoma",0,8,0) Text "Zastitni kanal" 		Line Pen (1,49,6332416) 
+			Frame From Layer LayerID(SIFON) 			Position (0,0.65) Units "in" Style Font ("Tahoma",0,8,0) Text "Sifon" 			Symbol (44,12595200,14,"MapInfo Oil&Gas",16,0) 
+			Frame From Layer LayerID(PRELIV) 			Position (0,0.87) Units "in" Style Font ("Tahoma",0,8,0) Text "Preliv" 			Symbol (45,16711680,12,"MapInfo Oil&Gas",257,0) 
+			Frame From Layer LayerID(SLIVNIK) 			Position (0,1.10) Units "in" Style Font ("Tahoma",0,8,0) Text "Slivnik" 		Symbol (83,53248,10,"MapInfo Miscellaneous",256,0) 
+			Frame From Layer LayerID(SLIVNIK_PRIKLJUCAK) Position (0.2,1.31) Units "in" Style Font ("Tahoma",0,8,0) Text "Slivnik priklj." 	Line Pen (2,2,8245248) 
+			Frame From Layer LayerID(ATM_IZLIV) 		Position (0,1.51) Units "in" Style Font ("Tahoma",0,8,0) Text "Atm. izliv" 		Symbol (46,53248,14) 
+			Frame From Layer LayerID(ATM_SAHT) 			Position (0,1.71) Units "in" Style Font ("Tahoma",0,8,0) Text "Atm. šaht" 		Symbol (44,45056,10,"MapInfo Cartographic",257,0) 
+			Frame From Layer LayerID(ATM_PRIKLJUCAK) 	Position (0.2,1.93) Units "in" Style Font ("Tahoma",0,8,0) Text "Atm. priklj." 	Line Pen (2,2,12632064) 
+			Frame From Layer LayerID(ATMOSFERSKA) 		Position (0.2,2.14) Units "in" Style Font ("Tahoma",0,8,0) Text "Atmosferska kan." Line Pen (2,2,57344) 
+			Frame From Layer LayerID(KORISNICKI_SAHT) 	Position (0,2.35) Units "in" Style Font ("Tahoma",0,8,0) Text "Šaht korisnika" 	Symbol (40,16711680,10) 
+			Frame From Layer LayerID(FEK_KAN_IZLIV) 	Position (0,2.55) Units "in" Style Font ("Tahoma",0,8,0) Text "Fek. izliv" 		Symbol (46,16734240,14) 
+			Frame From Layer LayerID(FEK_KAN_SAHT) 		Position (0,2.76) Units "in" Style Font ("Tahoma",0,8,0) Text "Fek. šaht" 		Symbol (44,12595200,10,"MapInfo Cartographic",257,0) 
+			Frame From Layer LayerID(FEK_KAN_PRIKLJUCAK) Position (0.2,2.98) Units "in" Style Font ("Tahoma",0,8,0) Text "Fek. priklj." 	Line Pen (2,2,16744448) 
+			Frame From Layer LayerID(FEKALNA) 			Position (0.2,3.18) Units "in" Style Font ("Tahoma",0,8,0) Text "Fekalna kan." 	Line Pen (2,2,14694400) 
+      
+		Case 5 
+		Print "NIKAS(pregledna)"
+		Create Designer Legend
+			From Window MapWinID(0)
+			Position (1.17708,0.260417) Units "in"
+			Width 2.40625 Units "in" Height 3.83333 Units "in" 
+			Window Title "Legenda NIKAS"
+			Custom
+			Default Frame Line Width 36 Units "pt"
+			Default Frame Region Width 32 Units "pt"
+			Default Frame Region Height 14 Units "pt"
+			Frame From Layer LayerID(POSTR_ZA_PREC) 		Position (0,0.04) Units "in" Style Font ("Tahoma",0,8,0) Text "Postrojenje" 	Symbol (44,14694400,18) 
+			Frame From Layer LayerID(CS_OTPAD_VODA) 		Position (0,0.25) Units "in" Style Font ("Tahoma",0,8,0) Text "Crpna stanica" 	Symbol (45,13658112,18) 
+			Frame From Layer LayerID(SIFON) 				Position (0,0.44) Units "in" Style Font ("Tahoma",0,8,0) Text "Sifon" 			Symbol (44,12595200,14,"MapInfo Oil&Gas",16,0) 
+			Frame From Layer LayerID(PRELIV) 				Position (0,0.66) Units "in" Style Font ("Tahoma",0,8,0) Text "Preliv" 			Symbol (45,16711680,12,"MapInfo Oil&Gas",257,0) 
+			Frame From Layer LayerID(ATM_IZLIV) 			Position (0,0.88) Units "in" Style Font ("Tahoma",0,8,0) Text "Atm. izliv" 		Symbol (46,53248,14) 
+			Frame From Layer LayerID(ATMOSFERSKA) 			Position (0.2,1.10) Units "in" Style Font ("Tahoma",0,8,0) Text "Atmosferska kan." Line Pen (2,2,57344) 
+			Frame From Layer LayerID(FEK_KAN_IZLIV) 		Position (0,1.28) Units "in" Style Font ("Tahoma",0,8,0) Text "Fek. izliv" 		Symbol (46,16734240,14) 
+			Frame From Layer LayerID(FEKALNA) 				Position (0.2,1.52) Units "in" Style Font ("Tahoma",0,8,0) Text "Fekalna kan." 	Line Pen (2,2,14694400) 		
+			
+		Case 4 
+		Print "NIKAS(detaljna)"
+		Create Designer Legend
+			From Window MapWinID(0)
+			Position (1.17708,0.260417) Units "in"
+			Width 2.40625 Units "in" Height 3.83333 Units "in" 
+			Window Title "Legenda NIKAS"
+			Custom
+			Default Frame Line Width 36 Units "pt"
+			Default Frame Region Width 32 Units "pt"
+			Default Frame Region Height 14 Units "pt" 		
+			Frame From Layer LayerID(ZASTIT_KANAL_CEVI) 	Position (0.2,0.00) Units "in" Style Font ("Tahoma",0,8,0) Text "Zastitni kanal" 		Line Pen (1,49,6332416) 
+			Frame From Layer LayerID(SIFON) 				Position (0,0.17) Units "in" Style Font ("Tahoma",0,8,0) Text "Sifon" 			Symbol (44,12595200,14,"MapInfo Oil&Gas",16,0) 
+			Frame From Layer LayerID(PRELIV) 				Position (0,0.39) Units "in" Style Font ("Tahoma",0,8,0) Text "Preliv" 			Symbol (45,16711680,12,"MapInfo Oil&Gas",257,0) 
+			Frame From Layer LayerID(SLIVNIK) 				Position (0,0.62) Units "in" Style Font ("Tahoma",0,8,0) Text "Slivnik" 		Symbol (83,53248,10,"MapInfo Miscellaneous",256,0) 
+			Frame From Layer LayerID(SLIVNIK_PRIKLJUCAK) 	Position (0.2,0.83) Units "in" Style Font ("Tahoma",0,8,0) Text "Slivnik priklj." 	Line Pen (2,2,8245248) 
+			Frame From Layer LayerID(ATM_IZLIV) 			Position (0,1.03) Units "in" Style Font ("Tahoma",0,8,0) Text "Atm. izliv" 		Symbol (46,53248,14) 
+			Frame From Layer LayerID(ATM_SAHT) 				Position (0,1.23) Units "in" Style Font ("Tahoma",0,8,0) Text "Atm. šaht" 		Symbol (44,45056,10,"MapInfo Cartographic",257,0) 
+			Frame From Layer LayerID(ATM_PRIKLJUCAK) 		Position (0.2,1.45) Units "in" Style Font ("Tahoma",0,8,0) Text "Atm. priklj." 		Line Pen (2,2,12632064) 
+			Frame From Layer LayerID(ATMOSFERSKA) 			Position (0.2,1.66) Units "in" Style Font ("Tahoma",0,8,0) Text "Atmosferska kan." 	Line Pen (2,2,57344) 
+			Frame From Layer LayerID(KORISNICKI_SAHT) 		Position (0,1.87) Units "in" Style Font ("Tahoma",0,8,0) Text "Šaht korisnika" 	Symbol (40,16711680,10) 
+			Frame From Layer LayerID(FEK_KAN_IZLIV) 		Position (0,2.07) Units "in" Style Font ("Tahoma",0,8,0) Text "Fek. izliv" 		Symbol (46,16734240,14) 
+			Frame From Layer LayerID(FEK_KAN_SAHT) 			Position (0,2.28) Units "in" Style Font ("Tahoma",0,8,0) Text "Fek. šaht" 		Symbol (44,12595200,10,"MapInfo Cartographic",257,0) 
+			Frame From Layer LayerID(FEK_KAN_PRIKLJUCAK) 	Position (0.2,2.51) Units "in" Style Font ("Tahoma",0,8,0) Text "Fek. priklj." 		Line Pen (2,2,16744448) 
+			Frame From Layer LayerID(FEKALNA) 				Position (0.2,2.69) Units "in" Style Font ("Tahoma",0,8,0) Text "Fekalna kan." 		Line Pen (2,2,14694400) 
+		
+		Case 3
+		Print "NIVOS+NIKAS (kompletna)"
+		Create Designer Legend 
+			From Window MapWinID(0)
+			Position (0,0) Units "cm"
+			Window Title "Legenda NIVOS+NIKAS" 
+			Custom		
+			Default Frame Line Width 36 Units "pt"
+			Default Frame Region Width 32 Units "pt"
+			Default Frame Region Height 14 Units "pt"
+			Frame From Layer LayerID(KAPTAZE) 				Position (0,0.15) Units "in" Style Font ("Tahoma",0,8,0) Text "Kaptaža" 				Symbol (39,6343679,10,"MapInfo Cartographic",256,0)
+			Frame From Layer LayerID(PREKIDNE_KOMORE) 		Position (0,0.31) Units "in" Style Font ("Tahoma",0,8,0) Text "Prekidna komora" 	Symbol (33,65280,10,"MapInfo Cartographic",48,0) 
+			Frame From Layer LayerID(REZERVOARI) 			Position (0,0.50) Units "in" Style Font ("Tahoma",0,8,0) Text "Rezervoar" 			Symbol (44,255,12) 
+			Frame From Layer LayerID(CRPNA_STANICA) 		Position (0,0.67) Units "in" Style Font ("Tahoma",0,8,0) Text "Crpna stanica" 		Symbol (59,255,12) 
+			Frame From Layer LayerID(REGULATORI_PRITISKA) 	Position (0,0.82) Units "in" Style Font ("Tahoma",0,8,0) Text "Regulator pritiska" 	Symbol (42,45056,14,"MapInfo Oil&Gas",257,0)
+			Frame From Layer LayerID(VAZD_VENTIL) 			Position (0,1.00) Units "in" Style Font ("Tahoma",0,8,0) Text "Vazdušni ventil" 	Symbol (49,255,14,"MapInfo Oil&Gas",257,0) 
+			Frame From Layer LayerID(MULJ_ISPUST) 			Position (0,1.20) Units "in" Style Font ("Tahoma",0,8,0) Text "Muljni ispust" 		Symbol (43,4243711,14,"MapInfo Oil&Gas",257,0) 		
+			Frame From Layer LayerID(NEPOVRATNI_VENTIL) 	Position (0,1.38) Units "in" Style Font ("Tahoma",0,8,0) Text "Nepovratni ventil" 	Symbol (39,65535,14,"MapInfo Oil&Gas",17,0) 
+			Frame From Layer LayerID(VELIKI_VODOMERI) 		Position (0,1.58) Units "in" Style Font ("Tahoma",0,8,0) Text "Zonski vodomer" 		Symbol (47,65535,10,"MapInfo Cartographic",17,0)
+			Frame From Layer LayerID(MERACI_PROTOKA) 		Position (0,1.78) Units "in" Style Font ("Tahoma",0,8,0) Text "Meraè protoka" 		Symbol (45,8443391,14) 
+			Frame From Layer LayerID(MERNE_ZONE_ZATVARACI) 	Position (0,1.92) Units "in" Style Font ("Tahoma",0,8,0) Text "Zonski zatvaraè" 	Symbol (63,8454143,12,"MapInfo Weather",16,0) 		
+			Frame From Layer LayerID(CEVOVODNI_SAHT) 		Position (0,2.14) Units "in" Style Font ("Tahoma",0,8,0) Text "Šaht" 				Symbol (37,255,10,"MapInfo Cartographic",256,0) 		
+			Frame From Layer LayerID(ZATVARAC) 				Position (0,2.29) Units "in" Style Font ("Tahoma",0,8,0) Text "Zatvaraè" 			Symbol (63,255,12,"MapInfo Weather",257,0)
+			Frame From Layer LayerID(HIDRANT) 				Position (0,2.48) Units "in" Style Font ("Tahoma",0,8,0) Text "Hidrant" 			Symbol (60,255,12,"MapInfo Weather",256,0) 
+			Frame From Layer LayerID(VODOMERI) 				Position (0,2.71) Units "in" Style Font ("Tahoma",0,8,0 ) Text "Vodomer" 			Symbol (59,5278719,12)
+			Frame From Layer LayerID(CEVOVOD) 				Position (0.2,2.91) Units "in" Style Font ("Tahoma",0,8,0) Text "Vodovod" 				Line Pen (2,2,38368)
+			Frame From Layer LayerID(POSTR_ZA_PREC) 		Position (0,3.25) Units "in" Style Font ("Tahoma",0,8,0) Text "Postrojenje" 		Symbol (44,14694400,18)
+			Frame From Layer LayerID(CS_OTPAD_VODA) 		Position (0,3.43) Units "in" Style Font ("Tahoma",0,8,0) Text "Crpna stanica" 		Symbol (45,13658112,18) 
+			Frame From Layer LayerID(ZASTIT_KANAL_CEVI) 	Position (0.2,3.65) Units "in" Style Font ("Tahoma",0,8,0) Text "Zastitni kanal" 			Line Pen (1,49,6332416) 
+			Frame From Layer LayerID(SIFON) 				Position (0,3.77) Units "in" Style Font ("Tahoma",0,8,0) Text "Sifon" 				Symbol (44,12595200,14,"MapInfo Oil&Gas",16,0) 
+			Frame From Layer LayerID(PRELIV) 				Position (0,3.97) Units "in" Style Font ("Tahoma",0,8,0) Text "Preliv" 				Symbol (45,16711680,12,"MapInfo Oil&Gas",257,0) 
+			Frame From Layer LayerID(SLIVNIK) 				Position (0,4.16) Units "in" Style Font ("Tahoma",0,8,0) Text "Slivnik" 			Symbol (83,53248,10,"MapInfo Miscellaneous",256,0) 
+			Frame From Layer LayerID(ATM_IZLIV) 			Position (0,4.32) Units "in" Style Font ("Tahoma",0,8,0) Text "Atm. izliv" 			Symbol (46,53248,14) 
+			Frame From Layer LayerID(ATM_SAHT) 				Position (0,4.45) Units "in" Style Font ("Tahoma",0,8,0) Text "Atm. šaht" 			Symbol (44,45056,10,"MapInfo Cartographic",257,0) 
+			Frame From Layer LayerID(ATMOSFERSKA) 			Position (0.2,4.62) Units "in" Style Font ("Tahoma",0,8,0) Text "Atmosferska kan." 	Line Pen (2,2,57344) 
+			Frame From Layer LayerID(KORISNICKI_SAHT) 		Position (0,4.80) Units "in" Style Font ("Tahoma",0,8,0) Text "Šaht korisnika" 		Symbol (40,16711680,10) 
+			Frame From Layer LayerID(FEK_KAN_IZLIV) 		Position (0,4.96) Units "in" Style Font ("Tahoma",0,8,0) Text "Fek. izliv" 			Symbol (46,16734240,14) 
+			Frame From Layer LayerID(FEK_KAN_SAHT) 			Position (0,5.11) Units "in" Style Font ("Tahoma",0,8,0) Text "Fek. šaht" 			Symbol (44,12595200,10,"MapInfo Cartographic",257,0) 
+			Frame From Layer LayerID(FEKALNA) 				Position (0.2,5.32) Units "in" Style Font ("Tahoma",0,8,0) Text "Fekalna kan." 		Line Pen (2,2,14694400) 			
+	
+			Lgd.y = f1.y+7.9
+			
+		Case 2
+		Print "NIVOS+NIKAS (pregledna)"
+		Create Designer Legend 
+			From Window MapWinID(0) 
+			Position (0,0) Units "cm"
+			Window Title "Legenda NIVOS+NIKAS" 
+			Custom		
+			Default Frame Line Width 36 Units "pt"
+			Default Frame Region Width 32 Units "pt"
+			Default Frame Region Height 14 Units "pt"
+			Frame From Layer LayerID(KAPTAZE) 				Position (0,0.25) Units "in" Style Font ("Tahoma",0,8,0) Text "Kaptaža" 			Symbol (39,6343679,10,"MapInfo Cartographic",256,0)
+			Frame From Layer LayerID(PREKIDNE_KOMORE) 		Position (0,0.46) Units "in" Style Font ("Tahoma",0,8,0) Text "Prekidna komora" 	Symbol (33,65280,10,"MapInfo Cartographic",48,0) 
+			Frame From Layer LayerID(REZERVOARI) 			Position (0,0.67) Units "in" Style Font ("Tahoma",0,8,0) Text "Rezervoar" 			Symbol (44,255,12) 
+			Frame From Layer LayerID(CRPNA_STANICA) 		Position (0,0.85) Units "in" Style Font ("Tahoma",0,8,0) Text "Crpna stanica" 		Symbol (59,255,12) 
+			Frame From Layer LayerID(REGULATORI_PRITISKA) 	Position (0,1.06) Units "in" Style Font ("Tahoma",0,8,0) Text "Regulator pritiska" 	Symbol (42,45056,14,"MapInfo Oil&Gas",257,0)
+			Frame From Layer LayerID(VAZD_VENTIL) 			Position (0,1.27) Units "in" Style Font ("Tahoma",0,8,0) Text "Vazdušni ventil" 	Symbol (49,255,14,"MapInfo Oil&Gas",257,0) 
+			Frame From Layer LayerID(MULJ_ISPUST) 			Position (0,1.47) Units "in" Style Font ("Tahoma",0,8,0) Text "Muljni ispust" 		Symbol (43,4243711,14,"MapInfo Oil&Gas",257,0) 		
+			Frame From Layer LayerID(NEPOVRATNI_VENTIL) 	Position (0,1.70) Units "in" Style Font ("Tahoma",0,8,0) Text "Nepovratni ventil" 	Symbol (39,65535,14,"MapInfo Oil&Gas",17,0) 
+			Frame From Layer LayerID(VELIKI_VODOMERI) 		Position (0,1.93) Units "in" Style Font ("Tahoma",0,8,0) Text "Zonski vodomer" 		Symbol (47,65535,10,"MapInfo Cartographic",17,0)
+			Frame From Layer LayerID(MERACI_PROTOKA) 		Position (0,2.09) Units "in" Style Font ("Tahoma",0,8,0) Text "Meraè protoka" 		Symbol (45,8443391,12) 
+			Frame From Layer LayerID(MERNE_ZONE_ZATVARACI) 	Position (0,2.35) Units "in" Style Font ("Tahoma",0,8,0) Text "Zonski zatvaraè" 	Symbol (63,8454143,12,"MapInfo Weather",16,0) 		
+			Frame From Layer LayerID(CEVOVOD) 				Position (0.2,2.65) Units "in" Style Font ("Tahoma",0,8,0) Text "Vodovod" 				Line Pen (2,2,38368) 								'------------------------
+			Frame From Layer LayerID(POSTR_ZA_PREC) 		Position (0,3.16) Units "in" Style Font ("Tahoma",0,8,0) Text "Postrojenje" 		Symbol (44,14694400,18) 
+			Frame From Layer LayerID(CS_OTPAD_VODA) 		Position (0,3.37) Units "in" Style Font ("Tahoma",0,8,0) Text "Crpna stanica" 		Symbol (45,13658112,18) 
+			Frame From Layer LayerID(SIFON) 				Position (0,3.56) Units "in" Style Font ("Tahoma",0,8,0) Text "Sifon" 				Symbol (44,12595200,14,"MapInfo Oil&Gas",16,0) 
+			Frame From Layer LayerID(PRELIV) 				Position (0,3.78) Units "in" Style Font ("Tahoma",0,8,0) Text "Preliv" 				Symbol (45,16711680,12,"MapInfo Oil&Gas",257,0) 
+			Frame From Layer LayerID(ATM_IZLIV) 			Position (0,4.00) Units "in" Style Font ("Tahoma",0,8,0) Text "Atm. izliv" 			Symbol (46,53248,14) 
+			Frame From Layer LayerID(ATMOSFERSKA) 			Position (0.2,4.22) Units "in" Style Font ("Tahoma",0,8,0) Text "Atmosferska kan." 		Line Pen (2,2,57344) 
+			Frame From Layer LayerID(FEK_KAN_IZLIV) 		Position (0,4.40) Units "in" Style Font ("Tahoma",0,8,0) Text "Fek. izliv" 			Symbol (46,16734240,14) 
+			Frame From Layer LayerID(FEKALNA) 				Position (0.2,4.64) Units "in" Style Font ("Tahoma",0,8,0) Text "Fekalna kan." 			Line Pen (2,2,14694400)			
+			
+			Lgd.y = f1.y+7.27
+						
+		Case 1 
+		Print "NIVOS+NIKAS (detaljna)"
+		Create Designer Legend 
+			From Window MapWinID(0) 
+			Position (0,0) Units "cm"
+			Window Title "Legenda NIVOS+NIKAS" 
+			Custom		
+			Default Frame Line Width 36 Units "pt"
+			Default Frame Region Width 32 Units "pt"
+			Default Frame Region Height 14 Units "pt"
+			Frame From Layer LayerID(MERACI_PROTOKA) 		Position (0,0.24) Units "in" Style Font ("Tahoma",0,8,0) Text "Meraè protoka" 	Symbol (45,8443391,12) 
+			Frame From Layer LayerID(MERNE_ZONE_ZATVARACI) 	Position (0,0.40) Units "in" Style Font ("Tahoma",0,8,0) Text "Zonski zatvaraè" Symbol (63,8454143,12,"MapInfo Weather",16,0) 		
+			Frame From Layer LayerID(CEVOVODNI_SAHT) 		Position (0,0.64) Units "in" Style Font ("Tahoma",0,8,0) Text "Šaht" 			Symbol (37,255,10,"MapInfo Cartographic",256,0) 		
+			Frame From Layer LayerID(ZATVARAC) 				Position (0,0.80) Units "in" Style Font ("Tahoma",0,8,0) Text "Zatvaraè" 		Symbol (63,255,12,"MapInfo Weather",257,0)
+			Frame From Layer LayerID(HIDRANT) 				Position (0,1.02) Units "in" Style Font ("Tahoma",0,8,0) Text "Hidrant" 		Symbol (60,255,12,"MapInfo Weather",256,0) 
+			Frame From Layer LayerID(VODOMERI) 				Position (0,1.27) Units "in" Style Font ("Tahoma",0,8,0 ) Text "Vodomer" 		Symbol (59,5278719,12) 
+			Frame From Layer LayerID(PRIKLJUCCI) 			Position (0.2,1.45) Units "in" Style Font ("Tahoma",0,8,0) Text "Prikljuèak"		Line Pen (20,2,3175935) 
+			Frame From Layer LayerID(CEVOVOD) 				Position (0.2,1.65) Units "in" Style Font ("Tahoma",0,8,0) Text "Vodovod" 			Line Pen (2,2,38368)    
+			Frame From Layer LayerID(INTERNI_CEVOVOD) 		Position (0.2,1.84) Units "in" Style Font ("Tahoma",0,8,0) Text "(interno)" 		Line Pen (1,6,15790080) 			
+			Frame From Layer LayerID(ZASTIT_KANAL_CEVI) 	Position (0.2,2.35) Units "in" Style Font ("Tahoma",0,8,0) Text "Zastitni kanal" 	Line Pen (1,49,6332416) 				'-------------------------------------------------
+			Frame From Layer LayerID(SIFON) 				Position (0,2.52) Units "in" Style Font ("Tahoma",0,8,0) Text "Sifon" 			Symbol (44,12595200,14,"MapInfo Oil&Gas",16,0) 
+			Frame From Layer LayerID(PRELIV) 				Position (0,2.74) Units "in" Style Font ("Tahoma",0,8,0) Text "Preliv" 			Symbol (45,16711680,12,"MapInfo Oil&Gas",257,0) 
+			Frame From Layer LayerID(SLIVNIK) 				Position (0,2.97) Units "in" Style Font ("Tahoma",0,8,0) Text "Slivnik" 		Symbol (83,53248,10,"MapInfo Miscellaneous",256,0) 
+			Frame From Layer LayerID(SLIVNIK_PRIKLJUCAK) 	Position (0.2,3.18) Units "in" Style Font ("Tahoma",0,8,0) Text "Slivnik priklj." 	Line Pen (2,2,8245248) 
+			Frame From Layer LayerID(ATM_IZLIV) 			Position (0,3.38) Units "in" Style Font ("Tahoma",0,8,0) Text "Atm. izliv" 		Symbol (46,53248,14) 
+			Frame From Layer LayerID(ATM_SAHT) 				Position (0,3.58) Units "in" Style Font ("Tahoma",0,8,0) Text "Atm. šaht" 		Symbol (44,45056,10,"MapInfo Cartographic",257,0) 
+			Frame From Layer LayerID(ATM_PRIKLJUCAK) 		Position (0.2,3.80) Units "in" Style Font ("Tahoma",0,8,0) Text "Atm. priklj." 		Line Pen (2,2,12632064) 
+			Frame From Layer LayerID(ATMOSFERSKA) 			Position (0.2,4.00) Units "in" Style Font ("Tahoma",0,8,0) Text "Atmosferska kan." 	Line Pen (2,2,57344) 
+			Frame From Layer LayerID(KORISNICKI_SAHT) 		Position (0,4.22) Units "in" Style Font ("Tahoma",0,8,0) Text "Šaht korisnika" 	Symbol (40,16711680,10) 
+			Frame From Layer LayerID(FEK_KAN_IZLIV) 		Position (0,4.42) Units "in" Style Font ("Tahoma",0,8,0) Text "Fek. izliv" 		Symbol (46,16734240,14) 
+			Frame From Layer LayerID(FEK_KAN_SAHT) 			Position (0,4.63) Units "in" Style Font ("Tahoma",0,8,0) Text "Fek. šaht" 		Symbol (44,12595200,10,"MapInfo Cartographic",257,0) 
+			Frame From Layer LayerID(FEK_KAN_PRIKLJUCAK) 	Position (0.2,4.86) Units "in" Style Font ("Tahoma",0,8,0) Text "Fek. priklj." 		Line Pen (2,2,16744448) 
+			Frame From Layer LayerID(FEKALNA) 				Position (0.2,5.00) Units "in" Style Font ("Tahoma",0,8,0) Text "Fekalna kan." 		Line Pen (2,2,14694400) 		
+			
+			Lgd.y = f1.y+5.52
+			
+	End Case
+	
+	iLegendWindowID = FrontWindow()
+	
+	Exit Sub
+'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "Legenda()")
+	Call ERRShow()
+	
+End Sub
+
+Sub Legenda_provera_lejera
+	
+	onerror goto Greska  
+
+	Exit Sub
+'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "Legenda_provera_lejera")
+	Call ERRShow()	
+
+	
+End Sub

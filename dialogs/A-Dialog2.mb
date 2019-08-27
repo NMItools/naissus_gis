@@ -1,0 +1,47 @@
+'include "mapbasic.def"
+'include "menu.def"
+'include "icons.def"
+include "..\..\Library\ERRORLib.def"
+include "..\NAISSUS-GIS.def"
+
+Sub DLG_MRUWor
+
+	onError goto greska
+	
+'***** DIALOG DESIGNER GENERATED CODE. DO NOT EDIT OR REMOVE THIS LINE OR BELOW THIS LINE! *****
+Dialog
+	Title "Skoro otvarani WOR"
+	Width 192 Height 116
+
+Control GroupBox
+	Id 10
+	Position 8, 7
+	Width 178 Height 84
+	Title "Odaberite workspace:"
+	
+Control MultiListBox
+	Id 11
+	Position 12, 17
+	Width 170 Height 67
+	Title From Variable WorArr
+	
+Control CancelButton
+	Title "Cancel"
+	Id 12
+	Position 80, 95
+	Width 51 Height 14
+	
+Control OKButton
+	Title "OK"
+	Id 14
+	Position 135, 95
+	Width 51 Height 14
+	Calling Open_WOR
+
+	Exit Sub
+'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "DLG_MRUWor")
+	Call ERRShow()
+		
+End Sub

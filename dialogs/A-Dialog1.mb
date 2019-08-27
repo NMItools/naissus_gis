@@ -1,0 +1,108 @@
+'include "mapbasic.def"
+'include "menu.def"
+'include "icons.def"
+include "..\..\Library\ERRORLib.def"
+include "..\NAISSUS-GIS.def"
+
+Sub DLG_login 
+	
+	onError goto greska
+	
+' - dijalog prozor za logovanje korisnika
+	
+login_start:
+
+'	Exit Sub
+'	-------------------------
+'	Greska:
+'	Call ERRCreate(Err(), Error$(), "DLG_Podesavanja")
+'	Call ERRShow()
+'
+' END SUB	
+
+'***** DIALOG DESIGNER GENERATED CODE. DO NOT EDIT OR REMOVE THIS LINE OR BELOW THIS LINE! *****
+
+Dialog
+	Title "JKP ''Naissus'' GIS - Prijava korisnika"
+	Width 195 Height 179
+	
+Control StaticText
+	Id 11
+	Position 12, 12
+	Width 53 Height 8
+	Title "Korisnicko ime:"
+	
+Control RadioGroup
+	Id 7
+	Position 26, 87
+	Title "Uèitaj samo alate;Otvori skoro korišæeni .WOR;Kreiraj NAISSUS radni prostor;Offline mod (bez mreže)"
+	Value 1
+	Into i_Login_RG_1
+	
+Control StaticText
+	Id 10
+	Position 12, 33
+	Width 32 Height 8
+	Title "Lozinka:"
+	
+Control StaticText
+	Id 9
+	Position 12, 53
+	Width 82 Height 8
+	Title "Baza podataka (ODBC):"
+	
+Control EditText
+	Id 1
+	Position 98, 11
+	Width 88 Height 12
+	Value s_USER
+	Into s_USER
+	
+Control EditText
+	Id 2
+	Position 98, 31
+	Width 88 Height 12
+	Into s_PASS
+	Password
+	
+Control EditText
+	Id 3
+	Position 98, 51
+	Width 88 Height 12
+	Value s_DSN
+	Into s_DSN
+	
+Control GroupBox
+	Id 8
+	Position 12, 68
+	Width 174 Height 81
+	Title "Opcije"
+	
+Control OKButton
+	Title "OK"
+	Id 4
+	Position 135, 157
+	Width 51 Height 14
+	Calling Login_Param_Check
+	
+Control CancelButton
+	Title "Odustani"
+	Id 5
+	Position 67, 157
+	Width 51 Height 14
+	Calling Login_CANCEL
+	
+Control Button
+	Title "Pomoc"
+	Id 6
+	Position 12, 157
+	Width 51 Height 14
+	Calling Login_HELP
+	
+	Exit Sub
+'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "DLG_Podesavanja")
+	Call ERRShow()
+
+ END SUB		

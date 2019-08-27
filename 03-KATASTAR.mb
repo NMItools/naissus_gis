@@ -1,0 +1,573 @@
+include "mapbasic.def"
+include "menu.def"
+include "icons.def"
+include "..\Library\ERRORLib.def"
+include "..\nmiWin.def"
+include "..\nmiFunkcije.def"
+include "..\nmiDotNet.def"
+include "NAISSUS-GIS.def"
+
+'===================================================================================================================== 
+'	Meni i toolbar za prikaz katstarskih slojeva (parcele i objekti), izohipsi i reljefnog grida
+
+Sub KATASTAR
+
+	onerror goto Greska 
+	
+	Create Menu "Katastar" As
+		"Parcele" HelpMsg "Submenu Item" Calling KN_PARCELE,
+		"Objekti" HelpMsg "Submenu Item" Calling KN_OBJEKTI,
+		"(-",
+		"Administrativne granice" HelpMsg "Submenu Item" Calling KN_ADMJ
+
+	Create Menu "Digitalni Model Terena" As
+		"Prikaz pojedinih izohipsi" HelpMsg "Submenu Item" Calling DLG_Izohipse_1,
+		"Izohipse za oblast" HelpMsg "Submenu Item" Calling DLG_Izohipse_2_OK,
+		"(-",
+		"Izohipse Ortofoto - Grad Nis" HelpMsg "Submenu Item" Calling IZOHIPSE_OF,
+		"(-",
+		"3D Grid" HelpMsg "Submenu Item" Calling GRID,
+		"Grid Info" HelpMsg "Submenu Item" Calling GridInfo
+
+	Create Menu "Katastar, Izohipse, DTM" As
+		"Katastar" As "Katastar",
+		"Digitalni Model Terena" As "Digitalni Model Terena"		
+
+	Alter Menu "JKP Naissus" Add 
+		"Katastar, Izohipse, DTM" As "Katastar, Izohipse, DTM", 
+		"(-"
+		
+	'---   
+	
+	Create ButtonPad "Katastar, Izohipse, DTM" As
+
+		ToggleButton
+			Icon 8477 File "nmiIcons.dll"
+			Calling KN_PARCELE
+			ID 301
+			Uncheck
+			Enable
+			HelpMsg "Parcele KN\nParcele KN - Grad Nis"		
+		ToggleButton
+			Icon 8449 File "nmiIcons.dll"
+			Calling KN_OBJEKTI
+			ID 302
+			Uncheck
+			Enable
+			HelpMsg "Objekti KN\nObjekti KN - Grad Nis"		
+		ToggleButton
+			Icon 8453 File "nmiIcons.dll"
+			Calling KN_ADMJ
+			ID 303
+			Uncheck
+			Enable
+			HelpMsg "Administrativne granice\nAdministrativne granice - Grad Nis"
+
+		SEPARATOR
+		
+		PushButton
+			Calling DLG_Izohipse_1
+			Icon 8093 File "nmiIcons.dll"
+			HelpMsg "Prikaz pojedinih izohipsi \nPojedine izohipse"
+		
+		ToolButton
+			Calling DLG_Izohipse_2_OK
+			Icon 8201 File "nmiIcons.dll"
+			Cursor MI_CURSOR_CROSSHAIR
+			DrawMode DM_CUSTOM_POLYGON
+			HelpMsg "Obelezavanje oblasti za koju zelimo izohipse.\nOblast za izohipse"
+		
+		ToggleButton
+			Icon 8057 File "nmiIcons.dll"
+			Calling IZOHIPSE_OF
+			ID 304
+			Uncheck
+			Enable
+			HelpMsg "Ortofoto izohipse\nOrtofoto izohipse - Grad Nis"
+		
+		SEPARATOR 
+		
+		ToggleButton
+			Calling GRID
+			Icon 14
+			ID 305
+			Uncheck
+			Enable
+			HelpMsg "3D grid R=1:1000/1989 \n3D Grid"
+		
+		ToolButton
+			Calling GridInfoToolHandler
+			Icon MI_ICON_INFO
+			Cursor MI_CURSOR_CROSSHAIR
+			DrawMode DM_CUSTOM_POINT
+			HelpMsg "Ocitavanje vrednosti sa Grida.\nGrid vrednosti"
+
+	'---
+	
+	Alter ButtonPad "Katastar, Izohipse, DTM" 
+		'Position(0.5,4.8) Units "cm"
+		ToolbarPosition (1,4)
+		Fixed
+		Title "Katastar, Izohipse, DTM"
+		Width 25
+		Show
+		
+	Exit Sub
+	'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "KATASTAR")
+	Call ERRShow()
+	
+End Sub
+
+'===================================================================================================================== 
+' .....
+
+Sub KN_PARCELE
+
+	onerror goto Greska  
+
+	namLejer = setTabSQL("KATASTAR_PARCELE",301)
+	
+	Exit Sub
+	'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "KN_PARCELE")
+	Call ERRShow()
+
+End Sub
+
+'===================================================================================================================== 
+' .....
+
+Sub KN_OBJEKTI
+
+	onerror goto Greska  
+
+	namLejer = setTabSQL("KATASTAR_OBJEKTI",302)
+
+	Exit Sub
+	'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "KN_OBJEKTI")
+	Call ERRShow()
+
+End Sub
+
+'===================================================================================================================== 
+' .....
+
+Sub KN_ADMJ
+
+	onerror goto Greska  
+
+	i_GrupaLejera = GroupLayerInfo_ID("Administrativne granice",303)
+		
+	Exit Sub
+	'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "KN_ADMJ")
+	Call ERRShow()
+
+End Sub
+
+'===================================================================================================================== 
+' .....
+
+Sub DLG_Izohipse_1_OK
+
+	onerror goto Greska  
+
+	dim interval as string
+	dim comm as string
+	dim p_str as logical	
+
+	If MapWinSTATUS(0) <> 1 
+	Then
+		Dialog Preserve
+		Exit Sub
+	End If
+	
+	s_Kote=ReadControlValue(2)
+	
+		If s_Kote=""
+		Then 
+			Note "Unesite kotu izohipse !"
+			Dialog Preserve
+			Exit Sub
+		Else
+		End If
+
+		If ProveriString(s_Kote) = false
+			then
+			Dialog Preserve
+			Exit Sub
+		end if
+	
+	' 	--------------------------------------------------------------------------------------------------------------------------------------------
+	' SQL u mapinfo:
+	' 	izohipse na pet metara od kote 170 (cetvrtog reda u tabeli)
+	' 	select * from IZO where RowID Mod 5 = 4 into Selection
+	'
+	' Generisani query u TAB fajlu:
+	'	select ""KOTA"", ""MI_STYLE"", ""MI_PRINX"", ""OBJECT"" from ""GIS_dev"".""MAPINFO"".""IZO""  where (""KOTA"" = 260)
+	'	select ""KOTA"", ""MI_STYLE"", ""MI_PRINX"", ""OBJECT"" from ""GIS_dev"".""MAPINFO"".""IZO""  where (""KOTA"" >= 260) and (""KOTA"" <= 325)
+	'   select ""KOTA"", ""MI_STYLE"", ""MI_PRINX"", ""OBJECT"" from ""GIS_dev"".""MAPINFO"".""IZO""  where (""KOTA"" in (260,270))
+	' 	--------------------------------------------------------------------------------------------------------------------------------------------
+	
+	If izotip = 1 
+	then
+		print "Izohipsa "+s_Kote
+		imtab = "IZOHIPSA_"+s_Kote
+		imtab_f = replace(imtab,",","_")				
+
+		Server i_hdbc link table "Select ""KOTA"", ""MI_STYLE"", ""MI_PRINX"", ""OBJECT"" From ""kn"".""IZOHIPSE"" where (""KOTA"" in ("+s_Kote+"))" Toolkit "ODBC" Into ""+imtab_f+"" File s_FOLDER_RAD+imtab_f+".tab"			
+	else
+		print "Izohipse od "+kota_min+" do "+kota_max
+		imtab = "IZOHIPSE_"+kota_min+"_do_"+kota_max
+		imtab_f = replace(imtab,"-","_")
+
+		Server i_hdbc link table "Select ""KOTA"", ""MI_STYLE"", ""MI_PRINX"", ""OBJECT"" From ""kn"".""IZOHIPSE"" where (""KOTA"" >= "+kota_min+") and (""KOTA"" <= "+kota_max+")" Toolkit "ODBC" Into ""+imtab_f+"" File s_FOLDER_RAD+imtab_f+".tab"
+	End If
+
+	Add Map Window FrontWindow() Auto Layer imtab_f	
+	Set Map Window FrontWindow() Layer LayerID(imtab_f) Label Auto On Visibility Zoom (0,2) Units "km" Overlap On PartialSegments On Font ("Arial Narrow",256,10,16711680,16777215) Position Center
+
+	Exit Sub
+	'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "DLG_Izohipse_1_OK")
+	Call ERRShow()
+
+End Sub
+
+'===================================================================================================================== 
+' .....
+
+Sub DLG_Izohipse_2_OK
+
+	onerror goto Greska  
+	
+	Dim s_Izo as string
+	Dim s_IzoTab as string
+	
+	Print Chr$(12)
+	Print "=========================================================="
+	Print "PRIKAZ ORTOFOTO IZOHIPSA (za odredjenu oblast)"
+	Print "---------------------------------------------------------------------------------"
+	Print "Oblast za koju zelimo izohipse obelezimo poligonom."
+	print "Nakon toga dobicete generisane izohipse u lejeru ''mi_kor_Izohipse''" 
+	Print "---------------------------------------------------------------------------------"
+	
+	Dim objIzo as Object
+	Dim pPolygonPen As Pen
+	Dim bPolygonBrush As Brush
+
+'	ucrtani poligon
+	objIzo=CommandInfo(CMD_INFO_CUSTOM_OBJ)
+
+'	privremeni poligon je ZELEN sa CRNOM ivicom
+	pPolygonPen		= MakePen(1,2,BLACK)
+	bPolygonBrush	= MakeBrush(49,GREEN,-1)
+	Alter Object objIzo Info OBJ_INFO_PEN, pPolygonPen
+	Alter Object objIzo Info OBJ_INFO_BRUSH, bPolygonBrush
+
+'	prikazi ga u Cosmetic layer-u
+	Insert Into WindowInfo(FrontWindow(), WIN_INFO_TABLE) (Object) Values (objIzo)             ' Cosmetic1(obj) 
+
+'	Izvrši spatial secenje na SQL serveru
+	s_kom = "exec mbx.sp_SecIzo '"+WKT_Poligon(objIzo)+"'"
+	i_hstmt = Server_Execute(i_hdbc,s_kom) 
+	Server i_hstmt Close
+
+'	Random ime fajla	
+	s_Izo = "mi_kor_Izohipse_"+str$(Fix(1111*Rnd(1)))
+	s_IzoTab = s_Izo+".TAB"
+
+'	Preuzimanje isecenih izohipsi sa servera
+	Server i_hdbc link Table "Select * From ""MI_USER"".""IZO""" Toolkit "ODBC" Into "mi_user_IZO" Autokey ON File s_FOLDER_RAD+"mi_user_IZO.TAB"
+	Commit Table mi_user_IZO As s_FOLDER_RAD+s_IzoTab TYPE NATIVE Charset "WindowsLatin2" Interactive
+	Close Table mi_user_IZO Interactive	
+
+'	Otvaranje u aktivni map prozor
+	Open Table s_FOLDER_RAD+s_IzoTab Interactive
+	s_kom = "Add Map Auto Layer "+s_Izo
+	run command s_kom
+	Run Menu Command M_TOOLS_SELECTOR
+
+'	Ukljuèi labele sa stilovima, labelama itd                               
+	Set Map Window FrontWindow() Layer LayerID(s_Izo) Label Auto On Visibility Zoom (0,2) Units "km" Overlap On PartialSegments On Font ("Arial Narrow",256,10,16711680,16777215) Position Center	
+
+	If GroupLayer_ID("IZOHIPSE") = 9999 Then
+		Print "Kreirana grupa lejera 'Izohipse'!"
+		Add Map Window FrontWindow() GroupLayer("Izohipse") DestGroupLayer 0 
+	Else
+	'	Prebaci lejer u grupu IZOHIPSE
+		Set Map Window FrontWindow() Order Layers LayerID(s_Izo) DestGroupLayer GroupLayer_ID(IZOHIPSE)
+	
+	'	Ukljuèi grupu izohipse ako je OFF
+		Set Map Window FrontWindow() GroupLayer GroupLayer_ID(IZOHIPSE) Display On	
+	End If
+
+	Exit Sub
+	'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "DLG_Izohipse_2_OK")
+	Call ERRShow()
+
+End Sub
+
+'===================================================================================================================== 
+' .....
+
+Sub DLG_Izohipse_1_CANCEL
+
+	onerror goto Greska  
+
+	print "Komanda prekinuta!"
+	
+	Exit Sub
+	'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "DLG_Izohipse_1_CANCEL")
+	Call ERRShow()
+
+End Sub
+
+'===================================================================================================================== 
+' .....
+
+Sub DLG_Izohipse_2_CANCEL
+
+	onerror goto Greska  
+
+	print "Komanda prekinuta!"
+
+	Exit Sub
+	'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "DLG_Izohipse_2_CANCEL")
+	Call ERRShow()
+
+End Sub
+
+'===================================================================================================================== 
+' .....
+
+Sub IZOHIPSE_OF
+
+	onerror goto Greska  
+
+	namLejer = setTabSQL("IZOHIPSE",304)
+	
+	Exit Sub
+	'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "IZOHIPSE_OF")
+	Call ERRShow()
+
+End Sub
+
+'===================================================================================================================== 
+' .....
+
+Sub GridInfoToolHandler
+
+	onerror goto Greska  
+
+	Dim sCmd As String
+	Dim i As SmallInt
+	Dim lVerbose As Logical
+	Dim x, y As Float
+	Dim MapWindowID As Integer
+	Dim lReturn As Logical
+	Dim hGrid As Integer
+	Dim sPath As String
+	Dim ptchCoordSys As String
+	Dim pdMinXVal, pdMinYVal, pdMaxXVal, pdMaxYVal As Float
+	Dim pdMinZVal, pdMaxZVal As Float
+	Dim plWidth, plHeight As Integer
+	Dim lCol, lRow As Integer
+	Dim pdValue As Float
+	Dim puchIsNull As SmallInt
+
+	MapWindowID = FrontWindow()
+	
+	For i = 1 To MapperInfo(MapWindowID, MAPPER_INFO_LAYERS)
+		If LayerInfo(MapWindowID, i, LAYER_INFO_TYPE) =	LAYER_INFO_TYPE_GRID 
+		Then
+		sPath = LayerInfo(MapWindowID, i, LAYER_INFO_PATH)
+		print "sPath 1 = "+sPath
+		Exit For
+		End If
+	Next
+
+	sPath = Left$(sPath, Len(sPath)-3) + "MIG"
+	print "sPath 2 = "+sPath
+
+	If Not FileExists(sPath) 
+	Then
+		If FileExists(ProgramDirectory$() + "Nwgrd30.ghl") 
+		Then
+		sPath = Left$(sPath, Len(sPath)-3) + "GRD"
+		End If
+	End If
+
+	If Not FileExists(sPath) 
+	Then
+		Note "Ne mogu da pronadjem Grid fajl " + sPath
+		Exit Sub
+	End If
+
+	If sPath <> gsPath 
+	Then
+		gsPath = sPath
+		lVerbose = TRUE
+	Else
+		lVerbose = FALSE
+	End If
+
+	sCmd = "Set " + MapperInfo(MapWindowID, MAPPER_INFO_COORDSYS_CLAUSE_WITH_BOUNDS)
+	Run Command sCmd
+
+'	X i Y koordinate 
+	x = CommandInfo(CMD_INFO_X)
+	y = CommandInfo(CMD_INFO_Y)
+	Print "X = " + x + ", Y = " + y
+
+'	------------------------------------------------------------------------------------------
+
+	lReturn = GE_OpenGrid(sPath, 1024, hGrid)
+	
+	If Not lReturn 
+	Then
+		Note "Otvaranje " + sPath + " nije uspelo"
+		Exit Sub
+	End If
+
+	If hGrid = 0 
+	Then
+		Note "Otvaranje " + sPath + " nije uspelo: grid handle = 0"
+		Exit Sub
+	End If
+
+	If lVerbose 
+	Then
+		Print " Otvaranje " + sPath + " sa handle-om " + hGrid
+	End If
+
+	ptchCoordSys = Space$(255) 'Initialize to allocate actually memory.
+
+	lReturn = GE_GetCoordSysInfo(hGrid, ptchCoordSys, pdMinXVal, pdMinYVal, pdMaxXVal, pdMaxYVal)
+
+	If lVerbose 
+	Then                       
+		' koordinatni sistem dodeljen gridu
+		Print " " + ptchCoordSys 
+		' min i max X,Y koordinate za celi grid 
+		Print " MinXVred = " + pdMinXVal + ", MinYVred = " + pdMinYVal + ", MaxXVred = " + pdMaxXVal + ", MaxYVred = " + pdMaxYVal
+	End If
+
+	lReturn = GE_GetContinuousMinMax(hGrid, pdMinZVal, pdMaxZVal)
+	
+	If lVerbose 
+		Then                              
+		' min i max vrednosti informacije grida
+		Print " MinZVred = " + pdMinZVal + ", MaxZVred = " + pdMaxZVal
+	End If
+
+	lReturn = GE_GetDimensions(hGrid, plWidth, plHeight)
+	
+	If lVerbose 
+	Then 
+		' dimenzije osnovne celije grida
+		Print " Sirina = " + plWidth + ", Visina = " + plHeight
+	End If
+ 
+'	---------------------------------------------------------------------------------
+
+	lReturn = GE_StartRead(hGrid)
+	
+	If lReturn 
+	Then
+		lCol = (plWidth * (x - pdMinXVal) / (pdMaxXVal - pdMinXVal)) - .5
+		lRow = (plHeight - plHeight * (y - pdMinYVal) / (pdMaxYVal - pdMinYVal)) - .5
+		lReturn = GE_GetContinuousValue(hGrid, lCol, lRow, pdValue, puchIsNull)
+	
+		If lCol < 0 Or lRow < 0 Or lCol >= plWidth Or lRow >= plHeight 
+		Then
+			If pdValue = 0 
+			Then
+				Print " Vrednost u koloni: " + (lCol+1) +", red: " + (lRow+1) + " je nedefinisana."
+			Else
+				Print " Vrednost u koloni: " + (lCol+1) +", red: " + (lRow+1) + " = " + pdValue +", ali bi trebala biti nedefinisana."
+			End If
+		Else
+			If puchIsNull 
+			Then
+				Print " Vrednost u koloni: " + (lCol+1) +", red: " + (lRow+1) + " je NULL."
+			Else
+				Print " Vrednost u koloni: " + (lCol+1) +", red: " + (lRow+1) + " = " + pdValue
+			End If
+		End If
+		lReturn = GE_EndRead(hGrid)
+	Else
+		Print " Citanje(" + hGrid + ") neuspelo"
+	End If
+
+	lReturn = GE_CloseGrid(hGrid)
+
+	Exit Sub
+	'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "GridInfoToolHandler")
+	Call ERRShow()
+
+End Sub
+
+'===================================================================================================================== 
+' .....
+
+Sub GridInfo
+
+	onerror goto Greska  
+
+	Dialog
+		Title "Grid Info" 	
+		Width 160
+		Control StaticText
+		Title "Alat pokrenite sa DTM tulbara."
+		Position 10, 10
+		Control StaticText
+		Title "Kliknite na ucitani grid a podatke"  
+		Position 10, 18
+		Control StaticText
+		Title "o gridu dobicete u Message prozoru."
+		Position 10, 26
+		Control OKButton
+		Title "&OK"
+
+	Exit Sub
+	'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "GridInfo")
+	Call ERRShow()
+
+End Sub
+
+'===================================================================================================================== 
+' .....
+
+Sub Grid
+
+	onerror goto Greska  
+
+	namLejer=setRaster(s_FOLDER_POD,"DTM_GRID_1000_1989",305)
+	
+	Exit Sub
+	'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "Grid")
+	Call ERRShow()
+
+End Sub

@@ -1,0 +1,29 @@
+  <Object type="System.Windows.Forms.Form, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" name="Form1" children="Controls">
+    <Object type="DialogDesigner.ToolboxLib.MapBasicControls.MapBasicGroupBox, DialogDesigner, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" name="MapBasicGroupBox1" children="Controls">
+      <Property name="ControlCode" />
+      <Property name="Id">0</Property>
+      <Property name="Name">MapBasicGroupBox1</Property>
+      <Property name="Position">39, 74</Property>
+      <Property name="Size">200, 100</Property>
+      <Property name="Title">GroupBox1</Property>
+      <Property name="Hide">False</Property>
+      <Property name="TabStop">False</Property>
+      <Property name="Text">GroupBox1</Property>
+      <Property name="DataBindings">
+        <Property name="DefaultDataSourceUpdateMode">OnValidation</Property>
+      </Property>
+      <Property name="Location">39, 74</Property>
+      <Property name="TabIndex">0</Property>
+      <Property name="Tag">Inited</Property>
+    </Object>
+    <Property name="ClientSize">292, 273</Property>
+    <Property name="MaximizeBox">False</Property>
+    <Property name="MinimizeBox">False</Property>
+    <Property name="ShowIcon">False</Property>
+    <Property name="Text">Dialog<Reference name="Form1" /></Property>
+    <Property name="DataBindings">
+      <Property name="DefaultDataSourceUpdateMode">OnValidation</Property>
+    </Property>
+    <Property name="Name">Form1</Property>
+    <Property name="Tag">Inited</Property>
+  </Object>

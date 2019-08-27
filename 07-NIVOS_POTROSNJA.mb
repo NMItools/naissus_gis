@@ -1,0 +1,528 @@
+include "mapbasic.def"
+include "menu.def"
+include "icons.def"
+include "..\Library\ERRORLib.def"
+include "..\nmiWin.def"
+include "..\nmiFunkcije.def"
+include "..\nmiDotNet.def"
+include "NAISSUS-GIS.def"
+
+SUB NIVOS_POTROSNJA
+	
+	Create Menu "Potrosnja" as
+		"Vodomeri" ID 701 calling IzborPotrosaca,
+		"Grupa vodomera" ID 702 calling IzborPotrosaca,
+		"Merna Zona" ID 703 calling IzborPotrosaca,	
+		"Sistem" ID 705 calling IzborSistema,
+		"Unos sifre..." calling	IzborPotrosaca_Sifra
+		
+	Alter Menu "NIVOS Potrosaci" Add
+		"Potrosnja" As "Potrosnja"
+
+' ----- 
+
+	Alter ButtonPad "NIVOS Potrosaci" Add
+	
+	SEPARATOR
+	
+	ToolButton Calling IzborPotrosaca
+		ID 701
+		Icon 8257 File "nmiIcons.dll"
+		Cursor MI_CURSOR_ARROW
+		DrawMode DM_CUSTOM_POINT
+		HelpMsg "Potrosnja za vodomere\nPotrosnja za vodomere"
+	ToolButton Calling IzborPotrosaca
+		ID 702
+		Icon 8249 File "nmiIcons.dll"
+		DrawMode DM_CUSTOM_POLYGON
+		HelpMsg "Potrosnja za grupu vodomera\nPotrosnja za grupu vodomera"
+	ToolButton Calling IzborPotrosaca_MZ
+		ID 703
+		Icon MI_ICON_MB_5
+		DrawMode DM_CUSTOM_POINT
+		HelpMsg "Potrosnja za Merne Zone\nPotrosnja za Merne Zone"
+	ToolButton Calling IzborSistema
+		ID 705
+		Icon MI_ICON_MB_12
+		DrawMode DM_CUSTOM_POINT
+		HelpMsg "Potrosnja za Sistem\nPotrosnja za Sistem"		
+	PushButton Calling IzborPotrosaca_Sifra 
+		ID 704
+		Icon MI_ICON_MB_6
+		HelpMsg "Potrosnja preko sifre korisnika\nPotrosnja preko sifre korisnika"
+		Uncheck
+		Enable 	
+
+	Alter ButtonPad "NIVOS Potrosaci" 
+	'	Position(8,5.5) Units "cm"
+		ToolbarPosition (2,1)
+		Fixed
+		Title "NIVOS Potrosaci"
+		Width 21
+		Show       
+		
+End Sub
+
+Sub SnapOn
+	
+	' - Ukljuèi SNAP mod
+		Set Window FrontWindow() Snap Mode On
+		
+End Sub
+
+Sub IzborPotrosaca
+
+	Onerror Goto greska
+	
+	Dim x,y as float
+	Dim objTmp As Object	
+
+	Dim n as smallint
+	Dim s_MatBr, s_ImePotr, s_Ulica, s_KBr as string
+
+' - Resetovanje stringova, nizova za prihvat Mat.Brojeva i Imena potrošaèa, brisanje Cosmetic lejera
+	s_kom = ""
+	ReDim rs_MatBr(0)
+	ReDim rs_MatBrPotr(0)
+	RollBack Table WindowInfo(FrontWindow(), WIN_INFO_TABLE)
+	
+' - Naèin selekcije vodomera	
+	Do Case CommandInfo(CMD_INFO_TOOLBTN)
+		
+		Case 701
+		Print "Klik na koordinatu"
+		
+		' - Oèitavanje koordinata na mesto klika
+			x = CommandInfo(CMD_INFO_X)
+			y = CommandInfo(CMD_INFO_Y)
+		' - Strelica na mesto klika
+			Set Map Window FrontWindow() Layer 0 Editable On
+			Create Point (x,y) Symbol (68,16776960,24,"MapInfo Cartographic",16,0) 
+		' - Komandni string za SQL StoredProc/query za selekciju svih vodomera na mesto klika
+			s_kom = "EXEC mbx.sp_Vodomeri_XY '"+WKT_Tacka(x,y)+"'"
+			
+		Case 702
+		Print "Poligona selekcija"
+		
+		' - Iscrtani poligon
+			objTmp = CommandInfo(CMD_INFO_CUSTOM_OBJ)
+		' -	definicija stila za selekcioni poligon
+			BrushPG = MakeBrush(1,0,16777215)
+			PenPG = MakePen (1,48,16711680) 
+			Alter Object objTmp Info OBJ_INFO_BRUSH, BrushPG
+			Alter Object objTmp Info OBJ_INFO_PEN, PenPG
+			Set Map Window FrontWindow() Layer 0 Editable On
+			Insert Into WindowInfo(FrontWindow(), WIN_INFO_TABLE) (Obj) Values (objTmp)
+		' - Komandni string za SQL StoredProc/query za selekciju svih vodomera koji padaju u iscrtani poligon
+			s_kom = "EXEC mbx.sp_Vodomeri_PG '"+WKT_Poligon(objTmp)+"'"
+
+	End Case
+	
+' - Izvršavanje SQL StoredProc/query 
+	i_hstmt = Server_Execute(i_hdbc,s_kom) 
+		Server i_hstmt Bind Column 1 To s_MatBr, am_stat
+		Server i_hstmt Bind Column 2 To s_ImePotr, am_stat
+		Server i_hstmt Bind Column 3 To s_Ulica, am_stat
+		Server i_hstmt Bind Column 4 To s_KBr, am_stat
+		Server i_hstmt Fetch First
+
+' - Kreiraj dva niza: 
+'   1) od Mat.Brojeva svih vodomera na mestu klika mišem  							= rs_MatBr() 
+'   2) od Mat.Brojeva+Imena Potrošaèa za prikaz u MultiListBox-u dijalog prozora	= rs_MatBrPotr()
+		n=1
+		While Not Server_EOT(i_hstmt)
+			ReDim rs_MatBr(n)
+			rs_MatBr(n) = s_MatBr			
+			ReDim rs_MatBrPotr(n)
+			rs_MatBrPotr(n) = s_MatBr+" - "+s_ImePotr+" ("+s_Ulica+","+s_KBr+")"
+			Server i_hstmt Fetch Next
+			n=n+1
+		Wend
+	
+	Print "Pronaðeno je "+(n-1)+" vodomera."
+	Server i_hstmt Close		
+
+' - Pozovi dijalog prozor za odabir odreðenih potrošaèa na mestu klika
+	Call DLG_Potrosnja
+
+	Exit Sub	
+'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "IzborPotrosaca")
+	Call ERRShow()
+	
+End Sub
+
+Sub IzborPotrosaca_MZ
+
+	Onerror Goto greska
+	
+	Dim x,y as float
+	
+	Print "Klik na Mernu Zonu"
+' - Oèitavanje koordinata na mesto klika
+	x = CommandInfo(CMD_INFO_X)
+	y = CommandInfo(CMD_INFO_Y)
+
+' - Osenceni poligon MZ	?
+	s_kom = "SELECT DISTINCT (MERNA_ZONA) FROM [MAPINFO].[ZONE] WHERE SP_GEOMETRY.STContains(Geometry::STPointFromText('"+WKT_Tacka(x,y)+"',31277)) = 1"
+	i_hstmt = Server_Execute(i_hdbc,s_kom) 
+		Server i_hstmt Bind Column 1 To s_MZ, am_stat
+		Server i_hstmt Fetch First
+	Server i_hstmt Close
+	
+	If s_MZ = 0
+		Then Note "Nema pronaðenih Mernih Zona!"
+		Exit Sub
+	End If
+	
+	Print "Odabrana je Merna Zona "+s_MZ
+	s_ImeTabele = "Potrosnja_za_MERNU_ZONU_"&s_MZ
+'	print s_ImeTabele
+	
+	If OtvorenTAB(s_ImeTabele) Then 
+		Close Table s_ImeTabele
+	End If
+		
+' - Komandni string za SQL StoredProc/query za selekciju svih vodomera u MZ ispod klika
+	s_kom = "EXEC mbx.sp_Vodomeri_MZ '"+WKT_Tacka(x,y)+"'"	
+	i_hstmt = Server_Execute(i_hdbc,s_kom) 
+	Server i_hstmt Fetch Into s_ImeTabele FILE s_FOLDER_RAD+s_ImeTabele
+	
+	i_TipGraf = 3
+	
+	Call SQL_Potrosnja
+
+	Exit Sub	
+'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "IzborPotrosaca_MZ")
+	Call ERRShow()
+	
+End Sub
+
+Sub IzborSistema
+
+	Onerror Goto greska
+	
+	Dim x,y as float
+	
+	Print "Klik na Sistem"
+' - Oèitavanje koordinata na mesto klika
+	x = CommandInfo(CMD_INFO_X)
+	y = CommandInfo(CMD_INFO_Y)
+
+' - Osenceni poligon MZ	?
+	s_kom = "SELECT DISTINCT (SISTEM) FROM [MAPINFO].[ZONE] WHERE SP_GEOMETRY.STContains(Geometry::STPointFromText('"+WKT_Tacka(x,y)+"',31277)) = 1"
+	i_hstmt = Server_Execute(i_hdbc,s_kom) 
+		Server i_hstmt Bind Column 1 To s_System, am_stat
+		Server i_hstmt Fetch First
+	Server i_hstmt Close
+	
+	If s_System = ""
+		Then Note "Nema pronaðenih Sistema!"
+		Exit Sub
+	End If
+	
+	Print "Odabran je Sistem "+s_System
+	s_ImeTabele = "Potrosnja_za_sistem_"&s_System
+'	print s_ImeTabele
+	
+	If OtvorenTAB(s_ImeTabele) Then 
+		Close Table s_ImeTabele
+	End If
+		
+' - Komandni string za SQL StoredProc/query za selekciju svih vodomera u MZ ispod klika
+	s_kom = "EXEC mbx.sp_Vodomeri_SISTEM '"+WKT_Tacka(x,y)+"'"	
+	i_hstmt = Server_Execute(i_hdbc,s_kom) 
+	Server i_hstmt Fetch Into s_ImeTabele FILE s_FOLDER_RAD+s_ImeTabele
+	
+	i_TipGraf = 4
+	
+	Call SQL_Potrosnja
+
+	Exit Sub	
+'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "IzborPotrosaca_Sistem")
+	Call ERRShow()
+	
+End Sub
+
+
+Sub IzborPotrosaca_Sifra
+End Sub			
+
+Sub DLG_PotrosnjaOK
+	
+	Onerror goto greska
+	
+	Dim i_MatBrSel, i_Period, j, l As Integer
+	Dim n as SmallInt	
+	
+	i_MatBrSel = ReadControlValue(2)
+	i_TipGraf = ReadControlValue(4)
+	i_Period = ReadControlValue(6)
+	
+	If i_MatBrSel = 0 or i_Period = 0
+	Then
+		Note "Izaberite potrošaèe i period !"
+		Dialog Preserve
+	Else
+	' - Resetovanje tastera	i vrednosti stringova
+		Alter Button ID 701 Uncheck
+		Run Menu Command M_TOOLS_SELECTOR
+		s_MatBroj = ""
+		s_Godine = ""
+		Redim rs_MatBrOdabrani(0)
+		Redim rs_GodPotrOdabrani(0)
+		
+	' - Kreiranje niza samo od Mat.Brojeva odabranih potrošaèa u MultiListBox-u dijalog prozora = 'rs_MatBrOdabrani()'
+		j = 0
+		Do Until i_MatBrSel = 0
+			j = j + 1
+			Redim rs_MatBrOdabrani(j)
+			rs_MatBrOdabrani(j) = rs_MatBr(i_MatBrSel)
+			i_MatBrSel = ReadControlValue(2)		
+		Loop
+	
+	' - Kreiranje stringa od niza Mat.Brojeva potrošaèa  = 's_MatBroj'
+		For l = 1 To Ubound(rs_MatBrOdabrani)
+			If s_MatBroj = "" Then
+				s_MatBroj = "" + rs_MatBrOdabrani(l) + ""
+			Else
+				s_MatBroj = s_MatBroj +"'',''"+ rs_MatBrOdabrani(l) + ""
+			End if
+		Next      
+	
+	' - Kreiranje niza od izabranih godina potrosnje = 'rs_GodPotrOdabrani()'
+		j = 0
+		Do Until i_Period = 0
+			j = j + 1
+			Redim rs_GodPotrOdabrani(j)
+			rs_GodPotrOdabrani(j) = rs_GodPotr(i_Period)
+			i_Period = ReadControlValue(6)		
+		Loop
+	
+	' - Kreiranje stringa od izabranih godina  = 's_Godine'
+		For l = 1 To Ubound(rs_GodPotrOdabrani)
+			If s_Godine = "" Then
+				s_Godine = "" + rs_GodPotrOdabrani(l) + ""
+			Else
+				s_Godine = s_Godine + "'',''" + rs_GodPotrOdabrani(l) + ""
+			End if
+		Next         
+	
+'		Print "s_MatBroj="+s_MatBroj
+'		Print "s_Godine="+s_Godine
+'		Print "i_TipGraf ="+i_TipGraf 
+	
+	If OtvorenTAB("PotrosnjaTmp") Then
+		Close Table PotrosnjaTmp
+	End If
+	
+	' - Komandni string za SQL StoredProc/query za selekciju svih vodomera na mesto klika i izvršavanje
+		s_kom = "EXEC mbx.sp_VodomeriPotrosnja '''"+s_MatBroj+"''','''"+s_Godine+"'''" 
+		print s_kom
+		i_hstmt = Server_Execute(i_hdbc,s_kom) 
+			Server i_hstmt Fetch Into "PotrosnjaTmp" FILE s_FOLDER_RAD+"PotrosnjaTmp"
+			Server i_hstmt Close	
+
+		Call SQL_Potrosnja	
+		
+	End If
+	
+	Exit Sub	
+'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "DLG_PotrosnjaOK")
+	Call ERRShow()	
+	
+End Sub		
+	
+Sub DLG_PotrosnjaCANCEL
+
+	Onerror goto greska	
+
+' - Resetovanje tastera, nizova	i vrednosti stringova
+	Alter Button ID 701 Uncheck
+	Run Menu Command M_QUERY_UNSELECT
+	Run Menu Command M_TOOLS_SELECTOR	
+	ReDim rs_MatBr(0)
+	ReDim rs_MatBrPotr(0)	
+	Redim rs_MatBrOdabrani(0)	
+	s_MatBroj = ""
+	
+	Exit Sub
+'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "DLG_PotrosnjaCANCEL")
+	Call ERRShow()	
+	
+End Sub
+
+Sub SQL_Potrosnja
+
+	Onerror goto greska
+	
+	Dim l as Integer
+	Dim s_UkBrojVodomera As String
+	Dim s_MB As Alias
+	Dim s_Naziv 	As Alias
+	Dim s_NazivKor	As String
+	Dim s_Ulica 	As Alias
+	Dim s_UlicaKor 	As String
+	Dim s_KB 		As Alias
+	Dim s_Mesto		As Alias
+	Dim s_Zona		As Alias
+	Dim s_Knjiga	As Alias
+	Dim s_RedBroj	As Alias
+	
+	Do Case i_TipGraf
+	
+	' - Posebni grafik za svaki vodomer u selekciji
+		Case 1
+'		Print "Case 1 pojedini vodomeri"	
+			
+			For l = 1 To Ubound(rs_MatBrOdabrani)
+				s_ImeTabele = "Potrosnja_MB_"+rs_MatBrOdabrani(l)
+				
+				s_kom= "Select * from PotrosnjaTmp where Sifra = """+rs_MatBrOdabrani(l)+""" order by Godina into "+s_ImeTabele
+				Run Command s_kom
+				Fetch First From s_ImeTabele
+					s_MB 		= s_ImeTabele+".COL1"				
+					s_Naziv 	= s_ImeTabele+".COL2"
+					s_Ulica 	= s_ImeTabele+".COL4"
+					s_KB 		= s_ImeTabele+".COL5"
+					s_Mesto		= s_ImeTabele+".COL6"
+					s_Zona		= s_ImeTabele+".COL7"
+					s_Knjiga	= s_ImeTabele+".COL8"
+					s_RedBroj	= s_ImeTabele+".COL9"
+					
+				s_NazivKor = Replace(s_Naziv, chr$(34), chr$(39) & chr$(39))
+				s_UlicaKor = Replace(s_Ulica, chr$(34), chr$(39) & chr$(39))
+				
+'				print s_NazivKor
+'				print s_UlicaKor
+
+				s_GrafNaslov = "MB " & s_MB & " / " & s_NazivKor & " [" & s_UlicaKor & ", " & s_KB & ", " & s_Mesto+"] - " & s_Zona & "/" & s_Knjiga & " (" & s_RedBroj & ")"
+			
+				If TableInfo(s_ImeTabele, TAB_INFO_NROWS) > 0
+				Then
+'					Print "DEBUG:"+s_ImeTabele
+					Call GrafikStatistika
+					Call GrafikPotrosnje
+				Else 
+					Note "Nema podatka o potrošnji!"
+				End If
+			Next
+		
+	' - Jedan sumarni grafik za SVE vodomere u selekciji	
+		Case 2
+'		Print "Case 2 Grupa vodomera"
+			
+			s_ImeTabele = "Potrosnja_grupe_vodomera"
+			
+			s_kom = "Select Godina,Sum(COL12) ""Jan"",Sum(COL13) ""Feb"",Sum(COL14) ""Mar"",Sum(COL15) ""Apr"",Sum(COL16) ""Maj"",Sum(COL17) ""Jun"",Sum(COL18) ""Jul"",Sum(COL19) ""Avgs"",Sum(COL20) ""Sep"",Sum(COL21) ""Okt"",Sum(COL22) ""Nov"",Sum(COL23) ""Decm"",Sum(COL24) ""SUMA_GOD_POTR"" from PotrosnjaTmp group by Godina order by Godina into "+s_ImeTabele
+			Run Command s_kom
+
+			s_UkBrojVodomera = str$(Ubound(rs_MatBrOdabrani))
+			s_GrafNaslov = "Zajednicka potrosnja za "+s_UkBrojVodomera+" odabranih vodomera"
+			
+			Call GrafikStatistika
+			Call GrafikPotrosnje		
+			
+	' - Grafik za MERNU ZONU
+		Case 3
+'		Print "Case 3 MZ"
+		
+			s_GrafNaslov= "Potrosnja za MERNU ZONU "&s_MZ
+			
+			Call GrafikStatistika
+			Call GrafikPotrosnje
+
+	' - Grafik za SISTEM
+		Case 4
+'		Print "Case 4 SISTEM"
+		
+			s_GrafNaslov= "Potrosnja za sistem "&s_System
+			
+			Call GrafikStatistika
+			Call GrafikPotrosnje
+			
+	End Case	
+
+	Exit Sub	
+'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "SQL_Potrosnja")
+	Call ERRShow()	
+		
+End Sub
+
+SUB GrafikStatistika
+
+	onerror goto greska
+	
+	Dim i_BrojGodina as SmallInt	
+	Dim potros as alias
+
+'	Commit Table s_ImeTabele As s_FOLDER_RAD+s_ImeTabele TYPE NATIVE Charset "WindowsLatin2" Interactive
+	i_BrojGodina = TableInfo(s_ImeTabele, TAB_INFO_NROWS)
+	
+	Select Sum(SUMA_GOD_POTR) from s_ImeTabele into SumaGod
+	Fetch First From SumaGod
+		potros = SumaGod+".COL1"
+			If potros <> 0
+			Then
+				stat1 = potros/i_BrojGodina
+				stat2 = Round(potros/(i_BrojGodina*12), 0.01)		
+			Else
+				stat1 = 0
+				stat2 = 0
+			End If
+	Close Table SumaGod
+	
+	s_GrafPodnaslov = "Prosek: "+stat1+" m3/god. - "+stat2+" m3/mesecno"
+
+'	Kill (s_FOLDER_RAD+"SumaGod.TAB")
+	
+	Exit Sub
+'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "GrafikStatistika")
+	Call ERRShow()	
+
+End Sub
+
+SUB GrafikPotrosnje
+             
+	onerror goto greska
+
+	Graph Godina, Jan, Feb, Mar, Apr, Maj, Jun, Jul, Avgs, Sep, Okt, Nov, Decm 
+	From s_ImeTabele
+		Position (0.6,3) Units "cm"
+		Width 11 Units "cm" Height 8 Units "cm" 
+	Using s_MBApp_Dir+"naissus-gis.3tf" Restore
+
+	Graf_Setup = "Set Graph "
+		+"Title "      +chr$(34)+s_GrafNaslov+chr$(34)+" Font ("+chr$(34)+"Arial"+chr$(34)+",1,9,0)"
+		+"SubTitle "   +chr$(34)+s_GrafPodnaslov+chr$(34)
+		+"Footnote "   +chr$(34)+"JKP Naissus GIS"+chr$(34)
+		+"TitleSeries "+chr$(34)+"TitleSeries"+chr$(34)
+		+"TitleGroup " +chr$(34)+"Godina "+chr$(34)
+		+"TitleAxisY1 "+chr$(34)+"Ocitano (m3)"+chr$(34)	
+		+"TitleAxisY2 "+chr$(34)+"TitleAxisY2"+chr$(34)	
+	
+'	Print Graf_Setup
+
+	Run command Graf_Setup
+	Run Menu Command M_QUERY_UNSELECT
+		
+	Exit Sub
+'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "GrafikPotrosnje")
+	Call ERRShow()	
+
+End Sub

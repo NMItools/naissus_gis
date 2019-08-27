@@ -1,0 +1,181 @@
+'include "mapbasic.def"
+'include "menu.def"
+'include "icons.def"
+include "..\..\Library\ERRORLib.def"
+include "..\NAISSUS-GIS.def"
+
+SUB DLG_NoviLogin
+
+	onerror goto Greska  
+
+	Redim arr_Baze(2)
+	arr_Baze(1) = "GIS"
+	arr_Baze(2) = "GIS_dev"
+
+	Redim arr_Klase(2)
+	arr_Klase(1) = "User"
+	arr_Klase(2) = "Editor"
+'	arr_Klase(3) = "Admin"
+	
+	Call DLG_Sektori
+	Call DLG_Sluzbe("4")
+	Call DLG_Odeljenja("1")
+
+'***** DIALOG DESIGNER GENERATED CODE. DO NOT EDIT OR REMOVE THIS LINE OR BELOW THIS LINE! *****
+Dialog
+	Title "Kreiranje novog korisnika GIS"
+	Width 176 Height 190
+
+Control GroupBox
+	Id 1
+	Position 8, 7
+	Width 159 Height 84
+	Title "Podaci o korisniku"
+	
+Control StaticText
+	Id 2
+	Position 12, 25
+	Width 48 Height 8
+	Title "Ime i prezime:"
+	
+Control EditText
+	Id 3
+	Position 65, 23
+	Width 95 Height 12
+	Into sn_IME
+	
+Control StaticText
+	Id 4
+	Position 30, 41
+	Width 28 Height 8
+	Title "Sektor:"
+	
+Control PopupMenu
+	Id 5
+	Position 65, 39
+	Width 95
+	Title From Variable arr_Sektori()
+	Calling DLG_Sluzbe_1
+	Value 4
+	Into sn_SEKTOR
+	
+Control StaticText
+	Id 6
+	Position 29, 58
+	Width 29 Height 8
+	Title "Služba:"
+	
+Control PopupMenu
+	Id 7
+	Position 65, 56
+	Width 95
+	Title From Variable arr_Sluzbe()
+	Calling DLG_Odeljenja_1
+	Value 1
+	Into sn_SLUZBA
+	
+Control StaticText
+	Id 8
+	Position 24, 74
+	Width 37 Height 8
+	Title "Odeljenje:"
+	
+Control PopupMenu
+	Id 9
+	Position 65, 73
+	Width 95
+	Title From Variable arr_Odeljenja()
+	Value 1
+	Into sn_ODELJENJE
+	
+Control GroupBox
+	Id 10
+	Position 8, 95
+	Width 159 Height 71
+	Title "Kreiranje Logina i klase korisnika"
+	
+Control StaticText
+	Id 11
+	Position 14, 111
+	Width 23 Height 8
+	Title "Baza:"
+	
+Control PopupMenu
+	Id 12
+	Position 39, 109
+	Width 44
+	Title From Variable arr_Baze()
+	Value 1
+	Into sn_BAZA
+	
+Control StaticText
+	Id 13
+	Position 87, 111
+	Width 24 Height 8
+	Title "Klasa:"
+	
+Control PopupMenu
+	Id 14
+	Position 116, 109
+	Width 44
+	Title From Variable arr_Klase()
+	Value 1
+	Into sn_KLASA
+	
+Control StaticText
+	Id 15
+	Position 13, 133
+	Width 24 Height 8
+	Title "Login:"
+	
+Control EditText
+	Id 16
+	Position 39, 131
+	Width 44 Height 12
+	Into sn_LOGIN
+	
+Control StaticText
+	Id 17
+	Position 91, 133
+	Width 22 Height 8
+	Title "Pass:"
+	
+Control EditText
+	Id 18
+	Position 116, 131
+	Width 44 Height 12
+	Into sn_PASS
+	
+Control StaticText
+	Id 19
+	Position 67, 149
+	Width 46 Height 8
+	Title "Ponovi pass:"
+	
+Control EditText
+	Id 20
+	Position 116, 147
+	Width 44 Height 12
+	Into sn_PASS2
+	
+Control CancelButton
+	Title "Cancel"
+	Id 21
+	Position 8, 170
+	Width 51 Height 14
+	Calling POD_cancel
+	
+Control OKButton
+	Title "OK"
+	Id 22
+	Position 117, 170
+	Width 51 Height 14
+	Calling DLG_NoviLogin_OK
+
+	Exit Sub
+'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "DLG_NoviLogin")
+	Call ERRShow()
+
+End Sub	

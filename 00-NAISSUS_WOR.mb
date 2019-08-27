@@ -1,0 +1,3250 @@
+include "mapbasic.def"
+include "menu.def"
+include "icons.def"
+include "..\Library\ERRORLib.def"
+include "..\nmiWin.def"
+include "..\nmiFunkcije.def"
+include "..\nmiDotNet.def"
+include "NAISSUS-GIS.def"
+                                                                                                
+' =====================================================================================================================
+
+SUB MSSQL_tabele  
+
+	onerror goto Greska  
+	
+	Dim i_Start_vremena As Integer           
+	Dim i_Vremena_proteklo As Integer   
+	Dim s_PresTAB_f As String 
+	Dim i_PresTAB_duz As SmallInt
+	
+	l_Pitanje = Ask("Lokalne GIS tabele kod kojih postoje izmene koje nisu snimljene na serveru nece biti preuzete ! Za te tabele ponudice se opcija snimanja. Da li zelite da nastavite ?", "DA", "Odustani")                         
+	     
+	If l_Pitanje = false 
+	Then 
+		Print "Preuzimanje odlozeno"
+		Exit Sub
+	else
+		Save Workspace As s_FOLDER_WOR+"_temp.wor"                        
+		Close All Interactive
+
+		Server i_hdbc link table "SELECT TABLENAME, OWNERNAME From ""MI_"+s_appmod+"""."""+s_appmod+"""" Toolkit "ODBC" Into "x_mapcatalog" File s_FOLDER_TAB+"x_mapcatalog.tab"
+'								  SELECT TABLENAME, OWNERNAME From [MI_user].[User]
+		i_preuz=0
+		i_pres=0
+		s_PresTAB=""
+		i_RID=1      
+				
+		i_Start_vremena = Timer( )
+
+		ProgressBar "Preuzimanje GIS tabela sa SQL Servera u lokalni folder ("+s_FOLDER_TAB+")..." Calling MSSQL_tabele_DL Range TableInfo(x_mapcatalog, TAB_INFO_NROWS)
+
+		If CommandInfo(CMD_INFO_STATUS) 
+		Then                            
+			i_Vremena_proteklo = Timer( ) - i_Start_vremena
+			i_PresTAB_duz = Len(s_PresTAB)         
+			s_PresTAB_f = Right$(s_PresTAB, i_PresTAB_duz-1)
+			Print "Preuzimanje gotovo!"
+			Print "Broj preuzetih tabela: "+i_preuz+" (od "+i_RID+")"
+			Print "Broj (ne)usaglasenih tabela :"+i_pres+" ("+s_PresTAB_f+")"
+			Print "Vreme preuzimanja: "+i_Vremena_proteklo+" sec"
+			Note "Preuzimanje tabela zavrseno! Mozete nastaviti sa radom."
+		Else 
+			Print "Preuzimanje prekinuto! Broj preuzetih tabela: "+(i_RID-1-i_pres)
+			Print "Tabele koje nisu azurirane :"+i_pres+" ("+s_PresTAB_f+")"
+			Print "Vreme preuzimanja: "+i_Vremena_proteklo+" sec"
+			Note "Preuzimanje prekinuto!"
+		End If 
+
+		Drop Table x_mapcatalog
+		Close All Interactive
+		Run Application s_FOLDER_WOR+"_temp.wor"
+	
+	End If
+	
+	Exit Sub
+'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "MSSQL_tabele")
+	Call ERRShow()
+	
+End Sub
+
+' =====================================================================================================================
+
+SUB MSSQL_tabele_DL
+	
+	onerror goto Greska
+	
+	Dim s_SQL_tab as string
+	Dim s_SQL_schema as string
+	Dim s_SQL_edit_info as string
+	
+	Fetch Rec i_RID from x_mapcatalog
+	s_SQL_tab = x_mapcatalog.COL1
+	s_SQL_schema = x_mapcatalog.COL2
+
+'	provera da li postoje nesmiljene izmene za server
+	If FileExists(s_FOLDER_TAB+s_SQL_tab+".TAB") 
+	Then
+
+'		Print "TAB postoji"
+		If s_SQL_tab = "IZOHIPSE"
+			or s_SQL_tab = "KATASTAR_PARCELE"
+			or s_SQL_tab = "IZO"
+		then 
+			goto progres_bar
+		else	
+		End If
+
+		Open Table s_FOLDER_TAB+s_SQL_tab Interactive
+		s_SQL_edit_info = GetMetadata$(s_SQL_tab, "\DATALINK\EditInfo\PostCount")
+
+			If s_SQL_edit_info = "1" 
+			Then
+				l_pitanje = Ask("Tabela "+s_SQL_tab+" ima nesnimljene izmene ka serveru! Da li zelite da ih snimite ?", "Da", "Ne")
+					If l_Pitanje = true 
+					Then 
+						s_kom = "Commit Table "+s_SQL_tab+" Interactive"
+						Run Command s_kom
+						print "Tabela "+s_SQL_tab+" je imala izmene koje su snimljene na serveru."
+					else
+						i_pres = i_pres+1
+						s_PresTAB = s_PresTAB+","+s_SQL_tab
+						print "Tabela "+s_SQL_tab+" nije preuzeta! Postoje izmene koje nisu snimljene na serveru."
+					End If
+				Close Table s_SQL_tab
+		  		goto progres_bar 
+		 	Else
+				Close Table s_SQL_tab Interactive
+			End If
+
+	Else
+	Print "Fajl "+s_SQL_tab+" ne postoji u GIS folderu !"
+	End If
+	
+	Print "Preuzimanje: "+s_SQL_tab+"..."
+	Server i_hdbc link table "Select * From """+s_SQL_schema+"""."""+s_SQL_tab+"""" Toolkit "ODBC" Into ""+s_SQL_tab+"" File s_FOLDER_TAB+s_SQL_tab+".tab"
+	i_preuz=i_preuz+1
+	
+	progres_bar:
+	If i_RID = TableInfo(x_mapcatalog, TAB_INFO_NROWS) 
+	Then
+		ProgressBar = -1 'gotovo!
+	Else  
+		i_RID = i_RID + 1
+		ProgressBar = i_RID  'jos nije gotovo...
+	End If   
+	
+	Exit Sub
+'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "MSSQL_tabele_DL")
+	Call ERRShow()
+
+End Sub
+                                                
+' =====================================================================================================================
+
+SUB WOR_naissus_GIS
+            
+	onerror goto Greska
+
+	Save Workspace As s_FOLDER_WOR+"_temp.wor"                        
+	Close All Interactive
+	
+	Print "-"
+	Print "Kreiranje radnog prostora:"
+
+' -	Preuzimanje ili bez
+	
+	Do Case i_Start
+		
+		Case i_Start = 1
+		Goto start1
+		
+		Case Else
+		l_Pitanje = Ask("Preuzeti kompletne tabele sa SQL servera ?", "DA", "NE")                         
+		If l_Pitanje = true
+		Then 
+			Print "Preuzimanje tabela..."
+			Goto start1	
+		else
+			Goto start2
+		End If
+		
+	End Case
+		
+	start1:
+	Call MSSQL_tabele
+	
+	start2:
+	Set Event Processing Off
+
+' = NIVOS
+	Open Table s_FOLDER_TAB+"CEVOVOD.TAB" Interactive
+	Open Table s_FOLDER_TAB+"CEVOVODNI_SAHT.TAB" Interactive
+	Open Table s_FOLDER_TAB+"CRPNA_STANICA.TAB" Interactive
+	Open Table s_FOLDER_TAB+"HIDRANT.TAB" Interactive
+	Open Table s_FOLDER_TAB+"KAPTAZE.TAB" Interactive
+	Open Table s_FOLDER_TAB+"MERACI_PROTOKA.TAB" Interactive
+	Open Table s_FOLDER_TAB+"MERNE_ZONE_ZATVARACI.TAB" Interactive
+	Open Table s_FOLDER_TAB+"MULJ_ISPUST.TAB" Interactive
+	Open Table s_FOLDER_TAB+"NEPOVRATNI_VENTIL.TAB" Interactive
+	Open Table s_FOLDER_TAB+"PREKIDNE_KOMORE.TAB" Interactive
+	Open Table s_FOLDER_TAB+"PRIKLJUCCI.TAB" Interactive 
+	Open Table s_FOLDER_TAB+"PUMPE.TAB" Interactive
+	Open Table s_FOLDER_TAB+"REGULATORI_PRITISKA.TAB" Interactive
+	Open Table s_FOLDER_TAB+"REZERVOARI.TAB" Interactive
+	Open Table s_FOLDER_TAB+"VAZD_VENTIL.TAB" Interactive
+	Open Table s_FOLDER_TAB+"VELIKI_VODOMERI.TAB" Interactive
+	Open Table s_FOLDER_TAB+"VODOMERI.TAB" Interactive
+	Open Table s_FOLDER_TAB+"VODOMERNI_SAHT.TAB" Interactive
+	Open Table s_FOLDER_TAB+"ZATVARAC.TAB" Interactive
+	Open Table s_FOLDER_TAB+"OBJEKTI_VODOVOD.TAB" Interactive
+	Open Table s_FOLDER_TAB+"Zone_sanitarne_zastite" As Zone_sanitarne_zastite Interactive
+
+' = NIVOS POMOÆNI	
+	Open Table s_FOLDER_TAB+"INTERNI_CEVOVOD.TAB" Interactive
+	Open Table s_FOLDER_TAB+"INTERNI_CEVOVODNI_SAHT.TAB" Interactive
+	Open Table s_FOLDER_TAB+"INTERNA_VEZA.TAB" Interactive
+	Open Table s_FOLDER_TAB+"Detekcija_VM_tacke" Interactive
+	Open Table s_FOLDER_TAB+"Detekcija_VM_trasa" Interactive
+
+' = NIVOS MEDIJANA IZVORISTE
+	Open Table s_FOLDER_TAB+"ATM_SAHT_M" Interactive
+	Open Table s_FOLDER_TAB+"DRENAZA" Interactive
+	Open Table s_FOLDER_TAB+"BAZENI" Interactive
+	Open Table s_FOLDER_TAB+"BAZENI_OGLEDALA" Interactive
+	Open Table s_FOLDER_TAB+"BUNARI" Interactive
+	Open Table s_FOLDER_TAB+"CEV_BAZENI" Interactive
+	Open Table s_FOLDER_TAB+"DIJAFRAGMA" Interactive
+	Open Table s_FOLDER_TAB+"MERNA_MESTA" Interactive
+	Open Table s_FOLDER_TAB+"NATEGE" Interactive
+	Open Table s_FOLDER_TAB+"PIJEZOMETRI" Interactive
+	Open Table s_FOLDER_TAB+"SAHTE" Interactive
+	Open Table s_FOLDER_TAB+"VENTILI" Interactive
+
+' = extra 	
+	Open Table s_FOLDER_TAB+"NOVI_VODOMERI.TAB" Interactive
+	Open Table s_FOLDER_TAB+"NOVI_PRIKLJUCCI.TAB" Interactive
+	Open Table s_FOLDER_TAB+"PRIKLJUCCI_NELEGALNI.TAB" Interactive
+	Open Table s_FOLDER_TAB+"JAVNE_CESME.TAB" Interactive
+	Open Table s_FOLDER_TAB+"ZONE.TAB" Interactive
+	Open Table s_FOLDER_TAB+"KVAROVI.TAB" Interactive
+
+' = NIKAS
+	Open Table s_FOLDER_TAB+"ATM_IZLIV.TAB" Interactive
+	Open Table s_FOLDER_TAB+"ATM_PRIKLJUCAK.TAB" Interactive
+	Open Table s_FOLDER_TAB+"ATM_SAHT.TAB" Interactive
+	Open Table s_FOLDER_TAB+"ATMOSFERSKA.TAB" Interactive
+	Open Table s_FOLDER_TAB+"CS_OTPAD_VODA.TAB" Interactive
+	Open Table s_FOLDER_TAB+"FEK_KAN_IZLIV.TAB" Interactive
+	Open Table s_FOLDER_TAB+"FEK_KAN_PRIKLJUCAK.TAB" Interactive
+	Open Table s_FOLDER_TAB+"FEK_KAN_SAHT.TAB" Interactive
+	Open Table s_FOLDER_TAB+"FEKALNA.TAB" Interactive
+	Open Table s_FOLDER_TAB+"KORISNICKI_SAHT.TAB" Interactive
+	Open Table s_FOLDER_TAB+"POSTR_ZA_PREC.TAB" Interactive
+	Open Table s_FOLDER_TAB+"PRELIV.TAB" Interactive
+	Open Table s_FOLDER_TAB+"SIFON.TAB" Interactive
+	Open Table s_FOLDER_TAB+"SLIVNIK.TAB" Interactive
+	Open Table s_FOLDER_TAB+"SLIVNIK_PRIKLJUCAK.TAB" Interactive
+	Open Table s_FOLDER_TAB+"ZASTIT_KANAL_CEVI.TAB" Interactive
+
+' = KATASTAR, ADMINISTRATIVNE GRANICE
+	
+	Open Table s_FOLDER_TAB+"ADMJ_OPSTINE.TAB" Interactive
+	Open Table s_FOLDER_TAB+"ADMJ_NASELJA_KO.TAB" Interactive
+	Open Table s_FOLDER_TAB+"ADMJ_GRAD_NIS.TAB" Interactive
+	Open Table s_FOLDER_TAB+"KATASTAR_OBJEKTI.TAB" Interactive
+	Open Table s_FOLDER_TAB+"KATASTAR_PARCELE.TAB" Interactive
+	Open Table s_FOLDER_TAB+"REKE" As REKE Interactive
+	
+' = PROBLEMI
+	Open Table s_FOLDER_TAB+"VODOMERI_NEPOZNATI.TAB" Interactive
+	Open Table s_FOLDER_TAB+"PROBLEMI_KANALIZACIJA.TAB" Interactive
+	Open Table s_FOLDER_TAB+"PROBLEMI_POTROSACI.TAB" Interactive
+	Open Table s_FOLDER_TAB+"PROBLEMI_VODA.TAB" Interactive
+
+' = GEODETSKI 1
+	Open Table s_FOLDER_TAB+"SNIMLJENO_KOTE.TAB" Interactive
+
+' = GEODETSKI 2
+	Open Table s_FOLDER_TAB+"SNIMLJENO_ATM_PRIKLJUCAK.TAB" Interactive
+	Open Table s_FOLDER_TAB+"SNIMLJENO_ATM_SAHT.TAB" Interactive
+	Open Table s_FOLDER_TAB+"SNIMLJENO_ATM_SLIVNIK.TAB" Interactive
+	Open Table s_FOLDER_TAB+"SNIMLJENO_ATMOSFERSKA.TAB" Interactive
+	Open Table s_FOLDER_TAB+"SNIMLJENO_CEVOVOD.TAB" Interactive
+	Open Table s_FOLDER_TAB+"SNIMLJENO_CEVOVODNI_SAHT.TAB" Interactive
+	Open Table s_FOLDER_TAB+"SNIMLJENO_FEK_KAN_PRIKLJUCAK.TAB" Interactive
+	Open Table s_FOLDER_TAB+"SNIMLJENO_FEK_KAN_SAHT.TAB" Interactive
+	Open Table s_FOLDER_TAB+"SNIMLJENO_FEK_KAN_SLIVNIK.TAB" Interactive
+	Open Table s_FOLDER_TAB+"SNIMLJENO_FEKALNA.TAB" Interactive
+	Open Table s_FOLDER_TAB+"SNIMLJENO_HIDRANT.TAB" Interactive
+	Open Table s_FOLDER_TAB+"SNIMLJENO_KABLOVI.TAB" Interactive
+	Open Table s_FOLDER_TAB+"SNIMLJENO_OBJEKTI.TAB" Interactive
+	Open Table s_FOLDER_TAB+"SNIMLJENO_PRIKLJUCAK.TAB" Interactive
+	Open Table s_FOLDER_TAB+"SNIMLJENO_VODOMER_SAHT.TAB" Interactive
+	Open Table s_FOLDER_TAB+"SNIMLJENO_ZATVARAC.TAB" Interactive
+
+' = Sluzba saglasnosti
+
+	Open Table s_FOLDER_TAB+"S_SAG_OBJ.TAB" Interactive
+	Open Table s_FOLDER_TAB+"S_SAG_PRIK.TAB" Interactive
+	Open Table s_FOLDER_TAB+"S_SAG_RASK.TAB" Interactive
+	Open Table s_FOLDER_TAB+"S_SAG_VOD.TAB" Interactive
+	Open Table s_FOLDER_TAB+"S_USLOVI.TAB" Interactive
+
+' = IZMENE	
+
+	Open Table s_FOLDER_TAB+"IZMENE_ATM_KANAL_SAHTE.TAB" Interactive
+	Open Table s_FOLDER_TAB+"IZMENE_ATM_KANALIZ.TAB" Interactive
+	Open Table s_FOLDER_TAB+"IZMENE_CEVOVOD.TAB" Interactive
+	Open Table s_FOLDER_TAB+"IZMENE_FEK_KANAL_SAHTE.TAB" Interactive
+	Open Table s_FOLDER_TAB+"IZMENE_FEK_KANALIZACIJA.TAB" Interactive
+
+' = UKINUTO
+	
+	Open Table s_FOLDER_TAB+"UKINUTO_ATM_KANAL_SAHT.TAB" Interactive
+	Open Table s_FOLDER_TAB+"UKINUTO_ATMOSFERSKA.TAB" Interactive
+	Open Table s_FOLDER_TAB+"UKINUTO_FEK_KANAL_SAHT.TAB" Interactive
+	Open Table s_FOLDER_TAB+"UKINUTO_FEKALNA.TAB" Interactive
+	Open Table s_FOLDER_TAB+"UKINUTO_SLIVNIK.TAB" Interactive
+	Open Table s_FOLDER_TAB+"UKINUTO_SLIVNIK_PRIKLJUCAK.TAB" Interactive
+	Open Table s_FOLDER_TAB+"UKINUTO_CEVOVOD.TAB" Interactive
+	Open Table s_FOLDER_TAB+"UKINUTO_VODOMERI.TAB" Interactive
+	Open Table s_FOLDER_TAB+"UKINUTO_PRIKLJUCCI.TAB" Interactive
+	
+' = PODLOGE
+	
+	Print "- Ucitavanje karata..."
+	
+	Open Table s_FOLDER_POD+"MREZA_fg_1963_1000" As MREZA_fg_1963_1000 Interactive
+	Open Table s_FOLDER_POD+"MREZA_fg_1963_2500" As MREZA_fg_1963_2500 Interactive
+	Open Table s_FOLDER_POD+"MREZA_fg_1989_1000" As MREZA_fg_1989_1000 Interactive
+	Open Table s_FOLDER_POD+"MREZA_fg_1989_5000" As MREZA_fg_1989_5000 Interactive
+	Open Table s_FOLDER_POD+"MREZA_of_2006" As MREZA_of_2006 Interactive
+	Open Table s_FOLDER_POD+"MREZA_pr_1939_1000" As MREZA_pr_1939_1000 Interactive
+	Open Table s_FOLDER_POD+"MREZA_pr_1939_2500" As MREZA_pr_1939_2500 Interactive
+	Open Table s_FOLDER_POD+"MREZA_pr_1955_00_500" As MREZA_pr_1955_00_500 Interactive
+	Open Table s_FOLDER_POD+"MREZA_pr_1955_00_1000" As MREZA_pr_1955_00_1000 Interactive
+	Open Table s_FOLDER_POD+"MREZA_vt_1973_25000" As MREZA_vt_1973_25000 Interactive
+	Open Table s_FOLDER_POD+"MREZA_vt_1983_50000" As MREZA_vt_1983_50000 Interactive
+	
+	Open Table s_FOLDER_POD+"set_fg_1963_1000" As set_fg_1963_1000 Interactive
+	Open Table s_FOLDER_POD+"set_fg_1963_2500" As set_fg_1963_2500 Interactive
+	Open Table s_FOLDER_POD+"set_fg_1989_1000" As set_fg_1989_1000 Interactive
+	Open Table s_FOLDER_POD+"set_fg_1989_5000" As set_fg_1989_5000 Interactive
+	Open Table s_FOLDER_POD+"set_ORTOFOTO_2006" As set_ORTOFOTO_2006 Interactive
+	Open Table s_FOLDER_POD+"set_ORTOFOTO_2010" As set_OF_Doljevac_2010 Interactive
+	Open Table s_FOLDER_POD+"set_pr_1939_1000" As set_pr_1939_1000 Interactive
+	Open Table s_FOLDER_POD+"set_pr_1939_2500" As set_pr_1939_2500 Interactive
+	Open Table s_FOLDER_POD+"set_pr_1955_00_500" As set_pr_1955_00_500 Interactive
+	Open Table s_FOLDER_POD+"set_pr_1955_00_1000" As set_pr_1955_00_1000 Interactive
+	Open Table s_FOLDER_POD+"set_vt_1973_25000" As set_vt_1973_25000 Interactive
+	Open Table s_FOLDER_POD+"set_vt_1983_50000" As set_vt_1983_50000 Interactive
+	
+' - GeoSrbija (WMS)
+
+	Open Table s_FOLDER_POD+"2010_of_GS\set_ORTOFOTO_2010_GS.TAB" As set_ORTOFOTO_2010_GS Interactive
+	Open Table s_FOLDER_POD+"2013_of_GS\set_ORTOFOTO_2013_GS.TAB" As set_ORTOFOTO_2013_GS Interactive
+	Open Table s_FOLDER_POD+"2016_sat_GS_30cm\2016_sat_GS_30cm.TAB" As _2016_sat_GS_30cm Interactive
+	Open Table s_FOLDER_POD+"2016_sat_GS_40cm\2016_sat_GS_40cm.TAB" As _2016_sat_GS_40cm Interactive
+	
+'	Finalna mapa
+	
+	Print "- Kreiranje GIS mape..."
+	
+Map From GroupLayer("NIVOS",GroupLayer("[Pomoæni]",Detekcija_VM_tacke,Detekcija_VM_trasa,INTERNI_CEVOVODNI_SAHT,INTERNA_VEZA,INTERNI_CEVOVOD
+  ),GroupLayer("Medijana",VENTILI,PIJEZOMETRI,SAHTE
+  ,MERNA_MESTA,BUNARI,ATM_SAHT_M,DRENAZA,DIJAFRAGMA,CEV_BAZENI
+  ,NATEGE,BAZENI_OGLEDALA,BAZENI),JAVNE_CESME
+  ,KVAROVI,KAPTAZE,PREKIDNE_KOMORE,REZERVOARI,CRPNA_STANICA
+  ,PUMPE,REGULATORI_PRITISKA,MULJ_ISPUST,VAZD_VENTIL,NEPOVRATNI_VENTIL,VELIKI_VODOMERI
+  ,MERNE_ZONE_ZATVARACI,MERACI_PROTOKA,VODOMERI,ZATVARAC
+  ,HIDRANT,VODOMERNI_SAHT,CEVOVODNI_SAHT,PRIKLJUCCI,CEVOVOD
+  ,CEVOVOD,Zone_sanitarne_zastite
+  ,OBJEKTI_VODOVOD,ZONE),GroupLayer("NIKAS",GroupLayer("Fekalna",POSTR_ZA_PREC,CS_OTPAD_VODA,ZASTIT_KANAL_CEVI
+  ,SIFON,PRELIV,KORISNICKI_SAHT,FEK_KAN_IZLIV,FEK_KAN_SAHT,FEK_KAN_PRIKLJUCAK
+  ,FEKALNA,FEKALNA),GroupLayer("Atmosferska",SLIVNIK
+  ,SLIVNIK_PRIKLJUCAK,ATM_IZLIV,ATM_SAHT,ATM_PRIKLJUCAK
+  ,ATMOSFERSKA,ATMOSFERSKA)),GroupLayer("[Radni]",GroupLayer("_uklonjeno",UKINUTO_SLIVNIK
+  ,UKINUTO_SLIVNIK_PRIKLJUCAK,UKINUTO_ATM_KANAL_SAHT,UKINUTO_ATMOSFERSKA,UKINUTO_FEK_KANAL_SAHT,UKINUTO_FEKALNA,UKINUTO_VODOMERI
+  ,UKINUTO_PRIKLJUCCI,UKINUTO_CEVOVOD),NOVI_VODOMERI,NOVI_PRIKLJUCCI,PRIKLJUCCI_NELEGALNI,VODOMERI_NEPOZNATI,PROBLEMI_POTROSACI
+  ,PROBLEMI_VODA,PROBLEMI_KANALIZACIJA),GroupLayer("[Saglasnosti i uslovi]",S_SAG_VOD,S_SAG_RASK,S_SAG_PRIK,S_USLOVI,S_SAG_OBJ
+  ),GroupLayer("[Geodetski]",GroupLayer("_izmene",IZMENE_ATM_KANAL_SAHTE,IZMENE_ATM_KANALIZ,IZMENE_FEK_KANAL_SAHTE
+  ,IZMENE_FEK_KANALIZACIJA,IZMENE_CEVOVOD),SNIMLJENO_KOTE
+  ,SNIMLJENO_KABLOVI,SNIMLJENO_OBJEKTI,SNIMLJENO_ATM_SLIVNIK,SNIMLJENO_ATM_SAHT,SNIMLJENO_ATM_PRIKLJUCAK,SNIMLJENO_ATMOSFERSKA
+  ,SNIMLJENO_FEK_KAN_SLIVNIK,SNIMLJENO_FEK_KAN_SAHT,SNIMLJENO_FEK_KAN_PRIKLJUCAK,SNIMLJENO_FEKALNA,SNIMLJENO_ZATVARAC,SNIMLJENO_HIDRANT
+  ,SNIMLJENO_VODOMER_SAHT,SNIMLJENO_PRIKLJUCAK,SNIMLJENO_CEVOVODNI_SAHT,SNIMLJENO_CEVOVOD),GroupLayer("Katastar",GroupLayer("Izohipse"),GroupLayer("Administrativne granice",ADMJ_NASELJA_KO,ADMJ_OPSTINE,ADMJ_GRAD_NIS),REKE,KATASTAR_OBJEKTI,KATASTAR_PARCELE
+  ),GroupLayer("Podloge",GroupLayer("_mreze"),GroupLayer("Planovi"),set_ORTOFOTO_2013_GS
+  ,set_ORTOFOTO_2010_GS,set_OF_Doljevac_2010,set_ORTOFOTO_2006,_2016_sat_GS_30cm,_2016_sat_GS_40cm,set_fg_1963_1000
+  ,set_fg_1963_2500,set_fg_1989_1000,set_fg_1989_5000,set_pr_1939_1000,set_pr_1939_2500,set_pr_1955_00_500
+  ,set_pr_1955_00_1000,set_vt_1973_25000,set_vt_1983_50000)
+  Position (0.197917,4.08333) Units "in"
+  Width 12.9375 Units "in" Height 4.04167 Units "in" 
+Set Window FrontWindow() ScrollBars Off Autoscroll On Snap Mode On Enhanced On Smooth Text Antialias Image High Vector Antialias
+Set Map
+  CoordSys Earth Projection 8, 9999, 10, 485.017844, 254.040967, 490.850757, -6.25099249, -3.40102363, 15.57471608, 3.12980309, 0, "m", 21, 0, 0.9999, 7500000, 0
+  Center (7573210.935,4797878.263)
+  Zoom 2400 Units "m"
+  Preserve Zoom Display Scale Cartographic
+  Distance Units "m" Area Units "sq m" XY Units "m"
+  Distance Type Cartesian
+shade 60 with NADLEZNOST values 
+  "" Line (1,1,14694400) ,
+  "U PRIJEMU" Line (4,2,65280) 
+  default Line (1,2,0)   ' # color 1 # 
+shade 59 with DN_mm ranges apply all use all Line (18,2,45056) 
+  0: 1 Line (14,2,45056) ,
+  1: 199 Line (18,2,45056) ,
+  200: 399 Line (22,2,45056) ,
+  400: 499 Line (26,2,45056) ,
+  500: 600 Line (30,2,45056) ,
+  600: 799 Line (35,2,45056) ,
+  800: 999 Line (40,2,45056) ,
+  1000: 3000 Line (50,2,45056) 
+  default Line (20,2,10526880) 
+  ' # use 1 round 1 inflect off Line (1,2,0) at 0 by 0 color 1 # 
+shade 60 with CCTV values 
+  0 Line (1,1,16711680) ,
+  1 Line (2,75,57344) 
+  default Line (1,2,0)   ' # color 1 # 
+shade 53 with NADLEZNOST values 
+  "" Line (1,2,16711680) ,
+  "JKP NAISSUS" Line (1,1,65280) ,
+  "Kucni savet" Line (1,2,16734240) ,
+  "U PRIJEMU" Line (4,2,16711935) 
+  default Line (1,2,0)   ' # color 1 # 
+shade 52 with DN_mm ranges apply all use all Line (56,2,14694400) 
+  0: 1 Line (15,2,14694400) ,
+  1: 199 Line (18,2,14694400) ,
+  200: 399 Line (22,2,14694400) ,
+  400: 499 Line (28,2,14694400) ,
+  500: 600 Line (30,2,14694400) ,
+  600: 799 Line (35,2,14694400) ,
+  800: 999 Line (40,2,14694400) ,
+  1000: 3200 Line (50,2,14694400) 
+  default Line (20,2,10526880) 
+  ' # use 1 round 1 inflect off Line (1,2,0) at 0 by 0 color 1 # 
+shade 41 with VRSTA ignore "" values 
+  "+CEV ZA HL" Brush (2,16752800,16777215) ,
+  "Cevovodni šaht" Brush (1,14680064,16777215) Pen (1,2,8421504) ,
+  "Kanal" Brush (1,19424,16777215) Pen (1,5,4243711) ,
+  "Kaptažna gradjevina" Brush (2,65535,16777215) Pen (1,2,16777215) ,
+  "Korito" Brush (1,19424,16777215) Pen (1,5,4243711) ,
+  "Mlin" Brush (2,16772272,16777215) ,
+  "MOST" Brush (2,16744448,16777215) ,
+  "Objekat" Brush (2,12632256,16777215) Pen (1,2,16777215) ,
+  "Ograda" Brush (1,41040,16777215) Pen (1,5,16711680) ,
+  "Postrojenje" Brush (2,14745520,16777215) Pen (1,2,16777215) ,
+  "Prekidna komora" Brush (2,53352,16777215) Pen (1,2,16777215) ,
+  "Pumpna stanica" Brush (2,16711680,16777215) Pen (1,2,16777215) ,
+  "Rezervoar" Brush (2,255,16777215) Pen (1,2,16777215) ,
+  "Sabirna komora" Brush (2,16752848,16777215) ,
+  "Trafo stanica" Brush (2,16720016,16777215) ,
+  "Vodomerni šaht" Brush (2,10551295,16777215) 
+  default Brush (2,0,16777215)   ' # color 1 # 
+shade 40 with Zona_sanitarne_zastite values 
+  "Neposredna" Brush (1,16711680,16777215) Pen (1,111,16711680) ,
+  "Šira" Brush (1,65280,16777215) Pen (1,5,65280) ,
+  "Uža" Brush (1,255,16777215) Pen (1,48,16711680) 
+  default Brush (1,0,16777215) Pen (1,2,0)   ' # color 1 # 
+shade 39 with DN_MM ranges apply all use all Line (50,2,4227327) 
+  10: 80 Line (15,2,12416) ,
+  80: 100 Line (22,2,1065104) ,
+  100: 200 Line (26,2,1065120) ,
+  200: 300 Line (30,2,2117808) ,
+  300: 400 Line (32,2,2121920) ,
+  400: 600 Line (38,2,3170512) ,
+  600: 800 Line (42,2,3174624) ,
+  800: 1000 Line (44,2,4223216) ,
+  1000: 1200 Line (50,2,4227327) 
+  default Line (1,2,16576) 
+  ' # use 1 round 1 inflect off Line (1,2,0) at 0 by 0 color 1 # 
+shade 40 with IZVOR_INFORMACIJE values 
+  "" Line (2,2,9474192) ,
+  "-" Line (2,2,32960) ,
+  "GEODETSKI" Line (2,2,16711680) ,
+  "GPS" Line (2,65,16776960) ,
+  "Iz projekta" Line (2,2,16711935) ,
+  "KATASTAR" Brush (2,11556864,16777215) Pen (1,2,0) Line (2,2,11556864) Symbol (34,11556864,12) ,
+  "Planovi" Brush (2,11559167,16777215) Pen (1,2,0) Line (2,2,11559167) Symbol (34,11559167,12) ,
+  "Terenska skica" Line (2,65,65280) 
+  default Line (1,2,0)   ' # color 1 # 
+shade 38 with NADLEZNOST values 
+  "-" Line (1,1,16711680) ,
+  "GR_GRADJANA" Line (3,2,14201087) ,
+  "JKP NAISSUS" Line (3,2,255) ,
+  "NEPOZNATA" Line (2,5,16711680) ,
+  "Nije Naissus" Line (2,2,16711935) ,
+  "U PRIJEMU" Line (4,2,16776960) 
+  default Line (1,2,0)   ' # color 1 # 
+shade 34 with IZVOR_INFORMACIJE values 
+  "" Symbol (34,16711680,12) ,
+  "-" Symbol (48,8421504,10,"MapInfo Cartographic",256,0) ,
+  "1" Symbol (34,16711680,12) ,
+  "GEODETSKI" Symbol (48,16711680,10,"MapInfo Cartographic",256,0) ,
+  "GPS" Symbol (48,16776960,10,"MapInfo Cartographic",16,0) ,
+  "Iz projekta" Symbol (48,16711935,10,"MapInfo Cartographic",256,0) ,
+  "KATASTAR" Brush (2,14694400,16777215) Pen (1,2,0) Line (1,2,14694400) Symbol (48,14694400,10,"MapInfo Cartographic",256,0) ,
+  "Terenska Skica" Symbol (48,65280,10,"MapInfo Cartographic",16,0) 
+  default Symbol (40,0,12)   ' # color 1 # 
+shade 33 with IZVOR_INFORMACIJE values 
+  "" Brush (2,65535,16777215) Pen (1,2,0) Line (1,2,65535) Symbol (34,65535,12) ,
+  "-" Symbol (63,8421504,10,"MapInfo Weather",256,0) ,
+  "GEODETSKI" Symbol (63,16711680,10,"MapInfo Weather",256,0) ,
+  "GPS" Symbol (63,16776960,10,"MapInfo Weather",16,0) ,
+  "Iz projekta" Brush (15,16711935,16777215) Pen (1,2,0) Line (1,2,16711935) Symbol (63,16711935,10,"MapInfo Weather",256,0) ,
+  "Terenska Skica" Symbol (63,65280,10,"MapInfo Weather",256,0) 
+  default Symbol (40,0,12)   ' # color 1 # 
+shade 19 with Status_kvara values 
+  0 Symbol (133,12632256,10,"MapInfo World POI",256,0) ,
+  1 Symbol (133,16711680,10,"MapInfo World POI",256,0) ,
+  2 Brush (2,255,16777215) Pen (1,2,0) Line (1,2,255) Symbol (151,255,10,"MapInfo World POI",256,0) ,
+  4 Brush (2,16711935,16777215) Pen (1,2,0) Line (1,2,16711935) Symbol (31,16711935,12) ,
+  10 Brush (2,16776960,16777215) Pen (1,2,0) Line (1,2,16776960) Symbol (32,16776960,10,"MapInfo World POI",16,0) ,
+  20 Brush (2,65535,16777215) Pen (1,2,0) Line (1,2,65535) Symbol (31,65535,12) 
+  default Symbol (40,0,12)   ' # color 1 # 
+shade 15 with NAPOMENA values 
+  "" Line (2,2,44031) ,
+  "nije u funkciji" Line (1,5,44031) 
+  default Line (1,2,0)   ' # color 1 # 
+Set Map
+  Layer 1
+    Display Global
+    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (71,16711680,12,"MapInfo Cartographic",1,0) Line (1,2,0) Font ("Tahoma",0,9,0)
+    Zoom (0, 1200) Units "m" 
+    Label Line Arrow Position Right Font ("Tahoma",0,9,0) Pen (1,2,0) 
+      With TIP_TACKE
+      Parallel On Auto Off Overlap Off Duplicates On Offset 2
+      Visibility On
+  Layer 2
+    Display Global
+    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (49,16711680,12) Line (20,70,16776960) Font ("Tahoma",0,9,0)
+    Zoom (0, 1200) Units "m" 
+    Label Line Arrow Position Above Font ("Tahoma",0,9,0) Pen (1,2,0) 
+      With ULICA
+      Parallel On Auto Off Overlap Off Duplicates Off Offset 2
+      Visibility On
+  Layer 3
+    Display Global
+    Global Pen (1,2,208) Brush (15,12632319) Symbol (46,65280,12) Line (2,2,32960) Font ("Arial",256,10,12432,16777215)
+    Selectable Off
+    Zoom (0, 800) Units "m" 
+    Label Line Arrow Position Right Font ("Arial",256,10,12432,16777215) Pen (1,2,0) 
+      With ULICA
+      Parallel On Auto Off Overlap Off Duplicates On Offset 2
+      Visibility On
+  Layer 4
+    Display Global
+    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (49,16711680,12) Line (1,5,16776960) Font ("Tahoma",0,9,0)
+    Selectable Off
+    Zoom (0, 800) Units "m" 
+    Label Line Arrow Position Above Font ("Tahoma",0,9,0) Pen (1,2,0) 
+      With ULICA
+      Parallel On Auto Off Overlap Off Duplicates Off Offset 2
+      Visibility On
+  Layer 5
+    Display Global
+    Global Pen (1,2,208) Brush (15,12632319) Symbol (49,16711680,12) Line (1,6,61680) Font ("Arial",256,10,12432,16777215)
+    Zoom (0, 15000) Units "m" 
+    Label Line Arrow Position Above Font ("Arial",256,10,12432,16777215) Pen (1,2,0) 
+      With ULICA
+      Parallel On Auto Off Overlap Off Duplicates Off Offset 2
+      Visibility On
+  Layer 6
+    Display Global
+    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (63,16711680,9,"MapInfo Weather",256,0) Line (1,2,0) Font ("Tahoma",0,9,0)
+    Zoom (0, 1200) Units "m" 
+    Label Line Arrow Position Right Font ("Tahoma",0,9,0) Pen (1,2,0) 
+      With ID
+      Parallel On Auto Off Overlap Off Duplicates On Offset 2
+      Visibility Off
+  Layer 7
+    Display Global
+    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (41,16776960,6,"MapInfo Cartographic",16,0) Line (1,2,0) Font ("Tahoma",0,9,0)
+    Zoom (0, 1500) Units "m" 
+    Label Line Arrow Position Left Auto Retry On Font ("Arial Narrow",257,9,16776960,0) Pen (1,2,0) 
+      With ID
+      Parallel On Auto On Overlap Off Duplicates On Offset 2
+      Visibility Zoom (0, 600) Units "m"
+  Layer 8
+    Display Global
+    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (33,8443391,10,"MapInfo Cartographic",32,0) Line (1,2,0) Font ("Tahoma",0,9,0)
+    Zoom (0, 1200) Units "m" 
+    Label Line Arrow Position Right Font ("Tahoma",0,9,0) Pen (1,2,0) 
+      With OZNAKA_SAHTE
+      Parallel On Auto Off Overlap Off Duplicates On Offset 2
+      Visibility On
+  Layer 9
+    Display Global
+    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (41,3175935,9,"MapInfo Cartographic",256,0) Line (1,2,0) Font ("Tahoma",0,9,0)
+    Zoom (0, 600) Units "m" 
+    Label Line Arrow Position Below Auto Retry On Font ("Tahoma",256,7,19424,16777215) Pen (1,2,0) 
+      With ID
+      Parallel On Auto On Overlap Off Duplicates On Offset 2
+      Visibility Zoom (0, 600) Units "m"
+  Layer 10
+    Display Global
+    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (76,10543359,10,"MapInfo Water",0,0) Line (1,2,0) Font ("Tahoma",0,9,0)
+    Zoom (0, 1200) Units "m" 
+    Label Line Arrow Position Right Auto Retry On Font ("Tahoma",259,7,11593215,0) Pen (1,2,0) 
+      With ID
+      Parallel On Auto On Overlap Off Duplicates On Offset 2
+      Visibility Zoom (0, 600) Units "m"
+  Layer 11
+    Display Global
+    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (44,40960,9,"MapInfo Cartographic",256,0) Line (1,2,0) Font ("Tahoma",0,9,0)
+    Zoom (0, 1000) Units "m" 
+    Label Line Arrow Position Right Auto Retry On Font ("Tahoma",258,8,5079040,16777215) Pen (1,2,0) 
+      With "KT "+Left$(Str$(KOTA_POKLOPCA), Int(KOTA_POKLOPCA>0)*Len(Str$(KOTA_POKLOPCA)))+Chr$(13)+"KD "+Left$(Str$(KOTA_DNA), Int(KOTA_DNA>0)*Len(Str$(KOTA_DNA)))
+      Parallel On Auto On Overlap Off Duplicates On Offset 2
+      Visibility Zoom (0, 500) Units "m"
+  Layer 12
+    Display Global
+    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (49,16711680,12) Line (2,2,53248) Font ("Tahoma",0,9,0)
+    Label Line Arrow Position Center Auto Retry On Font ("Arial Narrow",257,9,40960,16777215) Pen (1,2,0) 
+      With MATERIJAL+DN_mm
+      Parallel On Auto On Overlap Off Duplicates On Offset 2
+      Visibility Zoom (0, 1200) Units "m"
+  Layer 13
+    Display Global
+    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (49,16711680,12) Line (1,48,16711680) Font ("Tahoma",0,9,0)
+    Label Line Arrow Position Above Font ("Tahoma",0,9,0) Pen (1,2,0) 
+      With Materijal
+      Parallel On Auto Off Overlap Off Duplicates Off Offset 2
+      Visibility On
+  Layer 14
+    Display Global
+    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (49,16711680,12) Line (2,2,14745520) Font ("Tahoma",0,9,0)
+    Label Line Arrow Position Center Auto Retry On Font ("Arial Narrow",257,9,15597520,0) Pen (1,2,0) 
+      With MATERIJAL+DN_mm
+      Parallel On Auto On Overlap Off Duplicates Off Offset 2
+      Visibility Zoom (0, 1200) Units "m"
+  Layer 15
+    Display Value
+    Global Pen (1,2,0)  Brush (2,16777215,16777215)  Symbol (49,16711680,12)  Line (1,2,0)  Font ("Tahoma",0,9,0)
+    Selectable Off
+  Layer 16
+    Display Graphic
+    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (49,16711680,12) Line (1,2,0) Font ("Tahoma",0,9,0)
+    Label Line Arrow Position Center Auto Retry On Font ("Arial Narrow",257,9,32960,16777215) Pen (1,2,0) 
+      With MATERIJAL+DN_MM
+      Parallel On Auto On Overlap Off Duplicates On Offset 2
+      Visibility Zoom (0, 1200) Units "m"
+  Layer 17
+    Display Global
+    Global Pen (2,2,14745520) Brush (2,4243711,16777215) Symbol (49,16711680,12) Line (1,2,0) Font ("Tahoma",0,9,0)
+    Label Line None Position Center Font ("Tahoma",0,9,0) Pen (1,2,0) 
+      With ID
+      Parallel On Auto Off Overlap Off Duplicates On Offset 2
+      Visibility On
+  Layer 18
+    Display Global
+    Global Pen (1,2,10516480) Brush (16,13671424) Symbol (49,16711680,12) Line (1,2,0) Font ("Tahoma",0,9,0)
+    Label Line None Position Center Auto Retry On Font ("Tahoma",1,10,16777215) Pen (1,2,0) 
+      With ID
+      Parallel On Auto On Overlap Off Duplicates On Offset 0
+      Visibility Zoom (0, 2400) Units "m"
+  Layer 19
+    Display Off
+    Global Pen (1,2,0) Brush (2,16776960,16777215) Symbol (49,16711680,12) Line (2,2,255) Font ("Arial",0,9,0)
+    Zoom (0, 12000) Units "m" 
+    Label Line Arrow Position Above Auto Retry On Font ("Arial",258,8,4227327,16777215) Pen (1,2,0) 
+      With NAZIV
+      Parallel On Auto On Overlap Off Duplicates On Offset 8
+      Visibility Zoom (0, 2000) Units "m"
+  Layer 20
+    Display Off
+    Global Pen (1,2,208)  Brush (15,12632319)  Symbol (49,16711680,12)  Line (2,2,32960)  Font ("Arial",256,10,12432,16777215)
+    Selectable Off
+    Zoom (0, 4000) Units "m" 
+  Layer 21
+    Display Off
+    Global Pen (1,2,208) Brush (15,12632319) Symbol (49,16711680,12) Line (2,2,32960) Font ("Arial",256,10,12432,16777215)
+    Zoom (0, 2500) Units "m" 
+    Label Line Arrow Position Right Font ("Arial",256,10,12432,16777215) Pen (1,2,0) 
+      With MI_PRINX
+      Parallel On Auto Off Overlap Off Duplicates On Offset 2
+      Visibility On
+  Layer 22
+    Display Global
+    Global Pen (1,2,27552) Brush (17,16711680) Symbol (39,6343679,8,"MapInfo Cartographic",256,0) Line (1,2,27552) Font ("Arial CE",256,8,12432,16777215)
+    Label Line Arrow Position Right Auto Retry On Font ("Arial",769,6,38368,16777215) Pen (1,2,0) 
+      With KAPTAZA
+      Parallel On Auto On Overlap Off Duplicates On Offset 2
+      Visibility On
+  Layer 23
+    Display Global
+    Global Pen (1,2,16711680) Brush (17,53248) Symbol (33,65280,6,"MapInfo Cartographic",48,0) Line (2,2,12432) Font ("Arial",257,9,9584,16777215)
+    Label Line Arrow Position Right Font ("Arial CE",257,9,32768,16777215) Pen (1,2,0) 
+      With "PK "+NAZIV+Chr$(13)+"V= "+KAPACITET+" m3"+Chr$(13)+"KPr = "+KOTA_PRELIVA+" m"+Chr$(13)+"KDn = "+KOTA_DNA+" m"
+      Parallel On Auto On Overlap On Duplicates On Offset 2
+      Visibility Zoom (0, 50000) Units "m"
+  Layer 24
+    Display Global
+    Global Pen (1,2,27552) Brush (17,16711680) Symbol (44,255,12) Line (1,2,27552) Font ("Arial CE",256,8,12432,16777215)
+    Label Line Arrow Position Right Auto Retry On Font ("Arial",257,8,255,16777215) Pen (1,2,0) 
+      With "Rez "+NAZIV+Chr$(13)+"V = "+V_m3_UKUPNO+"m_"+Chr$(13)+"Kd  ="+KOTA_DNA+" m"
+      Parallel On Auto On Overlap Off Duplicates On Offset 2
+      Visibility Zoom (0, 8000) Units "m"
+  Layer 25
+    Display Global
+    Global Pen (1,2,27552) Brush (17,16711680) Symbol (59,255,12) Line (1,2,27552) Font ("Arial CE",256,8,12432,16777215)
+    Label Line None Position Below Auto Retry On Font ("Arial",257,9,16711680,16777215) Pen (1,2,0) 
+      With "PS "+NAZIV
+      Parallel On Auto On Overlap Off Duplicates Off Offset 10
+      Visibility Zoom (0, 15000) Units "m"
+  Layer 26
+    Display Global
+    Global Pen (1,2,19424) Brush (16,4227327) Symbol (59,16711680,10) Line (2,2,38368) Font ("Arial",257,9,16576,16777215)
+    Zoom (0, 400) Units "m" 
+    Label Line Arrow Position Right Font ("Arial",2,8,16711680) Pen (1,2,0) 
+      With Oznaka_pumpe
+      Parallel On Auto On Overlap Off Duplicates On Offset 6
+      Visibility On
+  Layer 27
+    Display Global
+    Global Pen (1,2,16711680) Brush (17,53248) Symbol (42,45056,14,"MapInfo Oil&Gas",257,0) Line (2,2,12432) Font ("Arial",257,9,9584,16777215)
+    Zoom (0, 25000) Units "m" 
+    Label Line Arrow Position Right Font ("Arial",257,9,41040,16777215) Pen (1,2,0) 
+      With "RP "+REGULATOR
+      Parallel On Auto On Overlap On Duplicates On Offset 2
+      Visibility Zoom (0, 10000) Units "m"
+  Layer 28
+    Display Global
+    Global Pen (1,2,16711680) Brush (17,53248) Symbol (43,4243711,14,"MapInfo Oil&Gas",257,0) Line (2,2,14694400) Font ("Arial",257,9,9584,16777215)
+    Zoom (0, 2500) Units "m" 
+    Label Line Arrow Position Right Font ("Arial",0,9,0) Pen (1,2,0) 
+      With LOKACIJA
+      Parallel On Auto Off Overlap Off Duplicates On Offset 2
+      Visibility On
+  Layer 29
+    Display Global
+    Global Pen (1,2,16711680) Brush (17,53248) Symbol (49,255,14,"MapInfo Oil&Gas",257,0) Line (2,2,12432) Font ("Arial",257,9,9584,16777215)
+    Zoom (0, 5000) Units "m" 
+    Label Line Arrow Position Right Font ("Arial",0,9,0) Pen (1,2,0) 
+      With LOKACIJA
+      Parallel On Auto Off Overlap Off Duplicates On Offset 2
+      Visibility On
+  Layer 30
+    Display Global
+    Global Pen (1,2,16711680) Brush (17,53248) Symbol (39,65535,12,"MapInfo Oil&Gas",17,0) Line (2,2,12432) Font ("Arial",257,9,9584,16777215)
+    Zoom (0, 5000) Units "m" 
+    Label Line Arrow Position Right Font ("Arial",0,9,0) Pen (1,2,0) 
+      With BROJ
+      Parallel On Auto Off Overlap Off Duplicates On Offset 2
+      Visibility On
+  Layer 31
+    Display Global
+    Global Pen (1,2,16711680) Brush (17,53248) Symbol (47,65535,10,"MapInfo Cartographic",16,0) Line (2,2,12432) Font ("Arial",257,9,9584,16777215)
+    Zoom (0, 15000) Units "m" 
+    Label Line Arrow Position Below Left Font ("Arial",259,8,255,16777215) Pen (1,2,0) 
+      With "V "+VODOMER
+      Parallel On Auto On Overlap On Duplicates On Offset 2
+      Visibility On
+  Layer 32
+    Display Global
+    Global Pen (1,2,16711680) Brush (17,53248) Symbol (63,8454143,10,"MapInfo Weather",16,0) Line (2,2,12432) Font ("Arial",257,9,9584,16777215)
+    Zoom (0, 15000) Units "m" 
+    Label Line Arrow Position Below Left Font ("Arial",258,8,14694400,16777215) Pen (1,2,0) 
+      With OZNAKA
+      Parallel On Auto On Overlap On Duplicates On Offset 2
+      Visibility Zoom (0, 10000) Units "m"
+  Layer 33
+    Display Global
+    Global Pen (1,2,16711680) Brush (17,53248) Symbol (45,8443391,14) Line (2,2,12432) Font ("Arial",257,9,9584,16777215)
+    Zoom (0, 15000) Units "m" 
+    Label Line Arrow Position Below Left Font ("Arial Narrow",259,10,255,16777215) Pen (1,2,0) 
+      With NAZIV
+      Parallel On Auto On Overlap On Duplicates On Offset 2
+      Visibility Zoom (0, 10000) Units "m"
+  Layer 34
+    Display Global
+    Global Pen (1,2,16711680) Brush (17,53248) Symbol (59,5278719,10) Line (2,2,12432) Font ("Arial",257,9,9584,16777215)
+    Zoom (0, 450) Units "m" 
+    Label Line Arrow Position Right Auto Retry On Font ("Arial",258,8,255,16777215) Pen (1,2,0) 
+      With KUCNI_BROJ
+      Parallel On Auto On Overlap Off Duplicates On Offset 4
+      Visibility Zoom (0, 450) Units "m"
+  Layer 35
+    Display Value
+    Global Pen (1,2,16711680)  Brush (17,53248)  Symbol (49,16711680,12)  Line (2,2,12432)  Font ("Arial",257,9,9584,16777215)
+    Selectable Off
+    Zoom (0, 800) Units "m" 
+  Layer 36
+    Display Global
+    Global Pen (1,2,16711680) Brush (17,53248) Symbol (63,255,9,"MapInfo Weather",256,0) Line (2,2,12432) Font ("Arial",257,9,9584,16777215)
+    Zoom (0, 1000) Units "m" 
+    Label Line Arrow Position Right Font ("Arial",0,9,0) Pen (1,2,0) 
+      With BROJ
+      Parallel On Auto Off Overlap Off Duplicates On Offset 2
+      Visibility On
+  Layer 37
+    Display Value
+    Global Pen (1,2,16711680)  Brush (17,53248)  Symbol (49,16711680,12)  Line (2,2,12432)  Font ("Arial",257,9,9584,16777215)
+    Selectable Off
+    Zoom (0, 1000) Units "m" 
+  Layer 38
+    Display Global
+    Global Pen (1,2,16711680) Brush (17,53248) Symbol (60,255,9,"MapInfo Weather",256,0) Line (2,2,255) Font ("Arial",257,9,9584,16777215)
+    Zoom (0, 1000) Units "m" 
+    Label Line Arrow Position Right Font ("Arial",0,9,0) Pen (1,2,0) 
+      With BROJ
+      Parallel On Auto Off Overlap Off Duplicates On Offset 2
+      Visibility On
+  Layer 39
+    Display Off
+    Global Pen (1,2,208) Brush (15,12632319) Symbol (37,6343679,8,"MapInfo Cartographic",256,0) Line (2,2,32960) Font ("Arial",256,10,12432,16777215)
+    Label Line Arrow Position Right Font ("Arial",256,10,12432,16777215) Pen (1,2,0) 
+      With ULICA
+      Parallel On Auto Off Overlap Off Duplicates On Offset 2
+      Visibility On
+  Layer 40
+    Display Global
+    Global Pen (1,2,208) Brush (15,12632319) Symbol (37,255,9,"MapInfo Cartographic",256,0) Line (2,2,32960) Font ("Arial",256,10,12432,16777215)
+    Zoom (0, 600) Units "m" 
+    Label Line Arrow Position Right Font ("Arial",257,8,12432,16777215) Pen (1,2,0) 
+      With MI_PRINX
+      Parallel On Auto Off Overlap Off Duplicates On Offset 2
+      Visibility Off
+  Layer 41
+    Display Graphic
+    Global Pen (1,2,16711680) Brush (17,53248) Symbol (49,16711680,12) Line (20,2,3175935) Font ("Arial",257,9,9584,16777215)
+    Zoom (0, 450) Units "m" 
+    Label Line Arrow Position Center Font ("Arial",257,8,65535,0) Pen (1,2,0) 
+      With MATERIJAL_PRIK_CEV+PRECNIK_PRIK_CEV+Chr$(13)+Broj_RN
+      Parallel On Auto On Overlap On Duplicates Off PartialSegments On Offset 2
+      Visibility Zoom (0, 150) Units "m"
+  Layer 42
+    Display Value
+    Global Pen (1,2,0)  Brush (2,16776960,16777215)  Symbol (49,16711680,12)  Line (2,2,255)  Font ("Arial",0,9,0)
+    Selectable Off
+  Layer 43
+    Display Graphic
+    Global Pen (1,2,0) Brush (2,16776960,16777215) Symbol (49,16711680,12) Line (2,2,255) Font ("Arial",0,9,0)
+    Label Line Arrow Position Center Auto Retry On Font ("Tahoma",257,7,16777215,0) Pen (1,2,0) 
+      With ULICA
+      Follow Path Percent Over 45 Auto On Overlap Off Duplicates Off Offset 2
+      Visibility Zoom (1000, 2500) Units "m"
+  Layer 44
+    Display Off
+    Global Pen (1,2,27552)  Brush (17,16711680)  Symbol (49,16711680,12)  Line (2,2,32960)  Font ("Arial CE",256,8,12432,16777215)
+    Selectable Off
+  Layer 45
+    Display Value
+    Global Pen (1,2,27552)  Brush (17,16711680)  Symbol (49,16711680,12)  Line (1,2,27552)  Font ("Arial CE",256,8,12432,16777215)
+    Selectable Off
+  Layer 46
+    Display Off
+    Global Pen (1,2,27552) Brush (17,16711680) Symbol (49,16711680,12) Line (1,2,65535) Font ("Arial CE",256,8,12432,16777215)
+    Label Line Arrow Position Center Font ("Arial Narrow",257,9,16576,16777215) Pen (1,2,0) 
+      With MATERIJAL+Left$(Str$(DN_MM), Int(DN_MM>0)*Len(Str$(DN_MM)))
+      Parallel On Auto On Overlap On Duplicates On PartialSegments On Offset 2
+      Visibility Zoom (0, 500) Units "m"
+  Layer 47
+    Display Value
+    Global Pen (1,2,0)  Brush (2,16777215,16777215)  Symbol (35,0,12)  Line (1,2,0)  Font ("Tahoma",0,9,0)
+    Selectable Off
+  Layer 48
+    Display Graphic
+    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (35,0,12) Line (1,2,0) Font ("Tahoma",0,9,0)
+    Label Line None Position Center Font ("Tahoma",0,9,0) Pen (1,2,0) 
+      With Izvoriste
+      Parallel On Auto Off Overlap Off Duplicates On Offset 2
+      Visibility On
+  Layer 49
+    Display Off
+    Global Pen (1,2,0)  Brush (2,16777215,16777215)  Symbol (49,16711680,12)  Line (1,2,0)  Font ("Tahoma",0,9,0)
+    Selectable Off
+  Layer 50
+    Display Graphic
+    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (49,16711680,12) Line (1,2,0) Font ("Tahoma",0,9,0)
+    Label Line None Position Center Font ("Tahoma",0,9,0) Pen (1,2,0) 
+      With NAZIV
+      Parallel On Auto Off Overlap Off Duplicates On Offset 2
+      Visibility On
+  Layer 51
+    Display Off
+    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (49,16711680,12) Line (1,2,0) Font ("Tahoma",0,9,0)
+    Label Line None Position Center Font ("Tahoma",0,9,0) Pen (1,2,0) 
+      With SISTEM
+      Parallel On Auto Off Overlap Off Duplicates On Offset 2
+      Visibility On
+  Layer 52
+    Display Global
+    Global Pen (1,2,208) Brush (15,12632319) Symbol (44,14694400,18) Line (2,2,32960) Font ("Arial",256,10,12432,16777215)
+    Label Line Arrow Position Right Font ("Arial",256,10,12432,16777215) Pen (1,2,0) 
+      With NAZIV
+      Parallel On Auto Off Overlap Off Duplicates On Offset 2
+      Visibility On
+  Layer 53
+    Display Global
+    Global Pen (1,2,208) Brush (15,12632319) Symbol (45,13658112,18) Line (2,2,32960) Font ("Arial",256,10,12432,16777215)
+    Label Line Arrow Position Right Font ("Arial",256,10,12432,16777215) Pen (1,2,0) 
+      With LOKACIJA
+      Parallel On Auto Off Overlap Off Duplicates On Offset 2
+      Visibility On
+  Layer 54
+    Display Global
+    Global Pen (1,2,208) Brush (15,12632319) Symbol (49,16711680,12) Line (1,49,6332416) Font ("Arial",256,10,12432,16777215)
+    Label Line Arrow Position Above Font ("Arial",256,10,12432,16777215) Pen (1,2,0) 
+      With ULICA
+      Parallel On Auto Off Overlap Off Duplicates Off Offset 2
+      Visibility On
+  Layer 55
+    Display Global
+    Global Pen (1,2,208) Brush (15,12632319) Symbol (44,12595200,14,"MapInfo Oil&Gas",16,0) Line (2,2,32960) Font ("Arial",256,10,12432,16777215)
+    Label Line Arrow Position Right Font ("Arial",256,10,12432,16777215) Pen (1,2,0) 
+      With ID
+      Parallel On Auto Off Overlap Off Duplicates On Offset 2
+      Visibility On
+  Layer 56
+    Display Global
+    Global Pen (1,2,208) Brush (15,12632319) Symbol (45,16711680,12,"MapInfo Oil&Gas",257,0) Line (2,2,14694400) Font ("Arial",256,10,12432,16777215)
+    Zoom (0, 1500) Units "m" 
+    Label Line Arrow Position Right Font ("Arial",256,10,12432,16777215) Pen (1,2,0) 
+      With NAZIV
+      Parallel On Auto Off Overlap Off Duplicates On Offset 2
+      Visibility On
+  Layer 57
+    Display Graphic
+    Global Pen (1,2,208) Brush (15,12632319) Symbol (49,16711680,12) Line (2,2,32960) Font ("Arial",256,10,12432,16777215)
+    Zoom (0, 600) Units "m" 
+    Label Line Arrow Position Right Font ("Arial",256,10,12432,16777215) Pen (1,2,0) 
+      With R_BROJ
+      Parallel On Auto Off Overlap Off Duplicates On Offset 2
+      Visibility On
+  Layer 58
+    Display Global
+    Global Pen (1,2,208) Brush (15,12632319) Symbol (46,16734240,14) Line (2,2,32960) Font ("Arial",256,10,12432,16777215)
+    Label Line Arrow Position Right Font ("Arial",256,10,12432,16777215) Pen (1,2,0) 
+      With IZLIV
+      Parallel On Auto Off Overlap Off Duplicates On Offset 2
+      Visibility On
+  Layer 59
+    Display Global
+    Global Pen (1,2,208) Brush (15,12632319) Symbol (44,12595200,10,"MapInfo Cartographic",257,0) Line (2,2,32960) Font ("Arial",256,10,12432,16777215)
+    Zoom (0, 500) Units "m" 
+    Label Line Arrow Position Right Auto Retry On Font ("Arial",257,8,12595200,16777215) Pen (1,2,0) 
+      With LABELA
+      Parallel On Auto On Overlap Off Duplicates On Offset 5
+      Visibility Zoom (0, 500) Units "m"
+  Layer 60
+    Display Global
+    Global Pen (1,2,208) Brush (15,12632319) Symbol (49,16711680,12) Line (2,2,16744448) Font ("Arial",256,10,12432,16777215)
+    Zoom (0, 400) Units "m" 
+    Label Line Arrow Position Above Font ("Arial",256,10,12432,16777215) Pen (1,2,0) 
+      With MATERIJAL
+      Parallel On Auto Off Overlap Off Duplicates Off Offset 2
+      Visibility On
+  Layer 61
+    Display Value
+    Global Pen (1,2,208)  Brush (15,12632319)  Symbol (49,16711680,12)  Line (2,2,32960)  Font ("Arial",256,10,12432,16777215)
+    Selectable Off
+  Layer 62
+    Display Global
+    Global Pen (1,2,208) Brush (15,12632319) Symbol (49,16711680,12) Line (2,2,14694400) Font ("Arial",256,10,12432,16777215)
+    Label Line Arrow Position Center Auto Retry On Font ("Arial Narrow",257,9,12595200,16777215) Pen (1,2,0) 
+      With MATERIJAL+PRECNIK
+      Parallel On Auto On Overlap Off Duplicates On Offset 2
+      Visibility Zoom (0, 1000) Units "m"
+  Layer 63
+    Display Value
+    Global Pen (2,2,65280)  Brush (17,65280)  Symbol (35,0,12)  Line (1,2,0)  Font ("Arial",0,9,0)
+    Selectable Off
+  Layer 64
+    Display Off
+    Global Pen (2,2,65280) Brush (17,65280) Symbol (35,0,12) Line (1,2,0) Font ("Arial",0,9,0)
+    Label Line Arrow Position Above Auto Retry On Font ("Arial",257,18,16711935,0) Pen (1,2,0) 
+      With Left$(NADLEZNOST, Abs(Int(Len(NADLEZNOST)-12.6))*14)
+      Parallel On Auto On Overlap Off Duplicates On Offset 2
+      Visibility Zoom (0, 1500) Units "m"
+  Layer 65
+    Display Global
+    Global Pen (1,2,208) Brush (15,12632319) Symbol (83,53248,10,"MapInfo Miscellaneous",256,0) Line (2,2,32960) Font ("Arial",256,10,12432,16777215)
+    Zoom (0, 600) Units "m" 
+    Label Line Arrow Position Right Font ("Arial",256,10,12432,16777215) Pen (1,2,0) 
+      With IZVOR_INFORMACIJE
+      Parallel On Auto Off Overlap Off Duplicates On Offset 2
+      Visibility On
+  Layer 66
+    Display Global
+    Global Pen (1,2,208) Brush (15,12632319) Symbol (49,16711680,12) Line (2,2,8245248) Font ("Arial",256,10,12432,16777215)
+    Zoom (0, 600) Units "m" 
+    Label Line Arrow Position Above Font ("Arial",256,10,12432,16777215) Pen (1,2,0) 
+      With ULICA
+      Parallel On Auto Off Overlap Off Duplicates Off Offset 2
+      Visibility On
+  Layer 67
+    Display Global
+    Global Pen (1,2,208) Brush (15,12632319) Symbol (46,53248,14) Line (2,2,32960) Font ("Arial",256,10,12432,16777215)
+    Label Line Arrow Position Right Font ("Arial",256,10,12432,16777215) Pen (1,2,0) 
+      With IZLIV
+      Parallel On Auto Off Overlap Off Duplicates On Offset 2
+      Visibility On
+  Layer 68
+    Display Global
+    Global Pen (1,2,208) Brush (15,12632319) Symbol (44,45056,10,"MapInfo Cartographic",257,0) Line (2,2,32960) Font ("Arial",256,10,12432,16777215)
+    Zoom (0, 1000) Units "m" 
+    Label Line Arrow Position Right Font ("Arial Narrow",259,8,5079040,16777215) Pen (1,2,0) 
+      With LABELA
+      Parallel On Auto On Overlap On Duplicates On PartialSegments On Offset 2
+      Visibility Zoom (0, 500) Units "m"
+  Layer 69
+    Display Global
+    Global Pen (1,2,208) Brush (15,12632319) Symbol (49,16711680,12) Line (2,2,12632064) Font ("Arial",256,10,12432,16777215)
+    Zoom (0, 400) Units "m" 
+    Label Line Arrow Position Above Font ("Arial",256,10,12432,16777215) Pen (1,2,0) 
+      With MATERIJAL
+      Parallel On Auto Off Overlap Off Duplicates Off Offset 2
+      Visibility On
+  Layer 70
+    Display Value
+    Global Pen (1,2,208)  Brush (15,12632319)  Symbol (49,16711680,12)  Line (2,2,57344)  Font ("Arial",256,10,12432,16777215)
+    Selectable Off
+  Layer 71
+    Display Value
+    Global Pen (1,2,208)  Brush (15,12632319)  Symbol (49,16711680,12)  Line (2,2,57344)  Font ("Arial",256,10,12432,16777215)
+    Selectable Off
+  Layer 72
+    Display Global
+    Global Pen (1,2,208) Brush (15,12632319) Symbol (49,16711680,12) Line (2,2,57344) Font ("Arial",256,10,12432,16777215)
+    Label Line Arrow Position Center Auto Retry On Font ("Arial Narrow",257,9,5079040,16777215) Pen (1,2,0) 
+      With MATERIJAL+PRECNIK
+      Parallel On Auto On Overlap On Duplicates On PartialSegments On Offset 2
+      Visibility Zoom (0, 1000) Units "m"
+  Layer 73
+    Display Value
+    Global Pen (2,2,65280)  Brush (17,65280)  Symbol (35,0,12)  Line (1,2,0)  Font ("Arial",0,9,0)
+    Selectable Off
+  Layer 74
+    Display Off
+    Global Pen (2,2,65280) Brush (17,65280) Symbol (35,0,12) Line (1,2,0) Font ("Arial",0,9,0)
+    Label Line Arrow Position Above Auto Retry On Font ("Arial",257,18,65280,0) Pen (1,2,0) 
+      With Left$(NADLEZNOST, Abs(Int(Len(NADLEZNOST)-12.6))*14)
+      Parallel On Auto On Overlap Off Duplicates On Offset 2
+      Visibility Zoom (0, 1500) Units "m"
+  Layer 75
+    Display Graphic
+    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (35,0,12) Line (1,2,0) Font ("Tahoma",0,9,0)
+    Label Line Arrow Position Right Font ("Tahoma",0,9,0) Pen (1,2,0) 
+      With IZVOR_INFORMACIJE
+      Parallel On Auto Off Overlap Off Duplicates On Offset 2
+      Visibility On
+  Layer 76
+    Display Graphic
+    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (35,0,12) Line (1,2,0) Font ("Tahoma",0,9,0)
+    Label Line Arrow Position Above Font ("Tahoma",0,9,0) Pen (1,2,0) 
+      With ULICA
+      Parallel On Auto Off Overlap Off Duplicates Off Offset 2
+      Visibility On
+  Layer 77
+    Display Graphic
+    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (35,0,12) Line (1,2,0) Font ("Tahoma",0,9,0)
+    Label Line Arrow Position Right Font ("Tahoma",0,9,0) Pen (1,2,0) 
+      With ULICA
+      Parallel On Auto Off Overlap Off Duplicates On Offset 2
+      Visibility On
+  Layer 78
+    Display Graphic
+    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (35,0,12) Line (1,2,0) Font ("Tahoma",0,9,0)
+    Label Line Arrow Position Above Font ("Tahoma",0,9,0) Pen (1,2,0) 
+      With ULICA
+      Parallel On Auto Off Overlap Off Duplicates Off Offset 2
+      Visibility On
+  Layer 79
+    Display Graphic
+    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (35,0,12) Line (1,2,0) Font ("Tahoma",0,9,0)
+    Label Line Arrow Position Right Font ("Tahoma",0,9,0) Pen (1,2,0) 
+      With R_BROJ
+      Parallel On Auto Off Overlap Off Duplicates On Offset 2
+      Visibility On
+  Layer 80
+    Display Graphic
+    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (35,0,12) Line (1,2,0) Font ("Tahoma",0,9,0)
+    Label Line Arrow Position Above Font ("Tahoma",0,9,0) Pen (1,2,0) 
+      With ULICA
+      Parallel On Auto Off Overlap Off Duplicates Off Offset 2
+      Visibility On
+  Layer 81
+    Display Graphic
+    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (35,0,12) Line (1,2,0) Font ("Tahoma",0,9,0)
+    Label Line Arrow Position Right Font ("Tahoma",0,9,0) Pen (1,2,0) 
+      With Broj_RN
+      Parallel On Auto Off Overlap Off Duplicates On Offset 2
+      Visibility On
+  Layer 82
+    Display Graphic
+    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (49,16711680,12) Line (1,2,0) Font ("Tahoma",0,9,0)
+    Label Line Arrow Position Above Font ("Tahoma",0,9,0) Pen (1,2,0) 
+      With MATERIJAL_GL_CEV
+      Parallel On Auto Off Overlap Off Duplicates Off Offset 2
+      Visibility On
+  Layer 83
+    Display Graphic
+    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (35,0,12) Line (1,2,0) Font ("Tahoma",0,9,0)
+    Label Line Arrow Position Above Font ("Tahoma",0,9,0) Pen (1,2,0) 
+      With ULICA
+      Parallel On Auto Off Overlap Off Duplicates Off Offset 2
+      Visibility On
+  Layer 84
+    Display Global
+    Global Pen (1,2,208) Brush (15,12632319) Symbol (33,16776960,14) Line (2,2,32960) Font ("Arial",256,10,12432,16777215)
+    Zoom (0, 6000) Units "m" 
+    Label Line Arrow Position Right Font ("Arial",256,10,12432,16777215) Pen (1,2,0) 
+      With Broj_RN
+      Parallel On Auto Off Overlap Off Duplicates On Offset 2
+      Visibility On
+  Layer 85
+    Display Global
+    Global Pen (1,2,208) Brush (15,12632319) Symbol (49,16711680,12) Line (2,193,16776960) Font ("Arial",256,10,12432,16777215)
+    Zoom (0, 6000) Units "m" 
+    Label Line Arrow Position Above Font ("Arial",256,10,12432,16777215) Pen (1,2,0) 
+      With Broj_RN
+      Parallel On Auto Off Overlap Off Duplicates Off Offset 2
+      Visibility On
+  Layer 86
+    Display Graphic
+    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (35,0,12) Line (1,2,0) Font ("Tahoma",0,9,0)
+    Label Line Arrow Position Above Font ("Tahoma",0,9,0) Pen (1,2,0) 
+      With MI_PRINX
+      Parallel On Auto Off Overlap Off Duplicates Off Offset 2
+      Visibility On
+  Layer 87
+    Display Graphic
+    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (35,0,12) Line (1,2,0) Font ("Tahoma",0,9,0)
+    Label Line Arrow Position Right Font ("Tahoma",0,9,0) Pen (1,2,0) 
+      With MI_PRINX
+      Parallel On Auto Off Overlap Off Duplicates On Offset 2
+      Visibility On
+  Layer 88
+    Display Graphic
+    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (35,0,12) Line (1,2,0) Font ("Tahoma",0,9,0)
+    Label Line None Position Center Font ("Tahoma",0,9,0) Pen (1,2,0) 
+      With STATUS
+      Parallel On Auto Off Overlap Off Duplicates On Offset 2
+      Visibility On
+  Layer 89
+    Display Graphic
+    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (35,0,12) Line (1,2,0) Font ("Tahoma",0,9,0)
+    Label Line None Position Center Font ("Tahoma",0,9,0) Pen (1,2,0) 
+      With Tip
+      Parallel On Auto Off Overlap Off Duplicates On Offset 2
+      Visibility On
+  Layer 90
+    Display Graphic
+    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (35,0,12) Line (1,2,0) Font ("Tahoma",0,9,0)
+    Label Line None Position Center Font ("Tahoma",0,9,0) Pen (1,2,0) 
+      With TIP
+      Parallel On Auto Off Overlap Off Duplicates On Offset 2
+      Visibility On
+  Layer 91
+    Display Graphic
+    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (35,0,12) Line (1,2,0) Font ("Tahoma",0,9,0)
+    Label Line Arrow Position Right Font ("Tahoma",0,9,0) Pen (1,2,0) 
+      With PROFIL_mm
+      Parallel On Auto Off Overlap Off Duplicates On Offset 2
+      Visibility On
+  Layer 92
+    Display Graphic
+    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (35,0,12) Line (1,2,0) Font ("Tahoma",0,9,0)
+    Label Line Arrow Position Above Font ("Tahoma",0,9,0) Pen (1,2,0) 
+      With PODNOSILAC
+      Parallel On Auto Off Overlap Off Duplicates Off Offset 2
+      Visibility On
+  Layer 93
+    Display Graphic
+    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (35,0,12) Line (1,2,0) Font ("Tahoma",0,9,0)
+    Label Line Arrow Position Above Font ("Tahoma",0,9,0) Pen (1,2,0) 
+      With VRSTA
+      Parallel On Auto Off Overlap Off Duplicates Off Offset 2
+      Visibility On
+  Layer 94
+    Display Graphic
+    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (35,0,12) Line (1,2,0) Font ("Tahoma",0,9,0)
+    Label Line None Position Center Font ("Tahoma",0,9,0) Pen (1,2,0) 
+      With PODNOSILAC
+      Parallel On Auto Off Overlap Off Duplicates On Offset 2
+      Visibility On
+  Layer 95
+    Display Graphic
+    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (35,0,12) Line (1,2,0) Font ("Tahoma",0,9,0)
+    Label Line None Position Center Font ("Tahoma",0,9,0) Pen (1,2,0) 
+      With PODNOSILAC
+      Parallel On Auto Off Overlap Off Duplicates On Offset 2
+      Visibility On
+  Layer 96
+    Display Graphic
+    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (35,0,12) Line (1,2,0) Font ("Tahoma",0,9,0)
+    Label Line Arrow Position Right Font ("Tahoma",0,9,0) Pen (1,2,0) 
+      With ULICA
+      Parallel On Auto Off Overlap Off Duplicates On Offset 2
+      Visibility On
+  Layer 97
+    Display Graphic
+    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (35,0,12) Line (1,2,0) Font ("Tahoma",0,9,0)
+    Label Line Arrow Position Above Font ("Tahoma",0,9,0) Pen (1,2,0) 
+      With ULICA
+      Parallel On Auto Off Overlap Off Duplicates Off Offset 2
+      Visibility On
+  Layer 98
+    Display Graphic
+    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (35,0,12) Line (1,2,0) Font ("Tahoma",0,9,0)
+    Label Line Arrow Position Right Font ("Tahoma",0,9,0) Pen (1,2,0) 
+      With ULICA
+      Parallel On Auto Off Overlap Off Duplicates On Offset 2
+      Visibility On
+  Layer 99
+    Display Graphic
+    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (35,0,12) Line (1,2,0) Font ("Tahoma",0,9,0)
+    Label Line Arrow Position Above Font ("Tahoma",0,9,0) Pen (1,2,0) 
+      With ULICA
+      Parallel On Auto Off Overlap Off Duplicates Off Offset 2
+      Visibility On
+  Layer 100
+    Display Graphic
+    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (35,0,12) Line (1,2,0) Font ("Tahoma",0,9,0)
+    Label Line Arrow Position Above Font ("Tahoma",0,9,0) Pen (1,2,0) 
+      With ULICA
+      Parallel On Auto Off Overlap Off Duplicates Off Offset 2
+      Visibility On
+  Layer 101
+    Display Graphic
+    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (35,0,12) Line (1,2,0) Font ("Arial",0,9,0)
+    Zoom (0, 600) Units "m" 
+    Label Line Arrow Position Above Right Auto Retry On Font ("Arial",258,8,12648288,0) Pen (1,2,0) 
+      With Left$(Str$(Kota_terena), Int(Kota_terena>0)*Len(Str$(Kota_terena)))
+      Parallel On Auto On Overlap Off Duplicates On PartialSegments On Offset 2
+      Visibility Zoom (0, 300) Units "m"
+  Layer 102
+    Display Graphic
+    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (35,0,12) Line (1,2,0) Font ("Tahoma",0,9,0)
+    Label Line Arrow Position Above Font ("Tahoma",0,9,0) Pen (1,2,0) 
+      With TIP
+      Parallel On Auto Off Overlap Off Duplicates Off Offset 2
+      Visibility On
+  Layer 103
+    Display Graphic
+    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (35,0,12) Line (1,2,0) Font ("Tahoma",0,9,0)
+    Label Line Arrow Position Above Font ("Tahoma",0,9,0) Pen (1,2,0) 
+      With OBJEKAT
+      Parallel On Auto Off Overlap Off Duplicates Off Offset 2
+      Visibility On
+  Layer 104
+    Display Graphic
+    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (35,0,12) Line (1,2,0) Font ("Tahoma",0,9,0)
+    Label Line Arrow Position Right Font ("Tahoma",0,9,0) Pen (1,2,0) 
+      With IZVOR_INFORMACIJE
+      Parallel On Auto Off Overlap Off Duplicates On Offset 2
+      Visibility On
+  Layer 105
+    Display Graphic
+    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (35,0,12) Line (1,2,0) Font ("Tahoma",0,9,0)
+    Label Line Arrow Position Right Font ("Tahoma",0,9,0) Pen (1,2,0) 
+      With ULICA
+      Parallel On Auto Off Overlap Off Duplicates On Offset 2
+      Visibility On
+  Layer 106
+    Display Graphic
+    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (35,0,12) Line (1,2,0) Font ("Tahoma",0,9,0)
+    Label Line Arrow Position Right Font ("Tahoma",0,9,0) Pen (1,2,0) 
+      With MATERIJAL
+      Parallel On Auto Off Overlap Off Duplicates On Offset 2
+      Visibility On
+  Layer 107
+    Display Graphic
+    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (35,0,12) Line (1,2,0) Font ("Tahoma",0,9,0)
+    Label Line Arrow Position Above Font ("Tahoma",0,9,0) Pen (1,2,0) 
+      With ULICA
+      Parallel On Auto Off Overlap Off Duplicates Off Offset 2
+      Visibility On
+  Layer 108
+    Display Graphic
+    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (35,0,12) Line (1,2,0) Font ("Tahoma",0,9,0)
+    Label Line Arrow Position Right Font ("Tahoma",0,9,0) Pen (1,2,0) 
+      With IZVOR_INFORMACIJE
+      Parallel On Auto Off Overlap Off Duplicates On Offset 2
+      Visibility On
+  Layer 109
+    Display Graphic
+    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (35,0,12) Line (1,2,0) Font ("Tahoma",0,9,0)
+    Label Line Arrow Position Right Font ("Tahoma",0,9,0) Pen (1,2,0) 
+      With ULICA
+      Parallel On Auto Off Overlap Off Duplicates On Offset 2
+      Visibility On
+  Layer 110
+    Display Graphic
+    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (35,0,12) Line (1,2,0) Font ("Tahoma",0,9,0)
+    Label Line Arrow Position Above Font ("Tahoma",0,9,0) Pen (1,2,0) 
+      With MATERIJAL
+      Parallel On Auto Off Overlap Off Duplicates Off Offset 2
+      Visibility On
+  Layer 111
+    Display Graphic
+    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (35,0,12) Line (1,2,0) Font ("Tahoma",0,9,0)
+    Label Line Arrow Position Above Font ("Tahoma",0,9,0) Pen (1,2,0) 
+      With ULICA
+      Parallel On Auto Off Overlap Off Duplicates Off Offset 2
+      Visibility On
+  Layer 112
+    Display Graphic
+    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (35,0,12) Line (1,2,0) Font ("Tahoma",0,9,0)
+    Label Line Arrow Position Right Font ("Tahoma",0,9,0) Pen (1,2,0) 
+      With BROJ
+      Parallel On Auto Off Overlap Off Duplicates On Offset 2
+      Visibility On
+  Layer 113
+    Display Graphic
+    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (35,0,12) Line (1,2,0) Font ("Tahoma",0,9,0)
+    Label Line Arrow Position Right Font ("Tahoma",0,9,0) Pen (1,2,0) 
+      With BROJ
+      Parallel On Auto Off Overlap Off Duplicates On Offset 2
+      Visibility On
+  Layer 114
+    Display Graphic
+    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (35,0,12) Line (1,2,0) Font ("Tahoma",0,9,0)
+    Label Line Arrow Position Right Font ("Tahoma",0,9,0) Pen (1,2,0) 
+      With ULICA
+      Parallel On Auto Off Overlap Off Duplicates On Offset 2
+      Visibility On
+  Layer 115
+    Display Graphic
+    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (35,0,12) Line (1,2,0) Font ("Tahoma",0,9,0)
+    Label Line Arrow Position Above Font ("Tahoma",0,9,0) Pen (1,2,0) 
+      With MI_PRINX
+      Parallel On Auto Off Overlap Off Duplicates Off Offset 2
+      Visibility On
+  Layer 116
+    Display Graphic
+    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (35,0,12) Line (1,2,0) Font ("Tahoma",0,9,0)
+    Label Line None Position Center Font ("Tahoma",0,9,0) Pen (1,2,0) 
+      With ULICA
+      Parallel On Auto Off Overlap Off Duplicates On Offset 2
+      Visibility On
+  Layer 117
+    Display Global
+    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (35,0,12) Line (1,2,16711680) Font ("Tahoma",0,9,0)
+    Label Line Arrow Position Above Font ("Tahoma",0,9,0) Pen (1,2,0) 
+      With ULICA
+      Parallel On Auto Off Overlap Off Duplicates Off Offset 2
+      Visibility On
+  Layer 118
+    Display Global
+    Global Pen (1,5,7585792) Brush (1,16777215,16777215) Symbol (35,0,12) Line (1,2,0) Font ("Tahoma",0,9,0)
+    Selectable Off
+    Zoom (0, 600) Units "m" Off 
+    Label Line None Position Center Auto Retry On Font ("Tahoma",256,7,53352,0) Pen (1,2,0) 
+      With NAZIV_LATIN2
+      Parallel On Auto On Overlap Off Duplicates On PartialSegments On Offset 2
+      Visibility On
+   Alpha 198
+  Layer 119
+    Display Global
+    Global Pen (30,2,9437184) Brush (1,16777215,16777215) Symbol (35,0,12) Line (1,2,0) Font ("Tahoma",0,9,0)
+    Selectable Off
+    Zoom (600, 100000) Units "m" Off 
+    Label Line None Position Center Font ("Tahoma",257,16,11556864,16777215) Pen (1,2,0) 
+      With NAZIV_LATIN2
+      Parallel On Auto Off Overlap Off Duplicates On PartialSegments On Offset 2
+      Visibility On
+  Layer 120
+    Display Global
+    Global Pen (4,2,16711680) Brush (1,16777215,16777215) Symbol (35,0,12) Line (1,2,0) Font ("Tahoma",0,9,0)
+    Selectable Off
+    Zoom (15000, 100000) Units "m" Off 
+    Label Line None Position Center Font ("Tahoma",0,9,0) Pen (1,2,0) 
+      With OPSTINA
+      Parallel On Auto Off Overlap Off Duplicates On Offset 2
+      Visibility On
+  Layer 121
+    Display Off
+    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (35,0,12) Line (1,2,0) Font ("Tahoma",0,9,0)
+    Label Line None Position Center Font ("Verdana",259,9,5278719,16777215) Pen (1,2,0) 
+      With REKA
+      Parallel On Auto On Overlap On Duplicates On PartialSegments On Offset 2
+      Visibility On AutoPosition On AutoSizes 1 AutoSizeStep 50 SuppressIfNoFit Off AutoCallout Off
+  Layer 122
+    Display Off
+    Global Pen (1,2,8421504) Brush (31,12632256) Symbol (35,0,12) Line (1,2,0) Font ("Tahoma",0,9,0)
+    Zoom (0, 1700) Units "m" 
+    Label Line None Position Center Font ("Tahoma",258,8,5263440,16777215) Pen (1,2,0) 
+      With KUCNI_BROJ
+      Parallel On Auto On Overlap Off Duplicates On Offset 2
+      Visibility Zoom (0, 1000) Units "m"
+  Layer 123
+    Display Off
+    Global Pen (12,2,8245248) Brush (2,15790320,16777215) Symbol (35,0,12) Line (13,2,8421504) Font ("Tahoma",0,9,0)
+    Zoom (0, 1700) Units "m" 
+    Label Line None Position Center Font ("Tahoma",2,8,8421504) Pen (1,2,0) 
+      With BR_PARCELE
+      Parallel On Auto On Overlap Off Duplicates On Offset 2
+      Visibility On
+   Alpha 142
+  Layer 124
+    Display Graphic
+    Global Pen (1,2,0)  Brush (2,16777215,16777215)  Symbol (35,0,12)  Line (1,2,0)  Font ("Tahoma",0,9,0)
+    Selectable Off
+    Zoom (0, 1000) Units "m" 
+  contrast 50 
+  brightness 50 
+  alpha 255 
+    transparency on 
+  color 16777215 
+    grayscale off 
+  Layer 125
+    Display Off
+    Global Pen (1,2,0)  Brush (2,16777215,16777215)  Symbol (35,0,12)  Line (1,2,0)  Font ("Tahoma",0,9,0)
+    Selectable Off
+    Zoom (0, 1000) Units "m" 
+  contrast 50 
+  brightness 50 
+  alpha 255 
+    transparency on 
+  color 16777215 
+    grayscale off 
+  Layer 126
+    Display Global
+    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (49,16711680,12) Line (1,2,0) Font ("Tahoma",0,9,0)
+  contrast 50 
+  brightness 50 
+  alpha 255 
+    transparency off 
+  color 0 
+    grayscale off 
+  Layer 127
+    Display Global
+    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (49,16711680,12) Line (1,2,0) Font ("Tahoma",0,9,0)
+    Zoom (0, 15000) Units "m" 
+  contrast 50 
+  brightness 50 
+  alpha 255 
+    transparency on 
+  color 16646143 
+    grayscale off 
+  Layer 128
+    Display Off
+    Global Pen (1,2,0)  Brush (2,16777215,16777215)  Symbol (35,0,12)  Line (1,2,0)  Font ("Tahoma",0,9,0)
+    Selectable On
+    Zoom (1000, 4000) Units "m" Off 
+  contrast 50 
+  brightness 50 
+  alpha 255 
+    transparency on 
+  color 0 
+    grayscale off 
+  Layer 129
+    Display Global
+    Global Pen (1,2,0)  Brush (2,16777215,16777215)  Symbol (35,0,12)  Line (1,2,0)  Font ("Tahoma",0,9,0)
+    Selectable On
+    Zoom (15000, 150000) Units "m" Off 
+  contrast 50 
+  brightness 57 
+  alpha 255 
+    transparency on 
+  color 0 
+    grayscale off 
+  Layer 130
+    Display Off
+    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (49,16711680,12) Line (1,2,0) Font ("Tahoma",0,9,0)
+  contrast 50 
+  brightness 50 
+  alpha 255 
+    transparency off 
+  color 0 
+    grayscale off 
+  Layer 131
+    Display Off
+    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (49,16711680,12) Line (1,2,0) Font ("Tahoma",0,9,0)
+  contrast 50 
+  brightness 50 
+  alpha 255 
+    transparency off 
+  color 0 
+    grayscale off 
+  Layer 132
+    Display Off
+    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (49,16711680,12) Line (1,2,0) Font ("Tahoma",0,9,0)
+  contrast 50 
+  brightness 50 
+  alpha 255 
+    transparency off 
+  color 0 
+    grayscale off 
+  Layer 133
+    Display Off
+    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (49,16711680,12) Line (1,2,0) Font ("Tahoma",0,9,0)
+  contrast 50 
+  brightness 50 
+  alpha 255 
+    transparency off 
+  color 0 
+    grayscale off 
+  Layer 134
+    Display Off
+    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (49,16711680,12) Line (1,2,0) Font ("Tahoma",0,9,0)
+  contrast 50 
+  brightness 50 
+  alpha 255 
+    transparency off 
+  color 0 
+    grayscale off 
+  Layer 135
+    Display Off
+    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (49,16711680,12) Line (1,2,0) Font ("Tahoma",0,9,0)
+  contrast 50 
+  brightness 50 
+  alpha 255 
+    transparency off 
+  color 0 
+    grayscale off 
+  Layer 136
+    Display Off
+    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (49,16711680,12) Line (1,2,0) Font ("Tahoma",0,9,0)
+  contrast 50 
+  brightness 50 
+  alpha 255 
+    transparency off 
+  color 0 
+    grayscale off 
+  Layer 137
+    Display Off
+    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (49,16711680,12) Line (1,2,0) Font ("Tahoma",0,9,0)
+  contrast 50 
+  brightness 50 
+  alpha 255 
+    transparency off 
+  color 0 
+    grayscale off 
+  Layer 138
+    Display Off
+    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (49,16711680,12) Line (1,2,0) Font ("Tahoma",0,9,0)
+  contrast 50 
+  brightness 50 
+  alpha 255 
+    transparency off 
+  color 0 
+    grayscale off 
+  Layer 139
+    Display Off
+    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (49,16711680,12) Line (1,2,0) Font ("Tahoma",0,9,0)
+  contrast 50 
+  brightness 50 
+  alpha 255 
+    transparency off 
+  color 0 
+    grayscale off 
+  GroupLayer 1
+    Display On Title "NIVOS"
+  GroupLayer 2
+    Display On Title "[Pomoæni]"
+  GroupLayer 3
+    Display On Title "Medijana"
+  GroupLayer 4
+    Display On Title "NIKAS"
+  GroupLayer 5
+    Display On Title "Fekalna"
+  GroupLayer 6
+    Display On Title "Atmosferska"
+  GroupLayer 7
+    Display Off Title "[Radni]"
+  GroupLayer 8
+    Display Off Title "_uklonjeno"
+  GroupLayer 9
+    Display Off Title "[Saglasnosti i uslovi]"
+  GroupLayer 10
+    Display Off Title "[Geodetski]"
+  GroupLayer 11
+    Display On Title "_izmene"
+  GroupLayer 12
+    Display On Title "Katastar"
+  GroupLayer 13
+    Display Off Title "Izohipse"
+  GroupLayer 14
+    Display On Title "Administrativne granice"
+  GroupLayer 15
+    Display On Title "Podloge"
+  GroupLayer 16
+    Display Off Title "_mreze"
+  GroupLayer 17
+    Display On Title "Planovi"
+Set Map Layer 13 Editable
+set legend 
+  layer 15 
+    display on 
+    shades off 
+    symbols off 
+    lines on 
+    count on 
+    title auto Font ("Arial",0,9,0)
+    subtitle auto Font ("Arial",0,8,0)
+    ascending on 
+    ranges Font ("Arial",0,8,0)
+      auto display off ,
+      auto display on ,
+      auto display on  
+set legend 
+  layer 20 
+    display on 
+    shades off 
+    symbols on 
+    lines off 
+    count on 
+    title auto Font ("Arial",0,9,0)
+    subtitle auto Font ("Arial",0,8,0)
+    ascending on 
+    ranges Font ("Arial",0,8,0)
+      auto display off ,
+      auto display on ,
+      auto display on ,
+      auto display on ,
+      auto display on ,
+      auto display on ,
+      auto display on  
+set legend 
+  layer 35 
+    display on 
+    shades off 
+    symbols on 
+    lines off 
+    count on 
+    title auto Font ("Arial",0,9,0)
+    subtitle auto Font ("Arial",0,8,0)
+    ascending on 
+    ranges Font ("Arial",0,8,0)
+      auto display off ,
+      auto display off ,
+      auto display on ,
+      auto display on ,
+      auto display on ,
+      auto display on ,
+      auto display on  
+set legend 
+  layer 37 
+    display on 
+    shades off 
+    symbols on 
+    lines off 
+    count on 
+    title auto Font ("Arial",0,9,0)
+    subtitle auto Font ("Arial",0,8,0)
+    ascending on 
+    ranges Font ("Arial",0,8,0)
+      auto display on ,
+      auto display on ,
+      auto display on ,
+      auto display off ,
+      auto display on ,
+      auto display on ,
+      auto display on ,
+      auto display on ,
+      auto display on  
+set legend 
+  layer 42 
+    display on 
+    shades off 
+    symbols off 
+    lines on 
+    count on 
+    title auto Font ("Arial",0,9,0)
+    subtitle auto Font ("Arial",0,8,0)
+    ascending on 
+    ranges Font ("Arial",0,8,0)
+      auto display off ,
+      auto display on ,
+      auto display on ,
+      auto display on ,
+      auto display off ,
+      auto display on ,
+      auto display on  
+set legend 
+  layer 44 
+    display on 
+    shades off 
+    symbols off 
+    lines on 
+    count on 
+    title auto Font ("Arial",0,9,0)
+    subtitle auto Font ("Arial",0,8,0)
+    ascending on 
+    ranges Font ("Arial",0,8,0)
+      auto display on ,
+      auto display on ,
+      auto display on ,
+      auto display on ,
+      auto display on ,
+      auto display off ,
+      auto display on ,
+      auto display on ,
+      auto display on  
+set legend 
+  layer 45 
+    display on 
+    shades off 
+    symbols off 
+    lines on 
+    count on 
+    title auto Font ("Arial",0,9,0)
+    subtitle auto Font ("Arial",0,8,0)
+    ascending off 
+    ranges Font ("Arial",0,8,0)
+      auto display on ,
+      auto display on ,
+      auto display on ,
+      auto display on ,
+      auto display on ,
+      auto display on ,
+      auto display on ,
+      auto display on ,
+      auto display on ,
+      auto display on  
+set legend 
+  layer 47 
+    display on 
+    shades on 
+    symbols off 
+    lines off 
+    count on 
+    title auto Font ("Arial",0,9,0)
+    subtitle auto Font ("Arial",0,8,0)
+    ascending on 
+    ranges Font ("Arial",0,8,0)
+      auto display off ,
+      auto display on ,
+      auto display on ,
+      auto display on  
+set legend 
+  layer 49 
+    display on 
+    shades on 
+    symbols off 
+    lines off 
+    count on 
+    title auto Font ("Arial",0,9,0)
+    subtitle auto Font ("Arial",0,8,0)
+    ascending on 
+    ranges Font ("Arial",0,8,0)
+      auto display off ,
+      auto display on ,
+      auto display on ,
+      auto display on ,
+      auto display on ,
+      auto display on ,
+      auto display on ,
+      auto display on ,
+      auto display on ,
+      auto display on ,
+      auto display on ,
+      auto display on ,
+      auto display on ,
+      auto display on ,
+      auto display on ,
+      auto display on ,
+      auto display on  
+set legend 
+  layer 61 
+    display on 
+    shades off 
+    symbols off 
+    lines on 
+    count on 
+    title auto Font ("Arial",0,9,0)
+    subtitle auto Font ("Arial",0,8,0)
+    ascending off 
+    ranges Font ("Arial",0,8,0)
+      auto display on ,
+      auto display on ,
+      auto display on ,
+      auto display on ,
+      auto display on ,
+      auto display on ,
+      auto display on ,
+      auto display on ,
+      auto display on  
+set legend 
+  layer 63 
+    display on 
+    shades off 
+    symbols off 
+    lines on 
+    count on 
+    title auto Font ("Arial",0,9,0)
+    subtitle auto Font ("Arial",0,8,0)
+    ascending on 
+    ranges Font ("Arial",0,8,0)
+      auto display off ,
+      auto display on ,
+      auto display on ,
+      auto display on ,
+      auto display on  
+set legend 
+  layer 70 
+    display on 
+    shades off 
+    symbols off 
+    lines on 
+    count off 
+    title auto Font ("Tahoma",0,9,0)
+    subtitle auto Font ("Tahoma",0,8,0)
+    ascending on 
+    ranges Font ("Tahoma",0,8,0)
+      auto display off ,
+      auto display on ,
+      auto display on  
+set legend 
+  layer 71 
+    display on 
+    shades off 
+    symbols off 
+    lines on 
+    count on 
+    title auto Font ("Arial",0,9,0)
+    subtitle auto Font ("Arial",0,8,0)
+    ascending off 
+    ranges Font ("Arial",0,8,0)
+      auto display off ,
+      auto display on ,
+      auto display on ,
+      auto display on ,
+      auto display on ,
+      auto display on ,
+      auto display on ,
+      auto display on ,
+      auto display on  
+set legend 
+  layer 73 
+    display on 
+    shades off 
+    symbols off 
+    lines on 
+    count on 
+    title auto Font ("Arial",0,9,0)
+    subtitle auto Font ("Arial",0,8,0)
+    ascending on 
+    ranges Font ("Arial",0,8,0)
+      auto display off ,
+      auto display on ,
+      auto display on  
+Set Window FrontWindow() Title "Niški vodovodni i kanalizacioni sistem - NIVOS/NIKAS"
+Dim WorkspaceMaximizedWindow As Integer
+WorkspaceMaximizedWindow = Frontwindow()
+Set Window WorkspaceMaximizedWindow Max
+
+'	----
+
+	Save Workspace As s_FOLDER_WOR+"NAISSUS-GIS.wor"
+	
+	Note "Radni prostor 'naissus-GIS.wor' je kreiran!"
+
+	Exit Sub
+'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "WOR_naissus_GIS")
+	Call ERRShow()		
+	
+End Sub
+
+' =====================================================================================================================
+
+SUB WOR_naissus
+	
+	OnError Goto Greska
+	
+	Save Workspace As s_FOLDER_WOR+"_temp.wor"                        
+	Close All Interactive
+	
+	Print "-"
+	Print "Kreiranje radnog prostora:"
+	
+' -	Preuzimanje ili bez
+	
+	Do Case i_Start
+		
+		Case i_Start = 1
+		Goto start1
+		
+		Case Else
+		l_Pitanje = Ask("Preuzeti kompletne tabele sa SQL servera ?", "DA", "NE")                         
+		If l_Pitanje = true
+		Then 
+			Print "Preuzimanje tabela..."
+			Goto start1	
+		else
+			Goto start2
+		End If
+		
+	End Case
+		
+	start1:
+	Call MSSQL_tabele
+	
+	start2:
+	Set Event Processing Off
+	
+' = NIVOS
+
+	Open Table s_FOLDER_TAB+"CEVOVOD.TAB" Interactive
+	Open Table s_FOLDER_TAB+"CEVOVODNI_SAHT.TAB" Interactive
+	Open Table s_FOLDER_TAB+"CRPNA_STANICA.TAB" Interactive
+	Open Table s_FOLDER_TAB+"HIDRANT.TAB" Interactive
+	Open Table s_FOLDER_TAB+"KAPTAZE.TAB" Interactive
+	Open Table s_FOLDER_TAB+"MERACI_PROTOKA.TAB" Interactive
+	Open Table s_FOLDER_TAB+"MERNE_ZONE_ZATVARACI.TAB" Interactive
+	Open Table s_FOLDER_TAB+"MULJ_ISPUST.TAB" Interactive
+	Open Table s_FOLDER_TAB+"NEPOVRATNI_VENTIL.TAB" Interactive
+	Open Table s_FOLDER_TAB+"PREKIDNE_KOMORE.TAB" Interactive
+	Open Table s_FOLDER_TAB+"PRIKLJUCCI.TAB" Interactive 
+	Open Table s_FOLDER_TAB+"PUMPE.TAB" Interactive
+	Open Table s_FOLDER_TAB+"REGULATORI_PRITISKA.TAB" Interactive
+	Open Table s_FOLDER_TAB+"REZERVOARI.TAB" Interactive
+	Open Table s_FOLDER_TAB+"VAZD_VENTIL.TAB" Interactive
+	Open Table s_FOLDER_TAB+"VELIKI_VODOMERI.TAB" Interactive
+	Open Table s_FOLDER_TAB+"VODOMERI.TAB" Interactive
+	Open Table s_FOLDER_TAB+"VODOMERNI_SAHT.TAB" Interactive
+	Open Table s_FOLDER_TAB+"ZATVARAC.TAB" Interactive
+	Open Table s_FOLDER_TAB+"OBJEKTI_VODOVOD.TAB" Interactive
+	Open Table s_FOLDER_TAB+"Zone_sanitarne_zastite" As Zone_sanitarne_zastite Interactive	
+
+' = NIVOS POMOÆNI	
+	Open Table s_FOLDER_TAB+"INTERNI_CEVOVOD.TAB" Interactive
+	Open Table s_FOLDER_TAB+"INTERNI_CEVOVODNI_SAHT.TAB" Interactive
+	Open Table s_FOLDER_TAB+"INTERNA_VEZA.TAB" Interactive
+	Open Table s_FOLDER_TAB+"Detekcija_VM_tacke" Interactive
+	Open Table s_FOLDER_TAB+"Detekcija_VM_trasa" Interactive
+
+' = NIVOS MEDIJANA IZVORISTE
+	Open Table s_FOLDER_TAB+"ATM_SAHT_M" Interactive
+	Open Table s_FOLDER_TAB+"DRENAZA" Interactive
+	Open Table s_FOLDER_TAB+"BAZENI" Interactive
+	Open Table s_FOLDER_TAB+"BAZENI_OGLEDALA" Interactive
+	Open Table s_FOLDER_TAB+"BUNARI" Interactive
+	Open Table s_FOLDER_TAB+"CEV_BAZENI" Interactive
+	Open Table s_FOLDER_TAB+"DIJAFRAGMA" Interactive
+	Open Table s_FOLDER_TAB+"MERNA_MESTA" Interactive
+	Open Table s_FOLDER_TAB+"NATEGE" Interactive
+	Open Table s_FOLDER_TAB+"PIJEZOMETRI" Interactive
+	Open Table s_FOLDER_TAB+"SAHTE" Interactive
+	Open Table s_FOLDER_TAB+"VENTILI" Interactive
+
+' = extra 	
+	Open Table s_FOLDER_TAB+"NOVI_VODOMERI.TAB" Interactive
+	Open Table s_FOLDER_TAB+"NOVI_PRIKLJUCCI.TAB" Interactive
+	Open Table s_FOLDER_TAB+"PRIKLJUCCI_NELEGALNI.TAB" Interactive
+	Open Table s_FOLDER_TAB+"JAVNE_CESME.TAB" Interactive
+	Open Table s_FOLDER_TAB+"ZONE.TAB" Interactive
+	Open Table s_FOLDER_TAB+"KVAROVI.TAB" Interactive
+
+
+' = NIKAS
+	
+	Open Table s_FOLDER_TAB+"ATM_IZLIV.TAB" Interactive
+	Open Table s_FOLDER_TAB+"ATM_PRIKLJUCAK.TAB" Interactive
+	Open Table s_FOLDER_TAB+"ATM_SAHT.TAB" Interactive
+	Open Table s_FOLDER_TAB+"ATMOSFERSKA.TAB" Interactive
+	Open Table s_FOLDER_TAB+"CS_OTPAD_VODA.TAB" Interactive
+	Open Table s_FOLDER_TAB+"FEK_KAN_IZLIV.TAB" Interactive
+	Open Table s_FOLDER_TAB+"FEK_KAN_PRIKLJUCAK.TAB" Interactive
+	Open Table s_FOLDER_TAB+"FEK_KAN_SAHT.TAB" Interactive
+	Open Table s_FOLDER_TAB+"FEKALNA.TAB" Interactive
+	Open Table s_FOLDER_TAB+"KORISNICKI_SAHT.TAB" Interactive
+	Open Table s_FOLDER_TAB+"POSTR_ZA_PREC.TAB" Interactive
+	Open Table s_FOLDER_TAB+"PRELIV.TAB" Interactive
+	Open Table s_FOLDER_TAB+"SIFON.TAB" Interactive
+	Open Table s_FOLDER_TAB+"SLIVNIK.TAB" Interactive
+	Open Table s_FOLDER_TAB+"SLIVNIK_PRIKLJUCAK.TAB" Interactive
+	Open Table s_FOLDER_TAB+"ZASTIT_KANAL_CEVI.TAB" Interactive
+
+' = GEODETSKI	
+	Open Table s_FOLDER_TAB+"SNIMLJENO_KOTE.TAB" Interactive
+	
+' = Sluzba saglasnosti
+
+	Open Table s_FOLDER_TAB+"S_SAG_OBJ.TAB" Interactive
+	Open Table s_FOLDER_TAB+"S_SAG_PRIK.TAB" Interactive
+	Open Table s_FOLDER_TAB+"S_SAG_RASK.TAB" Interactive
+	Open Table s_FOLDER_TAB+"S_SAG_VOD.TAB" Interactive
+	Open Table s_FOLDER_TAB+"S_USLOVI.TAB" Interactive	
+
+' = KATASTAR, ADMINISTRATIVNE GRANICE
+	
+	Open Table s_FOLDER_TAB+"ADMJ_OPSTINE.TAB" Interactive
+	Open Table s_FOLDER_TAB+"ADMJ_NASELJA_KO.TAB" Interactive
+	Open Table s_FOLDER_TAB+"ADMJ_GRAD_NIS.TAB" Interactive
+	Open Table s_FOLDER_TAB+"KATASTAR_OBJEKTI.TAB" Interactive
+	Open Table s_FOLDER_TAB+"KATASTAR_PARCELE.TAB" Interactive
+	Open Table s_FOLDER_TAB+"REKE" As REKE Interactive
+	
+' = PODLOGE
+	
+	Print "- Ucitavanje karata..."
+	
+	Open Table s_FOLDER_POD+"MREZA_fg_1963_1000" As MREZA_fg_1963_1000 Interactive
+	Open Table s_FOLDER_POD+"MREZA_fg_1963_2500" As MREZA_fg_1963_2500 Interactive
+	Open Table s_FOLDER_POD+"MREZA_fg_1989_1000" As MREZA_fg_1989_1000 Interactive
+	Open Table s_FOLDER_POD+"MREZA_fg_1989_5000" As MREZA_fg_1989_5000 Interactive
+	Open Table s_FOLDER_POD+"MREZA_of_2006" As MREZA_of_2006 Interactive
+	Open Table s_FOLDER_POD+"MREZA_pr_1939_1000" As MREZA_pr_1939_1000 Interactive
+	Open Table s_FOLDER_POD+"MREZA_pr_1939_2500" As MREZA_pr_1939_2500 Interactive
+	Open Table s_FOLDER_POD+"MREZA_pr_1955_00_500" As MREZA_pr_1955_00_500 Interactive
+	Open Table s_FOLDER_POD+"MREZA_pr_1955_00_1000" As MREZA_pr_1955_00_1000 Interactive
+	Open Table s_FOLDER_POD+"MREZA_vt_1973_25000" As MREZA_vt_1973_25000 Interactive
+	Open Table s_FOLDER_POD+"MREZA_vt_1983_50000" As MREZA_vt_1983_50000 Interactive
+	
+	Open Table s_FOLDER_POD+"set_fg_1963_1000" As set_fg_1963_1000 Interactive
+	Open Table s_FOLDER_POD+"set_fg_1963_2500" As set_fg_1963_2500 Interactive
+	Open Table s_FOLDER_POD+"set_fg_1989_1000" As set_fg_1989_1000 Interactive
+	Open Table s_FOLDER_POD+"set_fg_1989_5000" As set_fg_1989_5000 Interactive
+	Open Table s_FOLDER_POD+"set_ORTOFOTO_2006" As set_ORTOFOTO_2006 Interactive
+	Open Table s_FOLDER_POD+"set_ORTOFOTO_2010" As set_OF_Doljevac_2010 Interactive
+	Open Table s_FOLDER_POD+"set_pr_1939_1000" As set_pr_1939_1000 Interactive
+	Open Table s_FOLDER_POD+"set_pr_1939_2500" As set_pr_1939_2500 Interactive
+	Open Table s_FOLDER_POD+"set_pr_1955_00_500" As set_pr_1955_00_500 Interactive
+	Open Table s_FOLDER_POD+"set_pr_1955_00_1000" As set_pr_1955_00_1000 Interactive
+	Open Table s_FOLDER_POD+"set_vt_1973_25000" As set_vt_1973_25000 Interactive
+	Open Table s_FOLDER_POD+"set_vt_1983_50000" As set_vt_1983_50000 Interactive
+	
+' - GeoSrbija (WMS)
+
+	Open Table s_FOLDER_POD+"2010_of_GS\set_ORTOFOTO_2010_GS.TAB" As set_ORTOFOTO_2010_GS Interactive
+	Open Table s_FOLDER_POD+"2013_of_GS\set_ORTOFOTO_2013_GS.TAB" As set_ORTOFOTO_2013_GS Interactive
+	Open Table s_FOLDER_POD+"2016_sat_GS_30cm\2016_sat_GS_30cm.TAB" As _2016_sat_GS_30cm Interactive
+	Open Table s_FOLDER_POD+"2016_sat_GS_40cm\2016_sat_GS_40cm.TAB" As _2016_sat_GS_40cm Interactive
+	
+Map From GroupLayer("NIVOS",GroupLayer("[Pomoæni]",Detekcija_VM_tacke,Detekcija_VM_trasa,INTERNI_CEVOVODNI_SAHT,INTERNA_VEZA,INTERNI_CEVOVOD
+  ),GroupLayer("Medijana",VENTILI,PIJEZOMETRI,SAHTE
+  ,MERNA_MESTA,BUNARI,ATM_SAHT_M,DRENAZA,DIJAFRAGMA,CEV_BAZENI
+  ,NATEGE,BAZENI_OGLEDALA,BAZENI),JAVNE_CESME
+  ,KVAROVI,KAPTAZE,PREKIDNE_KOMORE,REZERVOARI,CRPNA_STANICA
+  ,PUMPE,REGULATORI_PRITISKA,MULJ_ISPUST,VAZD_VENTIL,NEPOVRATNI_VENTIL,VELIKI_VODOMERI
+  ,MERNE_ZONE_ZATVARACI,MERACI_PROTOKA,VODOMERI,ZATVARAC
+  ,HIDRANT,VODOMERNI_SAHT,CEVOVODNI_SAHT,PRIKLJUCCI,CEVOVOD
+  ,CEVOVOD,Zone_sanitarne_zastite
+  ,OBJEKTI_VODOVOD,ZONE),GroupLayer("NIKAS",GroupLayer("Fekalna",POSTR_ZA_PREC,CS_OTPAD_VODA,ZASTIT_KANAL_CEVI
+  ,SIFON,PRELIV,KORISNICKI_SAHT,FEK_KAN_IZLIV,FEK_KAN_SAHT,FEK_KAN_PRIKLJUCAK
+  ,FEKALNA,FEKALNA),GroupLayer("Atmosferska",SLIVNIK
+  ,SLIVNIK_PRIKLJUCAK,ATM_IZLIV,ATM_SAHT,ATM_PRIKLJUCAK
+  ,ATMOSFERSKA,ATMOSFERSKA)),GroupLayer("[Radni]",NOVI_VODOMERI
+  ,NOVI_PRIKLJUCCI,PRIKLJUCCI_NELEGALNI,S_SAG_RASK,S_SAG_OBJ,S_SAG_PRIK,S_SAG_VOD
+  ,S_USLOVI),GroupLayer("[Geodetski]",SNIMLJENO_KOTE),GroupLayer("Katastar",GroupLayer("Izohipse"),GroupLayer("Administrativne granice",ADMJ_NASELJA_KO
+  ,ADMJ_OPSTINE,ADMJ_GRAD_NIS),REKE,KATASTAR_OBJEKTI,KATASTAR_PARCELE),GroupLayer("Podloge",GroupLayer("_mreze"),GroupLayer("Planovi"),set_ORTOFOTO_2013_GS,set_ORTOFOTO_2010_GS,set_OF_Doljevac_2010
+  ,set_ORTOFOTO_2006,_2016_sat_GS_30cm,_2016_sat_GS_40cm,set_fg_1963_1000,set_fg_1963_2500,set_fg_1989_1000
+  ,set_fg_1989_5000,set_pr_1939_1000,set_pr_1939_2500,set_pr_1955_00_500,set_pr_1955_00_1000,set_vt_1973_25000
+  ,set_vt_1983_50000)
+  Position (0.197917,4.08333) Units "in"
+  Width 12.9375 Units "in" Height 4.04167 Units "in" 
+Set Window FrontWindow() ScrollBars Off Autoscroll On Snap Mode On Enhanced On Smooth Text Antialias Image High Vector Antialias
+Set Map
+  CoordSys Earth Projection 8, 9999, 10, 485.017844, 254.040967, 490.850757, -6.25099249, -3.40102363, 15.57471608, 3.12980309, 0, "m", 21, 0, 0.9999, 7500000, 0
+  Center (7573183.213,4797836.181)
+  Zoom 2398.52161 Units "m"
+  Preserve Zoom Display Zoom
+  Distance Units "m" Area Units "sq m" XY Units "m"
+  Distance Type Cartesian
+shade 60 with NADLEZNOST values 
+  "" Line (1,1,14694400) ,
+  "U PRIJEMU" Line (4,2,65280) 
+  default Line (1,2,0)   '# color 1 # 
+shade 59 with DN_mm ranges apply all use all Line (18,2,45056) 
+  0: 1 Line (14,2,45056) ,
+  1: 199 Line (18,2,45056) ,
+  200: 399 Line (22,2,45056) ,
+  400: 499 Line (26,2,45056) ,
+  500: 600 Line (30,2,45056) ,
+  600: 799 Line (35,2,45056) ,
+  800: 999 Line (40,2,45056) ,
+  1000: 3000 Line (50,2,45056) 
+  default Line (20,2,10526880) 
+  '# use 1 round 1 inflect off Line (0,0,0) at 0 by 0 color 1 # 
+shade 60 with CCTV values 
+  0 Line (1,1,16711680) ,
+  1 Line (2,75,57344) 
+  default Line (1,2,0)   '# color 1 # 
+shade 53 with NADLEZNOST values 
+  "" Line (1,2,16711680) ,
+  "JKP NAISSUS" Line (1,1,65280) ,
+  "Kucni savet" Line (1,2,16734240) ,
+  "U PRIJEMU" Line (4,2,16711935) 
+  default Line (1,2,0)   '# color 1 # 
+shade 52 with DN_mm ranges apply all use all Line (56,2,14694400) 
+  0: 1 Line (15,2,14694400) ,
+  1: 199 Line (18,2,14694400) ,
+  200: 399 Line (22,2,14694400) ,
+  400: 499 Line (28,2,14694400) ,
+  500: 600 Line (30,2,14694400) ,
+  600: 799 Line (35,2,14694400) ,
+  800: 999 Line (40,2,14694400) ,
+  1000: 3200 Line (50,2,14694400) 
+  default Line (20,2,10526880) 
+  '# use 1 round 1 inflect off Line (0,0,0) at 0 by 0 color 1 # 
+shade 41 with VRSTA ignore "" values 
+  "+CEV ZA HL" Brush (2,16752800,16777215) ,
+  "Cevovodni šaht" Brush (1,14680064,16777215) Pen (1,2,8421504) ,
+  "Kaptažna gradjevina" Brush (2,65535,16777215) Pen (1,2,16777215) ,
+  "Korito" Brush (1,19424,16777215) Pen (1,5,4243711) ,
+  "Mlin" Brush (2,16772272,16777215) ,
+  "MOST" Brush (2,16744448,16777215) ,
+  "Objekat" Brush (2,12632256,16777215) Pen (1,2,16777215) ,
+  "Ograda" Brush (1,41040,16777215) Pen (1,5,16711680) ,
+  "Postrojenje" Brush (2,14745520,16777215) Pen (1,2,16777215) ,
+  "Prekidna komora" Brush (2,53352,16777215) Pen (1,2,16777215) ,
+  "Pumpna stanica" Brush (2,16711680,16777215) Pen (1,2,16777215) ,
+  "Rezervoar" Brush (2,255,16777215) Pen (1,2,16777215) ,
+  "Sabirna komora" Brush (2,16752848,16777215) ,
+  "Trafo stanica" Brush (2,16720016,16777215) ,
+  "Vodomerni šaht" Brush (2,10551295,16777215) 
+  default Brush (2,0,16777215)   '# color 1 # 
+shade 40 with Zona_sanitarne_zastite values 
+  "Neposredna" Brush (1,16711680,16777215) Pen (1,111,16711680) ,
+  "Šira" Brush (1,65280,16777215) Pen (1,5,65280) ,
+  "Uža" Brush (1,255,16777215) Pen (1,48,16711680) 
+  default Brush (1,0,16777215) Pen (1,2,0)   '# color 1 # 
+shade 39 with DN_MM ranges apply all use all Line (50,2,4227327) 
+  10: 80 Line (15,2,12416) ,
+  80: 100 Line (22,2,1065104) ,
+  100: 200 Line (26,2,1065120) ,
+  200: 300 Line (30,2,2117808) ,
+  300: 400 Line (32,2,2121920) ,
+  400: 600 Line (38,2,3170512) ,
+  600: 800 Line (42,2,3174624) ,
+  800: 1000 Line (44,2,4223216) ,
+  1000: 1200 Line (50,2,4227327) 
+  default Line (1,2,16576) 
+  '# use 1 round 1 inflect off Line (0,0,0) at 0 by 0 color 1 # 
+shade 40 with IZVOR_INFORMACIJE values 
+  "" Line (2,2,9474192) ,
+  "-" Line (2,2,32960) ,
+  "GEODETSKI" Line (2,2,16711680) ,
+  "GPS" Line (2,65,16776960) ,
+  "Iz projekta" Line (2,2,16711935) ,
+  "KATASTAR" Brush (2,11556864,16777215) Pen (1,2,0) Line (2,2,11556864) Symbol (34,11556864,12) ,
+  "Planovi" Brush (2,11559167,16777215) Pen (1,2,0) Line (2,2,11559167) Symbol (34,11559167,12) ,
+  "Terenska skica" Line (2,65,65280) 
+  default Line (1,2,0)   '# color 1 # 
+shade 38 with NADLEZNOST values 
+  "-" Line (1,1,16711680) ,
+  "GR_GRADJANA" Line (3,2,14201087) ,
+  "JKP NAISSUS" Line (3,2,255) ,
+  "NEPOZNATA" Line (2,5,16711680) ,
+  "Nije Naissus" Line (2,2,16711935) ,
+  "U PRIJEMU" Line (4,2,16776960) 
+  default Line (1,2,0)   '# color 1 # 
+shade 34 with IZVOR_INFORMACIJE values 
+  "" Symbol (34,16711680,12) ,
+  "-" Symbol (48,8421504,10,"MapInfo Cartographic",256,0) ,
+  "1" Symbol (34,16711680,12) ,
+  "GEODETSKI" Symbol (48,16711680,10,"MapInfo Cartographic",256,0) ,
+  "GPS" Symbol (48,16776960,10,"MapInfo Cartographic",16,0) ,
+  "Iz projekta" Symbol (48,16711935,10,"MapInfo Cartographic",256,0) ,
+  "KATASTAR" Brush (2,14694400,16777215) Pen (1,2,0) Line (1,2,14694400) Symbol (48,14694400,10,"MapInfo Cartographic",256,0) ,
+  "Terenska Skica" Symbol (48,65280,10,"MapInfo Cartographic",16,0) 
+  default Symbol (40,0,12)   '# color 1 # 
+shade 33 with IZVOR_INFORMACIJE values 
+  "" Brush (2,65535,16777215) Pen (1,2,0) Line (1,2,65535) Symbol (34,65535,12) ,
+  "-" Symbol (63,8421504,10,"MapInfo Weather",256,0) ,
+  "GEODETSKI" Symbol (63,16711680,10,"MapInfo Weather",256,0) ,
+  "GPS" Symbol (63,16776960,10,"MapInfo Weather",16,0) ,
+  "Iz projekta" Brush (15,16711935,16777215) Pen (1,2,0) Line (1,2,16711935) Symbol (63,16711935,10,"MapInfo Weather",256,0) ,
+  "Terenska Skica" Symbol (63,65280,10,"MapInfo Weather",256,0) 
+  default Symbol (40,0,12)   '# color 1 # 
+shade 19 with Status_kvara values 
+  0 Symbol (133,12632256,10,"MapInfo World POI",256,0) ,
+  1 Symbol (133,16711680,10,"MapInfo World POI",256,0) ,
+  2 Brush (2,255,16777215) Pen (1,2,0) Line (1,2,255) Symbol (151,255,10,"MapInfo World POI",256,0) ,
+  4 Brush (2,16711935,16777215) Pen (1,2,0) Line (1,2,16711935) Symbol (31,16711935,12) ,
+  10 Brush (2,16776960,16777215) Pen (1,2,0) Line (1,2,16776960) Symbol (32,16776960,10,"MapInfo World POI",16,0) ,
+  20 Brush (2,65535,16777215) Pen (1,2,0) Line (1,2,65535) Symbol (31,65535,12) 
+  default Symbol (40,0,12)   '# color 1 # 
+shade 15 with NAPOMENA values 
+  "" Line (2,2,44031) ,
+  "nije u funkciji" Line (1,5,4243711) 
+  default Line (1,2,0)   '# color 1 # 
+Set Map
+  Layer 1
+    Display Global
+    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (71,16711680,12,"MapInfo Cartographic",1,0) Line (1,2,0) Font ("Tahoma",0,9,0)
+    Zoom (0, 1200) Units "m" 
+    Label Line Arrow Position Right Font ("Tahoma",0,9,0) Pen (1,2,0) 
+      With TIP_TACKE
+      Parallel On Auto Off Overlap Off Duplicates On Offset 2
+      Visibility On
+  Layer 2
+    Display Global
+    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (49,16711680,12) Line (20,70,16776960) Font ("Tahoma",0,9,0)
+    Zoom (0, 1200) Units "m" 
+    Label Line Arrow Position Above Font ("Tahoma",0,9,0) Pen (1,2,0) 
+      With ULICA
+      Parallel On Auto Off Overlap Off Duplicates Off Offset 2
+      Visibility On
+  Layer 3
+    Display Global
+    Global Pen (1,2,208) Brush (15,12632319) Symbol (46,65280,12) Line (2,2,32960) Font ("Arial",256,10,12432,16777215)
+    Selectable Off
+    Zoom (0, 800) Units "m" 
+    Label Line Arrow Position Right Font ("Arial",256,10,12432,16777215) Pen (1,2,0) 
+      With ULICA
+      Parallel On Auto Off Overlap Off Duplicates On Offset 2
+      Visibility On
+  Layer 4
+    Display Global
+    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (49,16711680,12) Line (1,5,16776960) Font ("Tahoma",0,9,0)
+    Selectable Off
+    Zoom (0, 800) Units "m" 
+    Label Line Arrow Position Above Font ("Tahoma",0,9,0) Pen (1,2,0) 
+      With ULICA
+      Parallel On Auto Off Overlap Off Duplicates Off Offset 2
+      Visibility On
+  Layer 5
+    Display Global
+    Global Pen (1,2,208) Brush (15,12632319) Symbol (49,16711680,12) Line (1,6,61680) Font ("Arial",256,10,12432,16777215)
+    Zoom (0, 15000) Units "m" 
+    Label Line Arrow Position Above Font ("Arial",256,10,12432,16777215) Pen (1,2,0) 
+      With ULICA
+      Parallel On Auto Off Overlap Off Duplicates Off Offset 2
+      Visibility On
+  Layer 6
+    Display Global
+    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (63,16711680,9,"MapInfo Weather",256,0) Line (1,2,0) Font ("Tahoma",0,9,0)
+    Zoom (0, 1200) Units "m" 
+    Label Line Arrow Position Right Font ("Tahoma",0,9,0) Pen (1,2,0) 
+      With ID
+      Parallel On Auto Off Overlap Off Duplicates On Offset 2
+      Visibility Off
+  Layer 7
+    Display Global
+    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (41,16776960,6,"MapInfo Cartographic",16,0) Line (1,2,0) Font ("Tahoma",0,9,0)
+    Zoom (0, 1500) Units "m" 
+    Label Line Arrow Position Left Auto Retry On Font ("Arial Narrow",257,9,16776960,0) Pen (1,2,0) 
+      With ID
+      Parallel On Auto On Overlap Off Duplicates On Offset 2
+      Visibility Zoom (0, 600) Units "m"
+  Layer 8
+    Display Global
+    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (33,8443391,10,"MapInfo Cartographic",32,0) Line (1,2,0) Font ("Tahoma",0,9,0)
+    Label Line Arrow Position Right Font ("Tahoma",0,9,0) Pen (1,2,0) 
+      With OZNAKA_SAHTE
+      Parallel On Auto Off Overlap Off Duplicates On Offset 2
+      Visibility On
+  Layer 9
+    Display Global
+    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (41,3175935,9,"MapInfo Cartographic",256,0) Line (1,2,0) Font ("Tahoma",0,9,0)
+    Zoom (0, 600) Units "m" 
+    Label Line Arrow Position Below Auto Retry On Font ("Tahoma",256,7,19424,16777215) Pen (1,2,0) 
+      With ID
+      Parallel On Auto On Overlap Off Duplicates On Offset 2
+      Visibility Zoom (0, 600) Units "m"
+  Layer 10
+    Display Global
+    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (76,10543359,10,"MapInfo Water",0,0) Line (1,2,0) Font ("Tahoma",0,9,0)
+    Zoom (0, 1200) Units "m" 
+    Label Line Arrow Position Right Auto Retry On Font ("Tahoma",259,7,11593215,0) Pen (1,2,0) 
+      With ID
+      Parallel On Auto On Overlap Off Duplicates On Offset 2
+      Visibility Zoom (0, 600) Units "m"
+  Layer 11
+    Display Global
+    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (44,40960,9,"MapInfo Cartographic",256,0) Line (1,2,0) Font ("Tahoma",0,9,0)
+    Zoom (0, 1000) Units "m" 
+    Label Line Arrow Position Right Auto Retry On Font ("Tahoma",258,8,5079040,16777215) Pen (1,2,0) 
+      With "KT "+Left$(Str$(KOTA_POKLOPCA), Int(KOTA_POKLOPCA>0)*Len(Str$(KOTA_POKLOPCA)))+Chr$(13)+"KD "+Left$(Str$(KOTA_DNA), Int(KOTA_DNA>0)*Len(Str$(KOTA_DNA)))
+      Parallel On Auto On Overlap Off Duplicates On Offset 2
+      Visibility Zoom (0, 500) Units "m"
+  Layer 12
+    Display Global
+    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (49,16711680,12) Line (2,2,53248) Font ("Tahoma",0,9,0)
+    Label Line Arrow Position Center Auto Retry On Font ("Arial Narrow",257,9,40960,16777215) Pen (1,2,0) 
+      With MATERIJAL+DN_mm
+      Parallel On Auto On Overlap Off Duplicates On Offset 2
+      Visibility Zoom (0, 1200) Units "m"
+  Layer 13
+    Display Global
+    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (49,16711680,12) Line (1,48,16711680) Font ("Tahoma",0,9,0)
+    Label Line Arrow Position Above Font ("Tahoma",0,9,0) Pen (1,2,0) 
+      With Materijal
+      Parallel On Auto Off Overlap Off Duplicates Off Offset 2
+      Visibility On
+  Layer 14
+    Display Global
+    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (49,16711680,12) Line (2,2,14745520) Font ("Tahoma",0,9,0)
+    Label Line Arrow Position Center Auto Retry On Font ("Arial Narrow",257,9,15597520,0) Pen (1,2,0) 
+      With MATERIJAL+DN_mm
+      Parallel On Auto On Overlap Off Duplicates Off Offset 2
+      Visibility Zoom (0, 1200) Units "m"
+  Layer 15
+    Display Value
+    Global Pen (1,2,0)  Brush (2,16777215,16777215)  Symbol (49,16711680,12)  Line (1,2,0)  Font ("Tahoma",0,9,0)
+    Selectable Off
+  Layer 16
+    Display Graphic
+    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (49,16711680,12) Line (1,2,0) Font ("Tahoma",0,9,0)
+    Label Line Arrow Position Center Auto Retry On Font ("Arial Narrow",257,9,32960,16777215) Pen (1,2,0) 
+      With MATERIJAL+DN_MM
+      Parallel On Auto On Overlap Off Duplicates On Offset 2
+      Visibility Zoom (0, 1200) Units "m"
+  Layer 17
+    Display Global
+    Global Pen (2,2,14745520) Brush (2,4243711,16777215) Symbol (49,16711680,12) Line (1,2,0) Font ("Tahoma",0,9,0)
+    Label Line None Position Center Font ("Tahoma",0,9,0) Pen (1,2,0) 
+      With ID
+      Parallel On Auto Off Overlap Off Duplicates On Offset 2
+      Visibility On
+  Layer 18
+    Display Global
+    Global Pen (1,2,10516480) Brush (16,13671424) Symbol (49,16711680,12) Line (1,2,0) Font ("Tahoma",0,9,0)
+    Label Line None Position Center Auto Retry On Font ("Tahoma",1,10,16777215) Pen (1,2,0) 
+      With ID
+      Parallel On Auto On Overlap Off Duplicates On Offset 2
+      Visibility Zoom (0, 2400) Units "m"
+  Layer 19
+    Display Graphic
+    Global Pen (1,2,0) Brush (2,16776960,16777215) Symbol (49,16711680,12) Line (2,2,255) Font ("Arial",0,9,0)
+    Zoom (0, 12000) Units "m" 
+    Label Line Arrow Position Above Auto Retry On Font ("Arial",258,8,4227327,16777215) Pen (1,2,0) 
+      With NAZIV
+      Parallel On Auto On Overlap Off Duplicates On Offset 8
+      Visibility Zoom (0, 2000) Units "m"
+  Layer 20
+    Display Off
+    Global Pen (1,2,208)  Brush (15,12632319)  Symbol (49,16711680,12)  Line (2,2,32960)  Font ("Arial",256,10,12432,16777215)
+    Selectable Off
+    Zoom (0, 4000) Units "m" 
+  Layer 21
+    Display Off
+    Global Pen (1,2,208) Brush (15,12632319) Symbol (49,16711680,12) Line (2,2,32960) Font ("Arial",256,10,12432,16777215)
+    Zoom (0, 2500) Units "m" 
+    Label Line Arrow Position Right Font ("Arial",256,10,12432,16777215) Pen (1,2,0) 
+      With MI_PRINX
+      Parallel On Auto Off Overlap Off Duplicates On Offset 2
+      Visibility On
+  Layer 22
+    Display Global
+    Global Pen (1,2,27552) Brush (17,16711680) Symbol (39,6343679,12,"MapInfo Cartographic",256,0) Line (1,2,27552) Font ("Arial CE",256,8,12432,16777215)
+    Label Line Arrow Position Below Auto Retry On Font ("Arial",769,12,38368,16777215) Pen (1,2,0) 
+      With KAPTAZA
+      Parallel On Auto On Overlap Off Duplicates On Offset 2
+      Visibility On
+  Layer 23
+    Display Global
+    Global Pen (1,2,16711680) Brush (17,53248) Symbol (33,65280,6,"MapInfo Cartographic",48,0) Line (2,2,12432) Font ("Arial",257,9,9584,16777215)
+    Label Line Arrow Position Right Font ("Arial CE",257,9,32768,16777215) Pen (1,2,0) 
+      With "PK "+NAZIV+Chr$(13)+"V= "+KAPACITET+" m3"+Chr$(13)+"KPr = "+KOTA_PRELIVA+" m"+Chr$(13)+"KDn = "+KOTA_DNA+" m"
+      Parallel On Auto On Overlap On Duplicates On Offset 2
+      Visibility Zoom (0, 50000) Units "m"
+  Layer 24
+    Display Global
+    Global Pen (1,2,27552) Brush (17,16711680) Symbol (44,255,12) Line (1,2,27552) Font ("Arial CE",256,8,12432,16777215)
+    Label Line Arrow Position Right Auto Retry On Font ("Arial",257,8,255,16777215) Pen (1,2,0) 
+      With "Rez "+NAZIV+Chr$(13)+"V = "+V_m3_UKUPNO+"m_"+Chr$(13)+"Kd  ="+KOTA_DNA+" m"
+      Parallel On Auto On Overlap Off Duplicates On Offset 2
+      Visibility Zoom (0, 8000) Units "m"
+  Layer 25
+    Display Global
+    Global Pen (1,2,27552) Brush (17,16711680) Symbol (59,255,12) Line (1,2,27552) Font ("Arial CE",256,8,12432,16777215)
+    Label Line None Position Below Auto Retry On Font ("Arial",257,9,16711680,16777215) Pen (1,2,0) 
+      With "PS "+NAZIV
+      Parallel On Auto On Overlap Off Duplicates Off Offset 10
+      Visibility Zoom (0, 15000) Units "m"
+  Layer 26
+    Display Global
+    Global Pen (1,2,19424) Brush (16,4227327) Symbol (59,16711680,10) Line (2,2,38368) Font ("Arial",257,9,16576,16777215)
+    Zoom (0, 400) Units "m" 
+    Label Line Arrow Position Right Font ("Arial",2,8,16711680) Pen (1,2,0) 
+      With Oznaka_pumpe
+      Parallel On Auto On Overlap Off Duplicates On Offset 6
+      Visibility On
+  Layer 27
+    Display Global
+    Global Pen (1,2,16711680) Brush (17,53248) Symbol (42,45056,14,"MapInfo Oil&Gas",257,0) Line (2,2,12432) Font ("Arial",257,9,9584,16777215)
+    Zoom (0, 25000) Units "m" 
+    Label Line Arrow Position Right Font ("Arial",257,9,41040,16777215) Pen (1,2,0) 
+      With "RP "+REGULATOR
+      Parallel On Auto On Overlap On Duplicates On Offset 2
+      Visibility Zoom (0, 10000) Units "m"
+  Layer 28
+    Display Global
+    Global Pen (1,2,16711680) Brush (17,53248) Symbol (43,4243711,14,"MapInfo Oil&Gas",257,0) Line (2,2,14694400) Font ("Arial",257,9,9584,16777215)
+    Zoom (0, 2500) Units "m" 
+    Label Line Arrow Position Right Font ("Arial",0,9,0) Pen (1,2,0) 
+      With LOKACIJA
+      Parallel On Auto Off Overlap Off Duplicates On Offset 2
+      Visibility On
+  Layer 29
+    Display Global
+    Global Pen (1,2,16711680) Brush (17,53248) Symbol (49,255,14,"MapInfo Oil&Gas",257,0) Line (2,2,12432) Font ("Arial",257,9,9584,16777215)
+    Zoom (0, 5000) Units "m" 
+    Label Line Arrow Position Right Font ("Arial",0,9,0) Pen (1,2,0) 
+      With LOKACIJA
+      Parallel On Auto Off Overlap Off Duplicates On Offset 2
+      Visibility On
+  Layer 30
+    Display Global
+    Global Pen (1,2,16711680) Brush (17,53248) Symbol (39,65535,12,"MapInfo Oil&Gas",17,0) Line (2,2,12432) Font ("Arial",257,9,9584,16777215)
+    Zoom (0, 5000) Units "m" 
+    Label Line Arrow Position Right Font ("Arial",0,9,0) Pen (1,2,0) 
+      With BROJ
+      Parallel On Auto Off Overlap Off Duplicates On Offset 2
+      Visibility On
+  Layer 31
+    Display Global
+    Global Pen (1,2,16711680) Brush (17,53248) Symbol (47,65535,10,"MapInfo Cartographic",16,0) Line (2,2,12432) Font ("Arial",257,9,9584,16777215)
+    Zoom (0, 15000) Units "m" 
+    Label Line Arrow Position Below Left Font ("Arial",259,8,255,16777215) Pen (1,2,0) 
+      With "V "+VODOMER
+      Parallel On Auto On Overlap On Duplicates On Offset 2
+      Visibility On
+  Layer 32
+    Display Global
+    Global Pen (1,2,16711680) Brush (17,53248) Symbol (63,8454143,10,"MapInfo Weather",16,0) Line (2,2,12432) Font ("Arial",257,9,9584,16777215)
+    Zoom (0, 15000) Units "m" 
+    Label Line Arrow Position Below Left Font ("Arial",258,8,14694400,16777215) Pen (1,2,0) 
+      With OZNAKA
+      Parallel On Auto On Overlap On Duplicates On Offset 2
+      Visibility Zoom (0, 10000) Units "m"
+  Layer 33
+    Display Global
+    Global Pen (1,2,16711680) Brush (17,53248) Symbol (45,8443391,14) Line (2,2,12432) Font ("Arial",257,9,9584,16777215)
+    Zoom (0, 15000) Units "m" 
+    Label Line Arrow Position Below Left Font ("Arial Narrow",259,10,255,16777215) Pen (1,2,0) 
+      With NAZIV
+      Parallel On Auto On Overlap On Duplicates On Offset 2
+      Visibility Zoom (0, 10000) Units "m"
+  Layer 34
+    Display Global
+    Global Pen (1,2,16711680) Brush (17,53248) Symbol (59,5278719,10) Line (2,2,12432) Font ("Arial",257,9,9584,16777215)
+    Zoom (0, 450) Units "m" 
+    Label Line Arrow Position Right Auto Retry On Font ("Arial",258,8,255,16777215) Pen (1,2,0) 
+      With KUCNI_BROJ
+      Parallel On Auto On Overlap Off Duplicates On Offset 4
+      Visibility Zoom (0, 450) Units "m"
+  Layer 35
+    Display Off
+    Global Pen (1,2,16711680)  Brush (17,53248)  Symbol (49,16711680,12)  Line (2,2,12432)  Font ("Arial",257,9,9584,16777215)
+    Selectable Off
+    Zoom (0, 800) Units "m" 
+  Layer 36
+    Display Global
+    Global Pen (1,2,16711680) Brush (17,53248) Symbol (63,255,9,"MapInfo Weather",256,0) Line (2,2,12432) Font ("Arial",257,9,9584,16777215)
+    Zoom (0, 1000) Units "m" 
+    Label Line Arrow Position Right Font ("Arial",0,9,0) Pen (1,2,0) 
+      With BROJ
+      Parallel On Auto Off Overlap Off Duplicates On Offset 2
+      Visibility On
+  Layer 37
+    Display Off
+    Global Pen (1,2,16711680)  Brush (17,53248)  Symbol (49,16711680,12)  Line (2,2,12432)  Font ("Arial",257,9,9584,16777215)
+    Selectable Off
+    Zoom (0, 1000) Units "m" 
+  Layer 38
+    Display Global
+    Global Pen (1,2,16711680) Brush (17,53248) Symbol (60,255,9,"MapInfo Weather",256,0) Line (2,2,255) Font ("Arial",257,9,9584,16777215)
+    Zoom (0, 1000) Units "m" 
+    Label Line Arrow Position Right Font ("Arial",0,9,0) Pen (1,2,0) 
+      With BROJ
+      Parallel On Auto Off Overlap Off Duplicates On Offset 2
+      Visibility On
+  Layer 39
+    Display Off
+    Global Pen (1,2,208) Brush (15,12632319) Symbol (37,6343679,8,"MapInfo Cartographic",256,0) Line (2,2,32960) Font ("Arial",256,10,12432,16777215)
+    Label Line Arrow Position Right Font ("Arial",256,10,12432,16777215) Pen (1,2,0) 
+      With ULICA
+      Parallel On Auto Off Overlap Off Duplicates On Offset 2
+      Visibility On
+  Layer 40
+    Display Global
+    Global Pen (1,2,208) Brush (15,12632319) Symbol (37,255,9,"MapInfo Cartographic",256,0) Line (2,2,32960) Font ("Arial",256,10,12432,16777215)
+    Zoom (0, 600) Units "m" 
+    Label Line Arrow Position Right Font ("Arial",257,8,12432,16777215) Pen (1,2,0) 
+      With MI_PRINX
+      Parallel On Auto Off Overlap Off Duplicates On Offset 2
+      Visibility Off
+  Layer 41
+    Display Graphic
+    Global Pen (1,2,16711680) Brush (17,53248) Symbol (49,16711680,12) Line (20,2,3175935) Font ("Arial",257,9,9584,16777215)
+    Zoom (0, 450) Units "m" 
+    Label Line Arrow Position Center Font ("Arial",257,8,65535,0) Pen (1,2,0) 
+      With MATERIJAL_PRIK_CEV+PRECNIK_PRIK_CEV+Chr$(13)+Broj_RN
+      Parallel On Auto On Overlap On Duplicates Off PartialSegments On Offset 2
+      Visibility Zoom (0, 150) Units "m"
+  Layer 42
+    Display Value
+    Global Pen (1,2,0)  Brush (2,16776960,16777215)  Symbol (49,16711680,12)  Line (2,2,255)  Font ("Arial",0,9,0)
+    Selectable Off
+  Layer 43
+    Display Graphic
+    Global Pen (1,2,0) Brush (2,16776960,16777215) Symbol (49,16711680,12) Line (2,2,255) Font ("Arial",0,9,0)
+    Label Line Arrow Position Center Auto Retry On Font ("Tahoma",257,7,16777215,0) Pen (1,2,0) 
+      With ULICA
+      Follow Path Percent Over 45 Auto On Overlap Off Duplicates Off Offset 2
+      Visibility Zoom (1000, 2500) Units "m"
+  Layer 44
+    Display Off
+    Global Pen (1,2,27552)  Brush (17,16711680)  Symbol (49,16711680,12)  Line (2,2,32960)  Font ("Arial CE",256,8,12432,16777215)
+    Selectable Off
+  Layer 45
+    Display Value
+    Global Pen (1,2,27552)  Brush (17,16711680)  Symbol (49,16711680,12)  Line (1,2,27552)  Font ("Arial CE",256,8,12432,16777215)
+    Selectable Off
+  Layer 46
+    Display Off
+    Global Pen (1,2,27552) Brush (17,16711680) Symbol (49,16711680,12) Line (2,2,32960) Font ("Arial CE",256,8,12432,16777215)
+    Label Line Arrow Position Center Font ("Arial Narrow",257,9,16576,16777215) Pen (1,2,0) 
+      With MATERIJAL+Left$(Str$(DN_MM), Int(DN_MM>0)*Len(Str$(DN_MM)))
+      Parallel On Auto On Overlap On Duplicates On PartialSegments On Offset 2
+      Visibility Zoom (0, 500) Units "m"
+  Layer 47
+    Display Value
+    Global Pen (1,2,0)  Brush (2,16777215,16777215)  Symbol (35,0,12)  Line (1,2,0)  Font ("Tahoma",0,9,0)
+    Selectable Off
+  Layer 48
+    Display Graphic
+    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (35,0,12) Line (1,2,0) Font ("Tahoma",0,9,0)
+    Label Line None Position Center Font ("Tahoma",0,9,0) Pen (1,2,0) 
+      With Izvoriste
+      Parallel On Auto Off Overlap Off Duplicates On Offset 2
+      Visibility On
+  Layer 49
+    Display Value
+    Global Pen (1,2,0)  Brush (2,16777215,16777215)  Symbol (49,16711680,12)  Line (1,2,0)  Font ("Tahoma",0,9,0)
+    Selectable Off
+  Layer 50
+    Display Graphic
+    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (49,16711680,12) Line (1,2,0) Font ("Tahoma",0,9,0)
+    Label Line None Position Center Font ("Tahoma",0,9,0) Pen (1,2,0) 
+      With NAZIV
+      Parallel On Auto Off Overlap Off Duplicates On Offset 2
+      Visibility On
+  Layer 51
+    Display Off
+    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (49,16711680,12) Line (1,2,0) Font ("Tahoma",0,9,0)
+    Label Line None Position Center Font ("Tahoma",0,9,0) Pen (1,2,0) 
+      With SISTEM
+      Parallel On Auto Off Overlap Off Duplicates On Offset 2
+      Visibility On
+  Layer 52
+    Display Global
+    Global Pen (1,2,208) Brush (15,12632319) Symbol (44,14694400,18) Line (2,2,32960) Font ("Arial",256,10,12432,16777215)
+    Label Line Arrow Position Right Font ("Arial",256,10,12432,16777215) Pen (1,2,0) 
+      With NAZIV
+      Parallel On Auto Off Overlap Off Duplicates On Offset 2
+      Visibility On
+  Layer 53
+    Display Global
+    Global Pen (1,2,208) Brush (15,12632319) Symbol (45,13658112,18) Line (2,2,32960) Font ("Arial",256,10,12432,16777215)
+    Label Line Arrow Position Right Font ("Arial",256,10,12432,16777215) Pen (1,2,0) 
+      With LOKACIJA
+      Parallel On Auto Off Overlap Off Duplicates On Offset 2
+      Visibility On
+  Layer 54
+    Display Global
+    Global Pen (1,2,208) Brush (15,12632319) Symbol (49,16711680,12) Line (1,49,6332416) Font ("Arial",256,10,12432,16777215)
+    Label Line Arrow Position Above Font ("Arial",256,10,12432,16777215) Pen (1,2,0) 
+      With ULICA
+      Parallel On Auto Off Overlap Off Duplicates Off Offset 2
+      Visibility On
+  Layer 55
+    Display Global
+    Global Pen (1,2,208) Brush (15,12632319) Symbol (44,12595200,14,"MapInfo Oil&Gas",16,0) Line (2,2,32960) Font ("Arial",256,10,12432,16777215)
+    Label Line Arrow Position Right Font ("Arial",256,10,12432,16777215) Pen (1,2,0) 
+      With ID
+      Parallel On Auto Off Overlap Off Duplicates On Offset 2
+      Visibility On
+  Layer 56
+    Display Global
+    Global Pen (1,2,208) Brush (15,12632319) Symbol (45,16711680,12,"MapInfo Oil&Gas",257,0) Line (2,2,14694400) Font ("Arial",256,10,12432,16777215)
+    Zoom (0, 1500) Units "m" 
+    Label Line Arrow Position Right Font ("Arial",256,10,12432,16777215) Pen (1,2,0) 
+      With NAZIV
+      Parallel On Auto Off Overlap Off Duplicates On Offset 2
+      Visibility On
+  Layer 57
+    Display Graphic
+    Global Pen (1,2,208) Brush (15,12632319) Symbol (49,16711680,12) Line (2,2,32960) Font ("Arial",256,10,12432,16777215)
+    Zoom (0, 600) Units "m" 
+    Label Line Arrow Position Right Font ("Arial",256,10,12432,16777215) Pen (1,2,0) 
+      With R_BROJ
+      Parallel On Auto Off Overlap Off Duplicates On Offset 2
+      Visibility On
+  Layer 58
+    Display Global
+    Global Pen (1,2,208) Brush (15,12632319) Symbol (46,16734240,14) Line (2,2,32960) Font ("Arial",256,10,12432,16777215)
+    Label Line Arrow Position Right Font ("Arial",256,10,12432,16777215) Pen (1,2,0) 
+      With IZLIV
+      Parallel On Auto Off Overlap Off Duplicates On Offset 2
+      Visibility On
+  Layer 59
+    Display Global
+    Global Pen (1,2,208) Brush (15,12632319) Symbol (44,12595200,10,"MapInfo Cartographic",257,0) Line (2,2,32960) Font ("Arial",256,10,12432,16777215)
+    Zoom (0, 500) Units "m" 
+    Label Line Arrow Position Right Auto Retry On Font ("Arial",257,8,12595200,16777215) Pen (1,2,0) 
+      With "KT "+Left$(Str$(KOTA_POKLOPCA), Int(KOTA_POKLOPCA>0)*Len(Str$(KOTA_POKLOPCA)))+Chr$(13)+"KD "+Left$(Str$(KOTA_DNA), Int(KOTA_DNA>0)*Len(Str$(KOTA_DNA)))
+      Parallel On Auto On Overlap Off Duplicates On Offset 5
+      Visibility Zoom (0, 500) Units "m"
+  Layer 60
+    Display Global
+    Global Pen (1,2,208) Brush (15,12632319) Symbol (49,16711680,12) Line (2,2,16744448) Font ("Arial",256,10,12432,16777215)
+    Zoom (0, 400) Units "m" 
+    Label Line Arrow Position Above Font ("Arial",256,10,12432,16777215) Pen (1,2,0) 
+      With MATERIJAL
+      Parallel On Auto Off Overlap Off Duplicates Off Offset 2
+      Visibility On
+  Layer 61
+    Display Value
+    Global Pen (1,2,208)  Brush (15,12632319)  Symbol (49,16711680,12)  Line (2,2,32960)  Font ("Arial",256,10,12432,16777215)
+    Selectable Off
+  Layer 62
+    Display Global
+    Global Pen (1,2,208) Brush (15,12632319) Symbol (49,16711680,12) Line (2,2,14694400) Font ("Arial",256,10,12432,16777215)
+    Label Line Arrow Position Center Auto Retry On Font ("Arial Narrow",257,9,12595200,16777215) Pen (1,2,0) 
+      With MATERIJAL+PRECNIK
+      Parallel On Auto On Overlap Off Duplicates On Offset 2
+      Visibility Zoom (0, 1000) Units "m"
+  Layer 63
+    Display Value
+    Global Pen (2,2,65280)  Brush (17,65280)  Symbol (35,0,12)  Line (1,2,0)  Font ("Arial",0,9,0)
+    Selectable Off
+  Layer 64
+    Display Off
+    Global Pen (2,2,65280) Brush (17,65280) Symbol (35,0,12) Line (1,2,0) Font ("Arial",0,9,0)
+    Label Line Arrow Position Above Auto Retry On Font ("Arial",257,18,16711935,0) Pen (1,2,0) 
+      With Left$(NADLEZNOST, Abs(Int(Len(NADLEZNOST)-12.6))*14)
+      Parallel On Auto On Overlap Off Duplicates On Offset 2
+      Visibility Zoom (0, 1500) Units "m"
+  Layer 65
+    Display Global
+    Global Pen (1,2,208) Brush (15,12632319) Symbol (83,53248,10,"MapInfo Miscellaneous",256,0) Line (2,2,32960) Font ("Arial",256,10,12432,16777215)
+    Zoom (0, 600) Units "m" 
+    Label Line Arrow Position Right Font ("Arial",256,10,12432,16777215) Pen (1,2,0) 
+      With IZVOR_INFORMACIJE
+      Parallel On Auto Off Overlap Off Duplicates On Offset 2
+      Visibility On
+  Layer 66
+    Display Global
+    Global Pen (1,2,208) Brush (15,12632319) Symbol (49,16711680,12) Line (2,2,8245248) Font ("Arial",256,10,12432,16777215)
+    Zoom (0, 600) Units "m" 
+    Label Line Arrow Position Above Font ("Arial",256,10,12432,16777215) Pen (1,2,0) 
+      With ULICA
+      Parallel On Auto Off Overlap Off Duplicates Off Offset 2
+      Visibility On
+  Layer 67
+    Display Global
+    Global Pen (1,2,208) Brush (15,12632319) Symbol (46,53248,14) Line (2,2,32960) Font ("Arial",256,10,12432,16777215)
+    Label Line Arrow Position Right Font ("Arial",256,10,12432,16777215) Pen (1,2,0) 
+      With IZLIV
+      Parallel On Auto Off Overlap Off Duplicates On Offset 2
+      Visibility On
+  Layer 68
+    Display Global
+    Global Pen (1,2,208) Brush (15,12632319) Symbol (44,45056,10,"MapInfo Cartographic",257,0) Line (2,2,32960) Font ("Arial",256,10,12432,16777215)
+    Zoom (0, 1000) Units "m" 
+    Label Line Arrow Position Right Font ("Arial Narrow",259,8,5079040,16777215) Pen (1,2,0) 
+      With "KT "+Left$(Str$(KOTA_POKLOPCA), Int(KOTA_POKLOPCA>0)*Len(Str$(KOTA_POKLOPCA)))+Chr$(13)+"KD "+Left$(Str$(KOTA_DNA), Int(KOTA_DNA>0)*Len(Str$(KOTA_DNA)))
+      Parallel On Auto On Overlap On Duplicates On PartialSegments On Offset 2
+      Visibility Zoom (0, 500) Units "m"
+  Layer 69
+    Display Global
+    Global Pen (1,2,208) Brush (15,12632319) Symbol (49,16711680,12) Line (2,2,12632064) Font ("Arial",256,10,12432,16777215)
+    Zoom (0, 400) Units "m" 
+    Label Line Arrow Position Above Font ("Arial",256,10,12432,16777215) Pen (1,2,0) 
+      With MATERIJAL
+      Parallel On Auto Off Overlap Off Duplicates Off Offset 2
+      Visibility On
+  Layer 70
+    Display Value
+    Global Pen (1,2,208)  Brush (15,12632319)  Symbol (49,16711680,12)  Line (2,2,57344)  Font ("Arial",256,10,12432,16777215)
+    Selectable Off
+  Layer 71
+    Display Value
+    Global Pen (1,2,208)  Brush (15,12632319)  Symbol (49,16711680,12)  Line (2,2,57344)  Font ("Arial",256,10,12432,16777215)
+    Selectable Off
+  Layer 72
+    Display Global
+    Global Pen (1,2,208) Brush (15,12632319) Symbol (49,16711680,12) Line (2,2,57344) Font ("Arial",256,10,12432,16777215)
+    Label Line Arrow Position Center Auto Retry On Font ("Arial Narrow",257,9,5079040,16777215) Pen (1,2,0) 
+      With MATERIJAL+PRECNIK
+      Parallel On Auto On Overlap On Duplicates On PartialSegments On Offset 2
+      Visibility Zoom (0, 1000) Units "m"
+  Layer 73
+    Display Value
+    Global Pen (2,2,65280)  Brush (17,65280)  Symbol (35,0,12)  Line (1,2,0)  Font ("Arial",0,9,0)
+    Selectable Off
+  Layer 74
+    Display Off
+    Global Pen (2,2,65280) Brush (17,65280) Symbol (35,0,12) Line (1,2,0) Font ("Arial",0,9,0)
+    Label Line Arrow Position Above Auto Retry On Font ("Arial",257,18,65280,0) Pen (1,2,0) 
+      With Left$(NADLEZNOST, Abs(Int(Len(NADLEZNOST)-12.6))*14)
+      Parallel On Auto On Overlap Off Duplicates On Offset 2
+      Visibility Zoom (0, 1500) Units "m"
+  Layer 75
+    Display Global
+    Global Pen (1,2,208) Brush (15,12632319) Symbol (33,16776960,14) Line (2,2,32960) Font ("Arial",256,10,12432,16777215)
+    Zoom (0, 6000) Units "m" 
+    Label Line Arrow Position Right Font ("Arial",256,10,12432,16777215) Pen (1,2,0) 
+      With Broj_RN
+      Parallel On Auto Off Overlap Off Duplicates On Offset 2
+      Visibility On
+  Layer 76
+    Display Global
+    Global Pen (1,2,208) Brush (15,12632319) Symbol (49,16711680,12) Line (2,193,16776960) Font ("Arial",256,10,12432,16777215)
+    Zoom (0, 6000) Units "m" 
+    Label Line Arrow Position Above Font ("Arial",256,10,12432,16777215) Pen (1,2,0) 
+      With Broj_RN
+      Parallel On Auto Off Overlap Off Duplicates Off Offset 2
+      Visibility On
+  Layer 77
+    Display Graphic
+    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (35,0,12) Line (1,2,0) Font ("Tahoma",0,9,0)
+    Label Line Arrow Position Above Font ("Tahoma",0,9,0) Pen (1,2,0) 
+      With MI_PRINX
+      Parallel On Auto Off Overlap Off Duplicates Off Offset 2
+      Visibility On
+  Layer 78
+    Display Global
+    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (35,0,12) Line (2,5,65280) Font ("Tahoma",0,9,0)
+    Label Line Arrow Position Above Font ("Tahoma",0,9,0) Pen (1,2,0) 
+      With PODNOSILAC
+      Parallel On Auto Off Overlap Off Duplicates Off Offset 2
+      Visibility On
+  Layer 79
+    Display Global
+    Global Pen (2,2,8388608) Brush (16,14737408) Symbol (35,0,12) Line (1,2,0) Font ("Tahoma",0,9,0)
+    Label Line None Position Center Font ("Tahoma",0,9,0) Pen (1,2,0) 
+      With PODNOSILAC
+      Parallel On Auto Off Overlap Off Duplicates On Offset 2
+      Visibility On
+  Layer 80
+    Display Graphic
+    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (35,0,12) Line (1,2,0) Font ("Tahoma",0,9,0)
+    Label Line Arrow Position Above Font ("Tahoma",0,9,0) Pen (1,2,0) 
+      With VRSTA
+      Parallel On Auto Off Overlap Off Duplicates Off Offset 2
+      Visibility On
+  Layer 81
+    Display Graphic
+    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (35,0,12) Line (1,2,0) Font ("Tahoma",0,9,0)
+    Label Line Arrow Position Right Font ("Tahoma",0,9,0) Pen (1,2,0) 
+      With PROFIL_mm
+      Parallel On Auto Off Overlap Off Duplicates On Offset 2
+      Visibility On
+  Layer 82
+    Display Graphic
+    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (35,0,12) Line (1,2,0) Font ("Tahoma",0,9,0)
+    Label Line None Position Center Font ("Tahoma",0,9,0) Pen (1,2,0) 
+      With PODNOSILAC
+      Parallel On Auto Off Overlap Off Duplicates On Offset 2
+      Visibility On
+  Layer 83
+    Display Graphic
+    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (35,0,12) Line (1,2,0) Font ("Arial",0,9,0)
+    Zoom (0, 600) Units "m" 
+    Label Line Arrow Position Above Right Auto Retry On Font ("Arial",258,8,12648288,0) Pen (1,2,0) 
+      With Left$(Str$(Kota_terena), Int(Kota_terena>0)*Len(Str$(Kota_terena)))
+      Parallel On Auto On Overlap Off Duplicates On PartialSegments On Offset 2
+      Visibility Zoom (0, 300) Units "m"
+  Layer 84
+    Display Global
+    Global Pen (1,5,7585792) Brush (1,16777215,16777215) Symbol (35,0,12) Line (1,2,0) Font ("Tahoma",0,9,0)
+    Selectable Off
+    Zoom (0, 600) Units "m" Off 
+    Label Line None Position Center Auto Retry On Font ("Tahoma",256,7,53352,0) Pen (1,2,0) 
+      With NAZIV_LATIN2
+      Parallel On Auto On Overlap Off Duplicates On PartialSegments On Offset 2
+      Visibility On
+   Alpha 198
+  Layer 85
+    Display Global
+    Global Pen (30,2,9437184) Brush (1,16777215,16777215) Symbol (35,0,12) Line (1,2,0) Font ("Tahoma",0,9,0)
+    Selectable Off
+    Zoom (600, 100000) Units "m" 
+    Label Line None Position Center Font ("Tahoma",257,16,11556864,16777215) Pen (1,2,0) 
+      With NAZIV_LATIN2
+      Parallel On Auto On Overlap Off Duplicates On PartialSegments On Offset 2
+      Visibility On
+  Layer 86
+    Display Global
+    Global Pen (4,2,16711680) Brush (1,16777215,16777215) Symbol (35,0,12) Line (1,2,0) Font ("Tahoma",0,9,0)
+    Selectable Off
+    Zoom (15000, 100000) Units "m" 
+    Label Line None Position Center Font ("Tahoma",0,9,0) Pen (1,2,0) 
+      With OPSTINA
+      Parallel On Auto Off Overlap Off Duplicates On Offset 2
+      Visibility On
+  Layer 87
+    Display Off
+    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (35,0,12) Line (1,2,0) Font ("Tahoma",0,9,0)
+    Label Line None Position Center Font ("Verdana",259,9,5278719,16777215) Pen (1,2,0) 
+      With REKA
+      Parallel On Auto On Overlap On Duplicates On PartialSegments On Offset 2
+      Visibility On AutoPosition On AutoSizes 1 AutoSizeStep 50 SuppressIfNoFit Off AutoCallout Off
+  Layer 88
+    Display Off
+    Global Pen (1,2,8421504) Brush (31,12632256) Symbol (35,0,12) Line (1,2,0) Font ("Tahoma",0,9,0)
+    Zoom (0, 1700) Units "m" 
+    Label Line None Position Center Font ("Tahoma",258,8,5263440,16777215) Pen (1,2,0) 
+      With KUCNI_BROJ
+      Parallel On Auto On Overlap Off Duplicates On Offset 2
+      Visibility Zoom (0, 1000) Units "m"
+  Layer 89
+    Display Off
+    Global Pen (12,2,8245248) Brush (2,15790320,16777215) Symbol (35,0,12) Line (13,2,8421504) Font ("Tahoma",0,9,0)
+    Zoom (0, 1700) Units "m" 
+    Label Line None Position Center Font ("Tahoma",2,8,8421504) Pen (1,2,0) 
+      With BR_PARCELE
+      Parallel On Auto On Overlap Off Duplicates On Offset 2
+      Visibility On
+   Alpha 142
+  Layer 90
+    Display Graphic
+    Global Pen (1,2,0)  Brush (2,16777215,16777215)  Symbol (35,0,12)  Line (1,2,0)  Font ("Tahoma",0,9,0)
+    Selectable Off
+    Zoom (0, 1000) Units "m" 
+  contrast 50 
+  brightness 50 
+  alpha 255 
+    transparency on 
+  color 16777215 
+    grayscale off 
+  Layer 91
+    Display Off
+    Global Pen (1,2,0)  Brush (2,16777215,16777215)  Symbol (35,0,12)  Line (1,2,0)  Font ("Tahoma",0,9,0)
+    Selectable Off
+    Zoom (0, 1000) Units "m" 
+  contrast 50 
+  brightness 50 
+  alpha 255 
+    transparency on 
+  color 16777215 
+    grayscale off 
+  Layer 92
+    Display Global
+    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (49,16711680,12) Line (1,2,0) Font ("Tahoma",0,9,0)
+  contrast 50 
+  brightness 50 
+  alpha 255 
+    transparency off 
+  color 0 
+    grayscale off 
+  Layer 93
+    Display Graphic
+    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (49,16711680,12) Line (1,2,0) Font ("Tahoma",0,9,0)
+    Zoom (0, 15000) Units "m" 
+  contrast 50 
+  brightness 50 
+  alpha 255 
+    transparency off 
+  color 0 
+    grayscale off 
+  Layer 94
+    Display Off
+    Global Pen (1,2,0)  Brush (2,16777215,16777215)  Symbol (35,0,12)  Line (1,2,0)  Font ("Tahoma",0,9,0)
+    Selectable On
+    Zoom (1000, 4000) Units "m" 
+  contrast 50 
+  brightness 50 
+  alpha 255 
+    transparency on 
+  color 0 
+    grayscale off 
+  Layer 95
+    Display Global
+    Global Pen (1,2,0)  Brush (2,16777215,16777215)  Symbol (35,0,12)  Line (1,2,0)  Font ("Tahoma",0,9,0)
+    Selectable On
+    Zoom (0, 150000) Units "m" Off 
+  contrast 50 
+  brightness 57 
+  alpha 255 
+    transparency on 
+  color 0 
+    grayscale off 
+  Layer 96
+    Display Off
+    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (49,16711680,12) Line (1,2,0) Font ("Tahoma",0,9,0)
+  contrast 50 
+  brightness 50 
+  alpha 255 
+    transparency off 
+  color 0 
+    grayscale off 
+  Layer 97
+    Display Off
+    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (49,16711680,12) Line (1,2,0) Font ("Tahoma",0,9,0)
+  contrast 50 
+  brightness 50 
+  alpha 255 
+    transparency off 
+  color 0 
+    grayscale off 
+  Layer 98
+    Display Off
+    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (49,16711680,12) Line (1,2,0) Font ("Tahoma",0,9,0)
+  contrast 50 
+  brightness 50 
+  alpha 255 
+    transparency off 
+  color 0 
+    grayscale off 
+  Layer 99
+    Display Off
+    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (49,16711680,12) Line (1,2,0) Font ("Tahoma",0,9,0)
+  contrast 50 
+  brightness 50 
+  alpha 255 
+    transparency off 
+  color 0 
+    grayscale off 
+  Layer 100
+    Display Off
+    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (49,16711680,12) Line (1,2,0) Font ("Tahoma",0,9,0)
+  contrast 50 
+  brightness 50 
+  alpha 255 
+    transparency off 
+  color 0 
+    grayscale off 
+  Layer 101
+    Display Off
+    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (49,16711680,12) Line (1,2,0) Font ("Tahoma",0,9,0)
+  contrast 50 
+  brightness 50 
+  alpha 255 
+    transparency off 
+  color 0 
+    grayscale off 
+  Layer 102
+    Display Off
+    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (49,16711680,12) Line (1,2,0) Font ("Tahoma",0,9,0)
+  contrast 50 
+  brightness 50 
+  alpha 255 
+    transparency off 
+  color 0 
+    grayscale off 
+  Layer 103
+    Display Off
+    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (49,16711680,12) Line (1,2,0) Font ("Tahoma",0,9,0)
+  contrast 50 
+  brightness 50 
+  alpha 255 
+    transparency off 
+  color 0 
+    grayscale off 
+  Layer 104
+    Display Off
+    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (49,16711680,12) Line (1,2,0) Font ("Tahoma",0,9,0)
+  contrast 50 
+  brightness 50 
+  alpha 255 
+    transparency off 
+  color 0 
+    grayscale off 
+  Layer 105
+    Display Off
+    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (49,16711680,12) Line (1,2,0) Font ("Tahoma",0,9,0)
+  contrast 50 
+  brightness 50 
+  alpha 255 
+    transparency off 
+  color 0 
+    grayscale off 
+  GroupLayer 1
+    Display On Title "NIVOS"
+  GroupLayer 2
+    Display On Title "[Pomoæni]"
+  GroupLayer 3
+    Display On Title "Medijana"
+  GroupLayer 4
+    Display On Title "NIKAS"
+  GroupLayer 5
+    Display On Title "Fekalna"
+  GroupLayer 6
+    Display On Title "Atmosferska"
+  GroupLayer 7
+    Display Off Title "[Radni]"
+  GroupLayer 8
+    Display Off Title "[Geodetski]"
+  GroupLayer 9
+    Display On Title "Katastar"
+  GroupLayer 10
+    Display Off Title "Izohipse"
+  GroupLayer 11
+    Display On Title "Administrativne granice"
+  GroupLayer 12
+    Display On Title "Podloge"
+  GroupLayer 13
+    Display Off Title "_mreze"
+  GroupLayer 14
+    Display On Title "Planovi"
+Set Map Layer 13 Editable
+set legend 
+  layer 15 
+    display on 
+    shades off 
+    symbols off 
+    lines on 
+    count on 
+    title auto Font ("Arial",0,9,0)
+    subtitle auto Font ("Arial",0,8,0)
+    ascending on 
+    ranges Font ("Arial",0,8,0)
+      auto display off ,
+      auto display on ,
+      auto display on  
+set legend 
+  layer 20 
+    display on 
+    shades off 
+    symbols on 
+    lines off 
+    count on 
+    title auto Font ("Arial",0,9,0)
+    subtitle auto Font ("Arial",0,8,0)
+    ascending on 
+    ranges Font ("Arial",0,8,0)
+      auto display off ,
+      auto display on ,
+      auto display on ,
+      auto display on ,
+      auto display on ,
+      auto display on ,
+      auto display on  
+set legend 
+  layer 35 
+    display on 
+    shades off 
+    symbols on 
+    lines off 
+    count on 
+    title auto Font ("Arial",0,9,0)
+    subtitle auto Font ("Arial",0,8,0)
+    ascending on 
+    ranges Font ("Arial",0,8,0)
+      auto display off ,
+      auto display off ,
+      auto display on ,
+      auto display on ,
+      auto display on ,
+      auto display on ,
+      auto display on  
+set legend 
+  layer 37 
+    display on 
+    shades off 
+    symbols on 
+    lines off 
+    count on 
+    title auto Font ("Arial",0,9,0)
+    subtitle auto Font ("Arial",0,8,0)
+    ascending on 
+    ranges Font ("Arial",0,8,0)
+      auto display on ,
+      auto display on ,
+      auto display on ,
+      auto display off ,
+      auto display on ,
+      auto display on ,
+      auto display on ,
+      auto display on ,
+      auto display on  
+set legend 
+  layer 42 
+    display on 
+    shades off 
+    symbols off 
+    lines on 
+    count on 
+    title auto Font ("Arial",0,9,0)
+    subtitle auto Font ("Arial",0,8,0)
+    ascending on 
+    ranges Font ("Arial",0,8,0)
+      auto display off ,
+      auto display on ,
+      auto display on ,
+      auto display on ,
+      auto display off ,
+      auto display on ,
+      auto display on  
+set legend 
+  layer 44 
+    display on 
+    shades off 
+    symbols off 
+    lines on 
+    count on 
+    title auto Font ("Arial",0,9,0)
+    subtitle auto Font ("Arial",0,8,0)
+    ascending on 
+    ranges Font ("Arial",0,8,0)
+      auto display on ,
+      auto display on ,
+      auto display on ,
+      auto display on ,
+      auto display on ,
+      auto display off ,
+      auto display on ,
+      auto display on ,
+      auto display on  
+set legend 
+  layer 45 
+    display on 
+    shades off 
+    symbols off 
+    lines on 
+    count on 
+    title auto Font ("Arial",0,9,0)
+    subtitle auto Font ("Arial",0,8,0)
+    ascending off 
+    ranges Font ("Arial",0,8,0)
+      auto display on ,
+      auto display on ,
+      auto display on ,
+      auto display on ,
+      auto display on ,
+      auto display on ,
+      auto display on ,
+      auto display on ,
+      auto display on ,
+      auto display on  
+set legend 
+  layer 47 
+    display on 
+    shades on 
+    symbols off 
+    lines off 
+    count on 
+    title auto Font ("Arial",0,9,0)
+    subtitle auto Font ("Arial",0,8,0)
+    ascending on 
+    ranges Font ("Arial",0,8,0)
+      auto display off ,
+      auto display on ,
+      auto display on ,
+      auto display on  
+set legend 
+  layer 49 
+    display on 
+    shades on 
+    symbols off 
+    lines off 
+    count on 
+    title auto Font ("Arial",0,9,0)
+    subtitle auto Font ("Arial",0,8,0)
+    ascending on 
+    ranges Font ("Arial",0,8,0)
+      auto display off ,
+      auto display on ,
+      auto display on ,
+      auto display on ,
+      auto display on ,
+      auto display on ,
+      auto display on ,
+      auto display on ,
+      auto display on ,
+      auto display on ,
+      auto display on ,
+      auto display on ,
+      auto display on ,
+      auto display on ,
+      auto display on ,
+      auto display on  
+set legend 
+  layer 61 
+    display on 
+    shades off 
+    symbols off 
+    lines on 
+    count on 
+    title auto Font ("Arial",0,9,0)
+    subtitle auto Font ("Arial",0,8,0)
+    ascending off 
+    ranges Font ("Arial",0,8,0)
+      auto display on ,
+      auto display on ,
+      auto display on ,
+      auto display on ,
+      auto display on ,
+      auto display on ,
+      auto display on ,
+      auto display on ,
+      auto display on  
+set legend 
+  layer 63 
+    display on 
+    shades off 
+    symbols off 
+    lines on 
+    count on 
+    title auto Font ("Arial",0,9,0)
+    subtitle auto Font ("Arial",0,8,0)
+    ascending on 
+    ranges Font ("Arial",0,8,0)
+      auto display off ,
+      auto display on ,
+      auto display on ,
+      auto display on ,
+      auto display on  
+set legend 
+  layer 70 
+    display on 
+    shades off 
+    symbols off 
+    lines on 
+    count off 
+    title auto Font ("Tahoma",0,9,0)
+    subtitle auto Font ("Tahoma",0,8,0)
+    ascending on 
+    ranges Font ("Tahoma",0,8,0)
+      auto display off ,
+      auto display on ,
+      auto display on  
+set legend 
+  layer 71 
+    display on 
+    shades off 
+    symbols off 
+    lines on 
+    count on 
+    title auto Font ("Arial",0,9,0)
+    subtitle auto Font ("Arial",0,8,0)
+    ascending off 
+    ranges Font ("Arial",0,8,0)
+      auto display off ,
+      auto display on ,
+      auto display on ,
+      auto display on ,
+      auto display on ,
+      auto display on ,
+      auto display on ,
+      auto display on ,
+      auto display on  
+set legend 
+  layer 73 
+    display on 
+    shades off 
+    symbols off 
+    lines on 
+    count on 
+    title auto Font ("Arial",0,9,0)
+    subtitle auto Font ("Arial",0,8,0)
+    ascending on 
+    ranges Font ("Arial",0,8,0)
+      auto display off ,
+      auto display on ,
+      auto display on  
+Set Window FrontWindow() Title "Niški vodovodni i kanalizacioni sistem - NIVOS/NIKAS"
+Dim WorkspaceMaximizedWindow As Integer
+WorkspaceMaximizedWindow = Frontwindow()
+Set Window WorkspaceMaximizedWindow Max
+	
+'	----
+
+	Save Workspace As s_FOLDER_WOR+"NAISSUS.wor"
+		
+	Note "Radni prostor 'naissus.wor' je kreiran!"
+	
+	Exit Sub
+	
+'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "WOR_naissus")
+	Call ERRShow()
+			
+End Sub

@@ -1,0 +1,1389 @@
+include "mapbasic.def"
+include "menu.def"
+include "icons.def"
+include "..\nmiWin.def"
+include "..\nmiFunkcije.def"
+include "..\nmiDotNet.def"
+include "NAISSUS-GIS.def"
+
+' ======================================================================
+' Ocitavanje potrosnje vodomera.
+
+' Kliknite na aktivni map prozor, 
+' izaberite metod klikom na odgovarajuci alat i
+' selektujte vodomere
+
+SUB nivos_POTROSNJA
+
+'=== kreiranje menija
+
+	Create Menu "Potrosnja" as
+		"Vodomeri" calling potr_grf_t,
+		"Grupa vodomera" calling potr_grf_pl,
+		"Merna Zona" calling potr_grf_zn,	
+		"Unos sifre..." calling	potr_sif
+	
+	Create Menu "NIVOS Potrosaci" As
+		"Korisnici" As "Korisnici",
+		"Potrosnja" As "Potrosnja"
+  
+'=== kreiranje palete sa alatima (toolbar)
+  
+	Create ButtonPad "NIVOS Potrosaci" As
+	PushButton Calling kor_knjige_unos 
+		ID 12884
+		Icon 187
+		HelpMsg "Kretanje kroz knjigu. Unesi knjigu, reon, redni broj vodomera za start\nPrikaz vodomera po inkaso knjigama"
+		Uncheck
+		Enable 	  
+	ToolButton Calling kor_knjige_map 
+		ID 12001
+		Icon MI_ICON_ARROW
+		Cursor MI_CURSOR_ARROW
+		DrawMode DM_CUSTOM_POINT
+		HelpMsg "Kretanje kroz knjigu. Izaberi vodomer na mapi za start\nPokazi na vodomer"		                
+	PushButton Calling vodomer_pret
+		ID 124102
+		Icon 48		
+		HelpMsg "Prethodni vodomer"
+		Uncheck
+		Enable
+	PushButton Calling vodomer_sled
+		ID 124103
+		Icon 47		
+		HelpMsg "Sledeci vodomer"
+		Uncheck
+		Enable
+	SEPARATOR
+	ToolButton Calling potr_grf
+		ID 881
+		Icon MI_ICON_MB_3
+		Cursor MI_CURSOR_ARROW
+		DrawMode DM_CUSTOM_POINT
+		HelpMsg "Potrosnja za vodomere\nPotrosnja za vodomere"
+	ToolButton Calling potr_grf
+		ID 882
+		Icon MI_ICON_SEARCH_BDY
+		DrawMode DM_CUSTOM_POLYGON
+		HelpMsg "Potrosnja za grupu vodomera\nPotrosnja za grupu vodomera"
+	ToolButton Calling potr_MZ
+		ID 883
+		Icon MI_ICON_MB_5
+		DrawMode DM_CUSTOM_POINT
+		HelpMsg "Potrosnja za Merne Zone\nPotrosnja za Merne Zone"
+	PushButton Calling potr_sif 
+		ID 884
+		Icon MI_ICON_MB_6
+		HelpMsg "Potrosnja preko sifre korisnika\nPotrosnja preko sifre korisnika"
+		Uncheck
+		Enable 	
+
+'=== pozicioniranje palete sa alatima
+	
+	Alter ButtonPad "NIVOS Potrosaci" 
+	'	Position(8,5.5) Units "cm"
+		ToolbarPosition (2,3)
+		Fixed
+		Title "NIVOS Potrosaci"
+		Width 21
+		Show        
+               
+End SUB
+
+' ======================================================================
+
+SUB potr_grf_t
+
+' - kliknut je alat za tackastu selekciju vodomera
+	Set Command Info CMD_INFO_TOOLBTN To 881
+
+' - ako nema aktivnog prozora izadji iz potprograma
+	If MapWinSTATUS(0) <> 1 then
+		exit sub
+	End If
+	
+	Call potr_grf
+	
+END SUB
+
+' ======================================================================
+
+SUB potr_grf_pl
+
+' - kliknut je alat za selekciju vodomera poligonom
+	Set Command Info CMD_INFO_TOOLBTN To 882
+	
+' - ako nema aktivnog prozora izadji iz potprograma
+	If MapWinSTATUS(0) <> 1 then
+		exit sub
+	End If
+		
+	Call potr_grf
+	
+END SUB
+
+' ======================================================================
+
+SUB potr_grf_zn
+
+' - kliknut je alat za selekciju svih vodomera u mernoj zoni
+	Set Command Info CMD_INFO_TOOLBTN To 883
+	
+' - ako nema aktivnog prozora izadji iz potprograma
+	If MapWinSTATUS(0) <> 1 then
+		exit sub
+	End If
+		
+	Call potr_grf
+	
+END SUB
+
+' ======================================================================
+
+Sub potr_grf  
+
+	Dim x, y, x2, y2 As Float,
+		l, n, i, i_found, i_row_id As Integer,
+		s_table, n_table As Alias,
+		selpol As Brush
+
+' === setovanje osnovih parametara za potprogram 
+
+' - obrada gresaka
+	onerror goto greska1
+
+' -	definicija stila za selekcioni poligon
+	selpol = MakeBrush(4, 1, -1)
+
+' - kreiranje fajla 'god.log' sa pocetnim vrednostima (trazene godine za potrosnju vodomera)
+	Open File s_TEMP_Dir+"god.log" For OUTPUT As #1
+		Print #1, "0"
+		Print #1, "0"
+		Print #1, "0"
+		Print #1, "0"
+'		Print #1, "0"
+'		Print #1, "0"
+	Close File #1     
+
+' - deselekcija svih objekata i aktiviranje 'select' alata
+	Run Menu Command M_QUERY_UNSELECT
+	Run Menu Command M_TOOLS_SELECTOR
+
+' - provera da li su svi lejeri potrebni za alat otvoreni
+
+	If OtvorenTAB("Potrosnja_za_vodomere") Then 
+		Close Table Potrosnja_za_vodomere
+	else
+		goto provera_2
+	End If
+
+	provera_2:
+	If OtvorenTAB("VODOMERI") Then 
+		goto selekcija_1
+	else
+		Open Table s_FOLDER_TAB+"VODOMERI.TAB" Interactive
+	End If                                       
+                        
+' === selekcija vodomera sa mape
+	selekcija_1:
+
+' - ID aktivnog MapInfo prozora
+	i_WinID = FrontWindow( )
+
+' - postavi lejer VODOMERI u edit modu
+	For i = 1 to mapperinfo(frontwindow(),MAPPER_INFO_LAYERS)
+		If layerinfo(frontwindow(),i,LAYER_INFO_NAME) = "VODOMERI" then
+			Set Map Window i_WinID Layer i Editable On
+			Exit For
+		Else
+			Set Map Window i_WinID Layer i Selectable Off
+		End If
+	Next
+
+' - provera koji je taster za metodu pritisnut
+	If CommandInfo(CMD_INFO_TOOLBTN) = 882 Then
+
+	' - Metoda POLIGONE SELEKCIJE -------------------------------------------------------------------------------------
+	' - koliko je objekata u nacrtanom poligonu ?
+
+		o_TmpPolygon = CommandInfo(CMD_INFO_CUSTOM_OBJ)
+		Alter Object o_TmpPolygon Info OBJ_INFO_BRUSH, selpol
+		Select * from VODOMERI Where Obj Within o_TmpPolygon into p_table
+
+		Print "Poligona selekcija"
+		Print "Izabrani vodomeri: "
+		
+		For i = 1 to SelectionInfo(SEL_INFO_NROWS)         
+			ReDim rs_MatBroj(i)
+
+		' - Izvrsi 'Fetch' reda koji predstavlja kliknut objekt.
+			Fetch rec i From p_table
+			n_table = p_table + ".col6"
+			s_table = p_table + ".col5"
+			Print s_table+" = "+n_table
+			rs_MatBroj(i) = s_table
+		Next
+		
+		Close Table p_table
+		Run Menu Command M_QUERY_UNSELECT
+		Run Menu Command M_TOOLS_SELECTOR
+	
+	Else
+
+	' - Metoda TACKASTE SELEKCIJE -------------------------------------------------------------------------------------
+	' - koliko je objekata u izabranoj tacki ?
+	' - startna pozicija tamo gde je korisnik kliknuo misem
+
+		Print "Tackasta selekcija"
+		x = CommandInfo(CMD_INFO_X)
+		y = CommandInfo(CMD_INFO_Y)
+		i_found = SearchPoint(i_WinID, x, y)
+	' 	print "i_found "+i_found
+
+			If i_found = 0 Then
+				Note "Nema objekata gde je korisnik kliknuo! Probajte ponovo ?"
+				redim rs_MatBroj(0)
+			Exit Sub
+			Else
+			End If	
+
+	' - Procesiranje pretrage.
+		Print "Izabrani vodomeri: "
+
+		For i = 1 to i_found
+		redim rs_MatBroj(i)
+	' - Ime tabele koja tabela sadrzi "pogodak".
+		s_table = SearchInfo(i, SEARCH_INFO_TABLE)
+		print "s_table: " + s_table			
+
+			If s_table = "VODOMERI" then
+
+			' - Koji je rowID objekta koji je "pogodjen" ?
+				i_row_id = SearchInfo(i, SEARCH_INFO_ROW)
+
+			' - Izvrsi 'Fetch' reda koji predstavlja kliknut objekt.
+				Fetch rec i_row_id From s_table
+				n_table = s_table + ".col6"
+				s_table = s_table + ".col5"
+				Print s_table + " = " + n_table
+				rs_MatBroj(i) = s_table
+				Exit For
+			Else						
+			End If
+		Next
+		Run Menu Command M_QUERY_UNSELECT
+		Run Menu Command M_TOOLS_SELECTOR
+	
+	End If
+
+	s_MatBroj = ""
+	s_MatBroj2 = ""
+
+' === DIJALOG prozor 
+
+	DIM l_Check11Into AS LOGICAL
+	DIM l_Check12Into AS LOGICAL
+	DIM l_Check13Into AS LOGICAL 
+	DIM l_Check14Into AS LOGICAL 
+	DIM l_Check15Into AS LOGICAL 
+	DIM l_Check16Into AS LOGICAL 
+	
+	DIALOG
+	
+	 POSITION 705, 362
+	    WIDTH 195 HEIGHT 201
+	    TITLE "Prikazivanje potrosnje vodomera"
+	    CONTROL MultiListBox
+	      POSITION 3, 25
+	      WIDTH 187 HEIGHT 78
+	      ID 2
+	      TITLE from variable rs_MatBroj
+	    CONTROL OKButton
+	      POSITION 126, 178
+	      WIDTH 38 HEIGHT 14
+	      ID OK1ID
+	      TITLE "OK"
+	      CALLING MLBOKButton
+	    CONTROL CancelButton
+	      POSITION 30, 178
+	      WIDTH 38 HEIGHT 14
+	      ID Cancel1ID
+	      TITLE "Cancel"
+	      CALLING CancelButtonCalling2
+	    CONTROL StaticText
+	      POSITION 7, 12
+	      WIDTH 152 HEIGHT 10
+	      ID Static1ID
+	      TITLE "Odaberite jedan ili vise vodomera sa liste:"
+	    CONTROL GroupBox
+	      POSITION 4, 108
+	      WIDTH 77 HEIGHT 65
+	      TITLE "Prikaz vodomera:"
+	    CONTROL RadioGroup
+	      POSITION 15, 130
+	      ID Radio1ID
+	      TITLE "Pojedinacno;Zbirno"
+	      VALUE 1
+	      INTO i_Radio1Into
+	    CONTROL CheckBox
+	      POSITION 97, 121
+	      WIDTH 31
+	      ID Check01ID
+	      TITLE "2009"
+				VALUE 0
+	      INTO l_Check11Into
+	    CONTROL CheckBox
+	      POSITION 97, 139
+	      WIDTH 31
+	      ID Check02ID
+	      TITLE "2010"
+	 			VALUE 0
+	      INTO l_Check12Into
+	    CONTROL CheckBox
+	      POSITION 97, 158
+	      WIDTH 31
+	      ID Check03ID
+	      TITLE "2011"
+				VALUE 0      
+	      INTO l_Check13Into
+	    
+	    CONTROL GroupBox
+	      POSITION 86, 108
+	      WIDTH 100 HEIGHT 65
+	      TITLE "Godina:"
+	      
+	    CONTROL CheckBox
+	      POSITION 131, 121
+	      WIDTH 31
+	      ID Check04ID
+	      TITLE "2012"
+	      VALUE 0
+	      INTO l_Check14Into
+	    CONTROL CheckBox
+	      POSITION 131, 139
+	      WIDTH 31
+	      ID Check05ID
+	      TITLE "2013"
+	      VALUE 0
+	      INTO l_Check15Into
+	      DISABLE
+	    CONTROL CheckBox
+	      POSITION 131, 158
+	      WIDTH 31
+	      ID Check06ID
+	      TITLE "2014"
+	      VALUE 0
+	      INTO l_Check16Into
+	      DISABLE      
+ 
+	' - akcija 
+
+	If CommandInfo(CMD_INFO_DLG_OK) Then 
+		For l = 1 To Ubound(iRegionsSelectedArray)
+			If s_MatBroj = "" Then
+				s_MatBroj = "" + rs_MatBroj(iRegionsSelectedArray(l)) + ""
+			Else
+				s_MatBroj = s_MatBroj + "," + "" + rs_MatBroj(iRegionsSelectedArray(l)) + ""
+			End if
+		Next                
+		
+		If s_MatBroj <> "" then 
+			m_zona = false
+			TRIkLimit = false
+	  		CALL SQL_upit
+			End If	
+	Else 
+		Print "Komanda prekinuta!"
+	' - vracanje selektabilnosti lejera na ON
+		For i = 1 to mapperinfo(i_WinID,MAPPER_INFO_LAYERS)
+			Set Map Window i_WinID Layer i Selectable On
+		Next
+		Exit Sub	
+	End If
+
+' - vracanje selektabilnosti lejera na ON
+	For i = 1 to mapperinfo(i_WinID,MAPPER_INFO_LAYERS)
+	Set Map Window i_WinID Layer i Selectable On
+	Next
+		                            
+	If i_BrReda =0 then 
+		Note "Nema odabranih vodomera! Probajte ponovo."
+		Exit sub
+	else 
+		Run Menu Command M_QUERY_UNSELECT	 
+		Call potrosnje_kalk
+	End If
+	
+	Exit Sub
+	
+	greska1:
+	Print "Greska: " + Error$()
+
+End Sub     
+
+' ======================================================================
+
+Sub MLBOKButton
+'*********************************************************************************************
+Dim iSel, j As Integer
+Dim gc1,gc2,gc3,gc4,gc5,gc6 as string
+
+j = 0
+'print "j="+j
+iSel = ReadControlValue(2)
+'print "prvi readcontrolvalue"+iSel
+
+If iSel <> 0 AND (ReadControlValue(12009) = TRUE or ReadControlValue(12010) = TRUE OR ReadControlValue(12011) = TRUE OR ReadControlValue(12012) = TRUE )
+	Then goto selekcija
+		Else Note "Oznacite sifru vodomera i izaberite godinu!"
+		Dialog Preserve
+End If		                      
+
+selekcija:
+Do Until iSel = 0
+	j = j + 1
+'	print "j="+j
+	Redim iRegionsSelectedArray(j)
+	iRegionsSelectedArray(j) = iSel
+'	print iRegionsSelectedArray(j)
+	iSel = ReadControlValue(2)
+'	print "drugi readcontrolvalue"+iSel
+Loop
+        
+	If ReadControlValue(12009) = TRUE then gc1="2009" else gc1="0"
+  End If
+	If ReadControlValue(12010) = TRUE then gc2="2010" else gc2="0"
+  End If
+	If ReadControlValue(12011) = TRUE then gc3="2011" else gc3="0"
+  End If
+	If ReadControlValue(12012) = TRUE then gc4="2012" else gc4="0"
+  End If
+'	If ReadControlValue(12013) = TRUE then gc5="2013" else gc5="0"
+'  End If
+'	If ReadControlValue(12014) = TRUE then gc6="2014" else gc6="0"
+'  End If    
+	
+	Open File s_Temp_Dir+"god.log" For OUTPUT As #1
+		Print #1, gc1
+		Print #1, gc2
+	 	Print #1, gc3
+	 	Print #1, gc4
+'	 	Print #1, gc5
+'	 	Print #1, gc6	 		 		 	
+	Close File #1
+	
+End Sub MLBOKButton             
+
+' ======================================================================
+
+SUB potr_MZ
+'*********************************************************************************************
+
+Dim x, x_c, y, y_c, x2, y2 As Float,
+		n, i, i_found, i_row_id As Integer,
+		s_table, n_table As Alias
+Dim l as Integer     
+Dim p as smallint
+
+onerror goto greska2
+
+x = CommandInfo(CMD_INFO_X)
+y = CommandInfo(CMD_INFO_Y)
+
+i_WinID = FrontWindow( )
+If WindowInfo(i_WinID, WIN_INFO_TYPE) <> WIN_MAPPER Then
+	Note "Ovo nije map prozor."
+	Exit Sub 
+End If
+
+' provera da li su lejeri ZONA i VODOMERI prisutni
+
+s_ImeLejera=setTabSQL("Vodomeri",7)
+i_LejerID = LayerID(VODOMERI)
+Set Map Window i_WinID Layer i_LejerID Display Graphic
+
+s_ImeLejera=setTabSQL("Zone",551)
+i_LejerID = LayerID(ZONE)
+Set Map Window i_WinID Layer i_LejerID Editable On Selectable On Global Pen (1,76,16711680) Global Brush (1,12632319) Display Global
+
+' smesti ZONE ispod lejera CEVOVOD
+p = LayerID(CEVOVOD)         
+If p > i_LejerID then
+kom = "Set Map Window "+i_WinID+" Order Layers "+i_LejerID+" DestGroupLayer 0 Position "+p
+run command kom  
+else
+End if
+
+i_LejerID = LayerID(VODOMERI)
+Set Map Window i_WinID Layer i_LejerID Zoom (0,400) Units "m" Off
+
+For i = 1 to mapperinfo(frontwindow(),MAPPER_INFO_LAYERS)
+	If layerinfo(frontwindow(),i,LAYER_INFO_NAME) <> "ZONE" 
+	then                                  
+  	Set Map Window i_WinID Layer i Selectable Off
+	Else                        
+	End If
+Next
+
+Print "Selekcija zone:"
+
+' Odabir merne zone klikom		
+
+i_found = SearchPoint(i_WinID, x, y)
+
+For i = 1 to i_found
+' Ime tabele koja tabela sadrzi "pogodak".
+	s_table = SearchInfo(i, SEARCH_INFO_TABLE)
+		If s_table = "ZONE" 
+		then 
+		'Koji je row IDd objekta koji je "pogodjen".
+		i_row_id = SearchInfo(i, SEARCH_INFO_ROW)
+				If Left$(s_table, 8) = "Cosmetic" 
+				Then
+					Print "Objekat je u Kozmetickom sloju"
+				Else
+  				' Izvrsi 'Fetch' reda koji predstavlja kliknut objekt.
+					Fetch rec i_row_id From s_table
+					s_table = s_table+".col3"
+					Print "Izabrana je zona: "+s_table
+					MZ = s_table
+					pos = centroid(ZONE.obj)         
+          x_c = centroidX(pos)
+					y_c = centroidY(pos)          
+					Set Map Window i_WinID Center (x_c,y_c) Zoom 4000 Units "m" 
+					i_LejerID = LayerID(ZONE)
+					Set Map Window i_WinID Layer i_LejerID Label Font ("Arial",257,18,12432,16777215) With MERNA_ZONA Overlap On PartialSegments Off Auto On
+				End If
+		End If
+Next         
+ 
+' Selekcija vodomera u okviru izabrane merne zone			
+comm = "Select SIFRA from VODOMERI Where Obj Within any ( select obj from ZONE where MERNA_ZONA = "+MZ+" ) into p_table"	
+Run Command comm
+
+bvmz = SelectionInfo(SEL_INFO_NROWS)
+Print "Broj georeferenciranih vodomera u MZ "+MZ+": "+bvmz 
+
+If bvmz <= 3000 then
+	TRIkLimit = FALSE                    
+' kreiranje polja sa siframa vodomera
+	For i = 1 to bvmz         
+  redim mzArray(i)
+   'Izvrsi 'Fetch' reda koji predstavlja kliknut objekt.
+   Fetch rec i From p_table
+    s_table = p_table + ".col1"
+		mzArray(i) = s_table
+	Next                     
+Else	
+	TRIkLimit = TRUE
+'	Print "broj vodomera veci od 32k limita: "+bvmz
+	bvmz2P = bvmz - 3000
+'	Print "ostatak: "+bvmz2P
+
+	For i = 1 to 3000         
+  redim mzArray(i)
+   'Izvrsi 'Fetch' reda koji predstavlja kliknut objekt.
+   Fetch rec i From p_table
+    s_table = p_table + ".col1"
+		mzArray(i) = s_table
+	Next                     
+'	Print i
+ 
+	For i = 3001 to bvmz
+  redim mzArray2(i)
+   'Izvrsi 'Fetch' reda koji predstavlja kliknut objekt.
+   Fetch rec i From p_table
+    s_table = p_table + ".col1"
+		mzArray2(i) = s_table
+	Next   
+'	Print i                  
+Else	
+End If
+
+MZVodSelected = ""
+MZVodSelected2 = ""
+
+kom = "select * from Zone where MERNA_ZONA="+MZ+" into Selection"
+Run Command kom
+
+DIM potrMZ_l_Check1Into AS LOGICAL
+DIM potrMZ_l_Check2Into AS LOGICAL
+DIM potrMZ_l_Check3Into AS LOGICAL
+DIM potrMZ_l_Check4Into AS LOGICAL
+DIM potrMZ_l_Check5Into AS LOGICAL
+DIM potrMZ_l_Check6Into AS LOGICAL
+
+' DIJALOG prozor 
+DIALOG
+    POSITION 648, 325
+    WIDTH 191 HEIGHT 114
+    TITLE "Prikazivanje ocitane potrosnje MERNIH ZONA"
+    CONTROL EditText
+      POSITION 7, 22
+      WIDTH 182 HEIGHT 12
+      ID potrMZEdit1ID
+      VALUE MZ
+      DISABLE
+    CONTROL GroupBox
+      POSITION 7, 43
+      WIDTH 181 HEIGHT 46
+      TITLE "Potrosnja za godinu:"
+    CONTROL CheckBox
+      POSITION 17, 56
+      WIDTH 36
+      ID potrMZCheck1ID
+      TITLE "2009"
+      VALUE 0
+      INTO potrMZ_l_Check1Into
+    CONTROL CheckBox
+      POSITION 87, 56
+      WIDTH 35
+      ID potrMZCheck2ID
+      TITLE "2010"
+      VALUE 0
+      INTO potrMZ_l_Check2Into
+    CONTROL CheckBox
+      POSITION 147, 56
+      WIDTH 33
+      ID potrMZCheck3ID
+      TITLE "2011"
+      VALUE 0
+      INTO potrMZ_l_Check3Into
+    CONTROL CheckBox
+      POSITION 147, 71
+      WIDTH 33
+      ID potrMZCheck6ID
+      TITLE "2014"
+      VALUE 0
+      INTO potrMZ_l_Check6Into
+      DISABLE
+    CONTROL CheckBox
+      POSITION 87, 71
+      WIDTH 33
+      ID potrMZCheck5ID
+      TITLE "2013"
+      VALUE 0
+      INTO potrMZ_l_Check5Into
+      DISABLE
+    CONTROL CheckBox
+      POSITION 17, 71
+      WIDTH 33
+      ID potrMZCheck4ID
+      TITLE "2012"
+      VALUE 0
+      INTO potrMZ_l_Check4Into
+    CONTROL StaticText
+      POSITION 8, 10
+      WIDTH 107 HEIGHT 10
+      ID potrMZStatic1ID
+      TITLE "Odabrana je Merna Zona:"  
+    CONTROL OKButton
+      POSITION 150, 95
+      WIDTH 38 HEIGHT 14
+      ID potrMZOK1ID
+      TITLE "OK"
+      CALLING OKButtonCalling3  
+    CONTROL CancelButton
+      POSITION 7, 95
+      WIDTH 38 HEIGHT 14
+      ID potrMZCancel1ID
+      TITLE "Cancel"
+      CALLING CancelButtonCalling2  
+ 
+' akcija 
+
+If CommandInfo(CMD_INFO_DLG_OK) 
+Then    
+'                
+	For l = 1 To Ubound(iMZVodSelectedArray)
+	If MZVodSelected = "" 
+	Then                                 
+		MZVodSelected = "" + mzArray(l) + ""
+	Else
+		 MZVodSelected = MZVodSelected + "," + "" + mzArray(l) + ""
+	End if
+	Next                
+		If TRIkLimit = TRUE
+		Then
+'			Print "triKlimit TRUE"
+			For l = Ubound(iMZVodSelectedArray)+1 To Ubound(iMZVodSelectedArray2)
+			If MZVodSelected2 = "" 
+			Then                                 
+			MZVodSelected2 = "" + mzArray2(l) + ""
+			Else
+			MZVodSelected2 = MZVodSelected2 + "," + "" + mzArray2(l) + ""
+			End if
+			Next
+			If MZVodSelected <> "" AND MZVodSelected2 <> ""
+		 	Then
+'	 		Print "s1="+MZVodSelected			 	
+'	 		Print "s2="+MZVodSelected2 
+'			Open File "d:\vodomeri.txt" For OUTPUT As #1
+'				Print #1, MZVodSelected
+'				Print #1, ""
+'				Print #1, MZVodSelected2
+'			Close File #1
+			m_zona = TRUE
+			Call SQL_upit
+			End If
+		Else
+		If MZVodSelected <> "" 
+		then
+		m_zona = TRUE 	
+		Call SQL_upit
+		End If
+End If  
+
+Else 
+	Print "Komanda prekinuta!"
+	' vracanje selektabilnosti lejera na ON
+	For i = 1 to mapperinfo(i_WinID,MAPPER_INFO_LAYERS)
+	Set Map Window i_WinID Layer i Selectable On
+	Next
+	Exit Sub	
+End If
+
+i_BrReda = SelectionInfo(SEL_INFO_NROWS)                            
+If i_BrReda = 0 
+	then Note "Nema odabranih vodomera! Probajte ponovo."
+	Exit sub
+else 
+	Run Menu Command M_QUERY_UNSELECT
+	i_Radio1Into = 2
+	Call potrosnje_kalk
+	kom = "select * from Zone where MERNA_ZONA="+MZ+" into Selection"
+	Run Command kom
+
+End If
+
+Exit Sub
+
+greska2:
+  Print "Greska: " + Error$()
+
+End Sub                  
+     
+' ======================================================================  
+
+SUB OKButtonCalling3
+'****************************************   
+Dim j As Integer
+Dim n_table As Alias
+Dim gc1,gc2,gc3,gc4,gc5,gc6 as string
+
+If (ReadControlValue(32009) = TRUE or ReadControlValue(32010) = TRUE OR ReadControlValue(32011) = TRUE OR ReadControlValue(32012) = TRUE)
+	Then goto selekcija
+Else Note "Izaberite godinu!"
+Dialog Preserve
+End If		
+
+selekcija:
+If bvmz <= 3000 
+then
+	redim iMZVodSelectedArray(bvmz)
+		For j = 1 to bvmz         
+		Fetch rec j From p_table
+		n_table = p_table + ".col1"
+		iMZVodSelectedArray(j) = n_table
+	Next
+Else
+	bvmz1P = 3000
+	bvmz2P = bvmz - 3000
+'	print "bvmz2 = "+bvmz2P
+	redim iMZVodSelectedArray(bvmz1P)
+		For j = 1 to bvmz1P
+		Fetch rec j From p_table
+		n_table = p_table + ".col1"
+		iMZVodSelectedArray(j) = n_table
+	Next                         
+	redim iMZVodSelectedArray2(bvmz)
+		For j = 3001 to bvmz
+		Fetch rec j From p_table
+		n_table = p_table + ".col1"
+'		print j+"-"+n_table
+		iMZVodSelectedArray2(j) = n_table
+	Next
+END IF	
+
+Close Table p_table
+        
+	If ReadControlValue(32009) = TRUE then gc1="2009" else gc1="0"
+  End If
+	If ReadControlValue(32010) = TRUE then gc2="2010" else gc2="0"
+  End If
+	If ReadControlValue(32011) = TRUE then gc3="2011" else gc3="0"
+  End If
+	If ReadControlValue(32012) = TRUE then gc4="2012" else gc4="0"
+  End If
+'	If ReadControlValue(32013) = TRUE then gc5="2013" else gc5="0"
+'  End If
+'	If ReadControlValue(32014) = TRUE then gc6="2014" else gc6="0"
+'  End If
+      	
+	Open File s_Temp_Dir+"god.log" For OUTPUT As #1
+		Print #1, gc1
+		Print #1, gc2
+	 	Print #1, gc3
+	 	Print #1, gc4
+'	 	Print #1, gc5
+'	 	Print #1, gc6	 		 	
+	Close File #1
+
+END SUB
+
+' ======================================================================
+
+Sub potr_sif
+'*********************************************************************************************
+
+dim x as float
+dim y as float
+dim objST as object
+                      
+Onerror goto greska      
+
+If OtvorenTAB("Potrosnja_za_vodomere") Then Close Table Potrosnja_za_vodomere
+else
+End If
+
+DIM l_Check1Into AS LOGICAL
+DIM l_Check2Into AS LOGICAL
+DIM l_Check3Into AS LOGICAL   
+DIM l_Check4Into AS LOGICAL 
+DIM l_Check5Into AS LOGICAL 
+DIM l_Check6Into AS LOGICAL 
+
+DIALOG
+    POSITION 648, 299
+    WIDTH 160 HEIGHT 115
+    TITLE "Prikaz potrosnje vodomera"
+    CONTROL EditText
+      POSITION 7, 22
+      WIDTH 149 HEIGHT 12
+      ID Edit1ID
+      VALUE "Unesite sifru..."
+      INTO s_MatBroj
+    CONTROL GroupBox
+      POSITION 7, 43
+      WIDTH 150 HEIGHT 46
+      TITLE "Potrosnja za godinu:"
+    CONTROL CheckBox
+      POSITION 17, 56
+      WIDTH 36
+      ID Check1ID
+      TITLE "2009"
+			VALUE 0
+      INTO l_Check1Into
+    CONTROL CheckBox
+      POSITION 67, 56
+      WIDTH 35
+      ID Check2ID
+      TITLE "2010"
+			VALUE 0
+      INTO l_Check2Into
+    CONTROL CheckBox
+      POSITION 117, 56
+      WIDTH 33
+      ID Check3ID
+      TITLE "2011"
+			VALUE 0
+      INTO l_Check3Into  
+    CONTROL CheckBox
+      POSITION 17, 73
+      WIDTH 36
+      ID Check4ID
+      TITLE "2012"
+      VALUE 0
+      INTO l_Check4Into
+    CONTROL CheckBox
+      POSITION 67, 73
+      WIDTH 36
+      ID Check5ID
+      TITLE "2013"
+      VALUE 0
+      INTO l_Check5Into
+      DISABLE
+    CONTROL CheckBox
+      POSITION 117, 73
+      WIDTH 36
+      ID Check6ID
+      TITLE "2014"
+      VALUE 0
+      INTO l_Check6Into
+      DISABLE
+    CONTROL StaticText
+      POSITION 8, 10
+      WIDTH 107 HEIGHT 10
+      ID Static2ID
+      TITLE "Unesite maticni broj potrosaca:"
+    CONTROL OKButton
+      POSITION 119, 95
+      WIDTH 38 HEIGHT 14
+      ID OK2ID
+      TITLE "OK"
+      CALLING OKButtonCalling2
+    CONTROL CancelButton
+      POSITION 7, 95
+      WIDTH 38 HEIGHT 14
+      ID Cancel2ID
+      TITLE "Cancel"
+      CALLING CancelButtonCalling2
+
+
+If CommandInfo(CMD_INFO_DLG_OK) Then  
+	m_zona = false
+	Call SQL_upit
+	If sel_vod = 0 then
+		Print "Nema odabranih vodomera!"
+		Print "Sifra "+s_MatBroj+" ne postoji u bazi."
+		Note "Sifra "+s_MatBroj+" ne postoji u bazi."
+  	Exit sub
+  else
+'  	Select obj from Potrosnja_za_vodomere where not obj into lokacije
+'		If SelectionInfo(SEL_INFO_NROWS) = 0 then note "Vodomer nema lokaciju!"
+'		else
+'		fetch first from lokacije
+'		Do While Not EOT(lokacije)
+'			x = CentroidX(lokacije.obj)
+'			y = CentroidY(lokacije.obj)
+'			Set Map Window frontwindow() Center (x, y)
+'			Create Point into Variable objST (x, y) Symbol(48, RED, 14)
+'			Insert Into Cosmetic1 (obj) Values (objST)
+'		Loop
+'		end if
+		Run Menu Command M_QUERY_UNSELECT	
+		i_Radio1Into = 1
+		Call potrosnje_kalk
+	End If
+Else
+	Print "Komanda prekinuta!"
+	Exit sub
+End If
+
+Exit Sub
+
+greska:
+Note "Unesen podatak nije validan! Ponovite unos."
+
+END SUB     
+
+' ======================================================================
+
+SUB SQL_upit
+'*********************************************************************************************
+onerror goto greska
+
+randomize
+z = 500*RND(1)+1         
+
+If m_zona = TRUE then 
+s_MatBroj = MZVodSelected
+s_MatBroj2 = MZVodSelected2
+Else 
+End IF 
+
+	comm = "IF OBJECT_ID('GIS.MI_user.Potrosnja_za_vodomere_"+z+"','U') IS NOT NULL drop table [GIS].[MI_user].[Potrosnja_za_vodomere_"+z+"]"
+	hstmt = Server_Execute(1, comm)
+  Server hstmt Close
+		               
+	  hstmt = Server_Execute(1, "USE GIS")
+		Server hstmt Close
+
+		comm = "select [sifra], [Zona], [Knjiga], [RedBroj], [naziv], [ulica], [broj] into GIS.MI_user.Potrosnja_za_vodomere_"+z+" from GIS.MAPINFO.NAV_POTROSACI where SIFRA in (" + s_MatBroj + ")"
+		hstmt = Server_Execute(1, comm)
+		Server hstmt Close                                           
+		
+'		comm = "select [Sifra_Nav], [MERNA_ZONA], [INKASO_KNJIGA], [REDNI_BROJ], [POTROSAC], [ULICA], [KUCNI_BROJ] into GIS.MI_user.Potrosnja_za_vodomere_"+z+" from GIS.MAPINFO.VODOMERI where Sifra_Nav in (" + s_MatBroj + ")"
+'		hstmt = Server_Execute(1, comm)
+'		Server hstmt Close                                           
+
+		
+		'spajanje dodatne tabele vodomera preko 3000
+		If TRIkLimit = TRUE
+		Then
+		comm = "insert into GIS.MI_user.Potrosnja_za_vodomere_"+z+" select [sifra], [Zona], [Knjiga], [RedBroj], [naziv], [ulica], [broj] from GIS.MAPINFO.NAV_POTROSACI where SIFRA in (" + s_MatBroj2 + ")"
+		hstmt = Server_Execute(1, comm)
+		Server hstmt Close                                           
+		Else
+    End If
+    
+		comm = "SELECT * FROM [GIS].[MI_user].[Potrosnja_za_vodomere_"+z+"]"
+		hstmt = Server_Execute(1, comm)
+		Server hstmt Fetch Into "Potrosnja_za_vodomere" FILE s_Temp_Dir+"Potrosnja_za_vodomere.tab"
+		Server hstmt Close            
+
+		comm = "drop table [GIS].[MI_user].[Potrosnja_za_vodomere_"+z+"]"     
+    hstmt = Server_Execute(1, comm)
+		Server hstmt Close
+		
+		' koliko vodomera je selektovano za pregled ?
+		
+		select * from Potrosnja_za_vodomere
+		i_BrReda = SelectionInfo(SEL_INFO_NROWS)
+		sel_vod = i_BrReda 
+		Print "Ukupno selektovanih vodomera: "+str$(sel_vod) 
+		
+		Exit Sub
+
+greska:
+Print "Greska: " + Error$()		
+
+End Sub
+
+' ======================================================================  
+
+SUB OKButtonCalling2
+'****************************************   
+Dim gc1,gc2,gc3,gc4,gc5,gc6 as string
+
+If ReadControlValue(22009) = TRUE or ReadControlValue(22010) = TRUE OR ReadControlValue(22011) = TRUE OR ReadControlValue(22012) = TRUE
+	Then 
+  	If ReadControlValue(22009) = TRUE then gc1="2009" else gc1="0"
+	  End If
+		If ReadControlValue(22010) = TRUE then gc2="2010" else gc2="0"
+	  End If
+		If ReadControlValue(22011) = TRUE then gc3="2011" else gc3="0"
+	  End If
+		If ReadControlValue(22012) = TRUE then gc4="2012" else gc4="0"
+	  End If
+'		If ReadControlValue(22013) = TRUE then gc5="2013" else gc5="0"
+'	  End If
+'		If ReadControlValue(22014) = TRUE then gc6="2014" else gc6="0"
+'	  End If
+	  
+	Open File s_Temp_Dir+"god.log" For OUTPUT As #1
+		Print #1, gc1
+		Print #1, gc2
+	 	Print #1, gc3
+	 	Print #1, gc4	 	
+'	 	Print #1, gc5
+'	 	Print #1, gc6
+	Close File #1
+  
+Else Note "Izaberite godinu!"
+		Dialog Preserve
+End If		
+
+
+END SUB
+    
+' ======================================================================
+
+SUB potrosnje_kalk
+'*********************************************************************************************                                                                                              
+            
+Dim i as Integer                
+dim g as smallint
+
+Call win_pos
+
+onerror goto greska
+
+' 1 IF
+IF i_Radio1Into = 1 then
+
+' --------------------------- pojedinacni prikaz grafika za svaki vodomer
+    Print "Pojedinacne potrosnje po vodomeru"
+   	Print "Prikazani grafici:"
+		i=0
+		Fetch First from Potrosnja_za_vodomere
+		Do While Not EOT(Potrosnja_za_vodomere)
+
+' DBF [Sifra], [Reon], [Knjiga], [Rbr], 		[Prezm], [Ime], [Ulica], [Kucbr]
+' NAV [sifra], [Zona], [Knjiga], [RedBroj], [naziv], 				[ulica], [broj]
+
+		sif = Potrosnja_za_vodomere.COL1
+
+		zameni = "MB "+sif+
+			" / "+Potrosnja_za_vodomere.COL5+
+'			" "+Potrosnja_za_vodomere.COL6+
+			" ["+
+			Potrosnja_za_vodomere.COL6+
+			" "+
+			Potrosnja_za_vodomere.COL7+
+			"]"+
+			" - I.K. "+Potrosnja_za_vodomere.COL2+
+			"/"+Potrosnja_za_vodomere.COL3+
+			" ("+Potrosnja_za_vodomere.COL4+")"
+                                            
+		kors = "MB_"+str$(sif)+"_"+Potrosnja_za_vodomere.COL5
+		
+		kor = replace (zameni, chr$(34), chr$(39))			
+		graf_naslov	= replace (kors, chr$(34), chr$(39))
+
+		Open File s_Temp_Dir+"god.log" For INPUT As #1
+			Do While Not EOF(1)
+				Line INPUT #1, god
+				' 2 IF
+				If Not EOF(1) Then
+					' 3 IF
+					If god = "0" then goto krajp
+					else 
+					hstmt = Server_Execute(1, "USE GIS")
+					Server hstmt Close
+            ' MS DYNAMICS NAVISION                                                                                                                           
+					  tip_tabele = "_"+god+"_NAV"
+						ime_tabele = "MB_"+str$(sif)+tip_tabele
+            comm = "IF OBJECT_ID('GIS.MI_user."+ime_tabele+"','U') IS NOT NULL drop table [GIS].[MI_user].["+ime_tabele+"]"
+						hstmt = Server_Execute(1, comm)                                                        
+						Server hstmt Close
+            comm = "SELECT [DATUM_1], [POTR_1] as Jan, [DATUM_2], [POTR_2] as Feb, [DATUM_3], [POTR_3] as Mar, [DATUM_4], [POTR_4] as Apr, [DATUM_5], [POTR_5] as Maj, [DATUM_6], [POTR_6] as Jun, [DATUM_7], [POTR_7] as Jul, [DATUM_8], [POTR_8] as Avgs, [DATUM_9], [POTR_9] as Sep, [DATUM_10], [POTR_10] as Okt, [DATUM_11], [POTR_11] as Nov ,[DATUM_12], [POTR_12] as Decm into GIS.MI_user."+ime_tabele+" from GIS.MAPINFO.NAV_POTROSNJA_"+god+" where Maticni_Broj="+sif
+						hstmt = Server_Execute(1, comm ) 
+						Server hstmt Close             
+							If OtvorenTAB(ime_tabele) Then	Close Table ime_tabele
+							else End If
+        		comm = "SELECT * FROM [GIS].[MI_user].["+ime_tabele+"]"
+						hstmt = Server_Execute(1, comm)
+						Server hstmt Fetch Into ime_tabele FILE s_Temp_Dir+ime_tabele
+						Server hstmt Close         
+						comm = "drop table [GIS].[MI_user].["+ime_tabele+"]"
+						hstmt = Server_Execute(1, comm)
+						Server hstmt Close         
+						Select * from ime_tabele
+            i_BrReda = SelectionInfo(SEL_INFO_NROWS)
+						' 4 IF
+							If i_BrReda = 0 then 
+								' nema potrosnje!											
+								Note ime_tabele+" nije pronadjena u bazi !"
+							Else 
+  							Print ime_tabele Call grafik_potrosnje     
+							End If
+						 krajp:
+					End If 
+				Else
+				End If	
+			Loop			
+			             
+		Close File #1
+		i = i + 1
+		Fetch Next From Potrosnja_za_vodomere
+		Loop
+
+Else
+' --------------------------- suma svih potrosnji odabranih vodomera po mesecima za datu godinu 
+
+If m_zona = TRUE 
+then           
+	s_MatBroj = MZVodSelected
+	s_MatBroj2 = MZVodSelected2
+	kor = "Potrosnja za MERNU ZONU "+MZ+" po mesecima za izabranu godinu"
+	pref_ime = "MERNA_ZONA_"+MZ+"_"
+else
+	kor = "Zajednicka potrosnja za "+str$(sel_vod)+" odabranih vodomera po mesecima za izabranu godinu"
+	pref_ime = "Grupa_vodomera_"+z+"_"	
+End If	
+
+Print "Prikazani grafici:"
+
+Open File s_Temp_Dir+"god.log" For INPUT As #1
+	Do While Not EOF(1)
+		Line INPUT #1, god
+		If Not EOF(1) Then
+			If god = "0" then goto krajz 
+			else 
+			hstmt = Server_Execute(1, "USE GIS")
+			Server hstmt Close
+			z = z+1
+			    '
+          ' NAV                                                                                                                            
+					'
+	  	    ime_tabele = pref_ime+god+"_NAV"
+					'
+          If OtvorenTAB("Potrosnja_za_grupu_vodomera") Then Close Table Potrosnja_za_grupu_vodomera
+					else
+					End If         
+					If OtvorenTAB(ime_tabele) Then Close Table ime_tabele
+					else
+					End If
+					'
+					hstmt = Server_Execute(1, "IF OBJECT_ID('GIS.MI_user.Potrosnja_za_grupu_vodomera','U') IS NOT NULL drop table [GIS].[MI_user].[Potrosnja_za_grupu_vodomera]")
+					Server hstmt Close            
+					
+					kom = "IF OBJECT_ID('GIS.MI_user."+ime_tabele+"','U') IS NOT NULL drop table [GIS].[MI_user].["+ime_tabele+"]"
+					hstmt = Server_Execute(1, kom)
+					Server hstmt Close
+										
+					'                 
+'					print "1. upit"
+					kom = "Select [Maticni_Broj],[POTR_1],[POTR_2],[POTR_3],[POTR_4],[POTR_5],[POTR_6],[POTR_7],[POTR_8],[POTR_9],[POTR_10],[POTR_11],[POTR_12] into GIS.MI_user.Potrosnja_za_grupu_vodomera From GIS.MAPINFO.NAV_POTROSNJA_"+god+" Where Maticni_Broj in (" + s_MatBroj + ")"
+					hstmt = Server_Execute(1, kom)
+					Server hstmt Close
+                                    
+'					Open File "D:\temp\sqlupit.txt" For OUTPUT As #3
+'					Print #3, kom
+'					Close File #3                                
+					
+					'spajanje dodatne tabele vodomera preko 3000
+					If TRIkLimit = TRUE
+					Then
+					                      
+'					kom = "SET IDENTITY_INSERT GIS.MI_user.Potrosnja_za_grupu_vodomera ON"
+'					hstmt = Server_Execute(1, kom)
+'					Server hstmt Close                                                      
+'					print "2. upit"					
+					kom = "insert into GIS.MI_user.Potrosnja_za_grupu_vodomera (Maticni_Broj,POTR_1,POTR_2,POTR_3,POTR_4,POTR_5,POTR_6,POTR_7,POTR_8,POTR_9,POTR_10,POTR_11,POTR_12) select Maticni_Broj,POTR_1,POTR_2,POTR_3,POTR_4,POTR_5,POTR_6,POTR_7,POTR_8,POTR_9,POTR_10,POTR_11,POTR_12 from GIS.MAPINFO.NAV_POTROSNJA_"+god+" Where Maticni_Broj in (" + s_MatBroj2 + ")"
+					hstmt = Server_Execute(1, kom)
+					Server hstmt Close
+					
+'					kom = "SET IDENTITY_INSERT GIS.MI_user.Potrosnja_za_grupu_vodomera OFF"
+'					hstmt = Server_Execute(1, kom)
+'					Server hstmt Close
+
+'					print "kraj"
+					Else
+					End IF
+
+
+'					print "finale..."
+					'
+					hstmt = Server_Execute(1, "SELECT * FROM [GIS].[MI_user].[Potrosnja_za_grupu_vodomera]")
+					Server hstmt Fetch Into "Potrosnja_za_grupu_vodomera" FILE s_Temp_Dir+"Potrosnja_za_grupu_vodomera" 
+					Server hstmt Close
+					Select * from Potrosnja_za_grupu_vodomera
+					If SelectionInfo(SEL_INFO_NROWS) > 0 then
+							'            
+'					print "1..."
+							kom = "SELECT Sum(POTR_1) as Jan, Sum(POTR_2) as Feb, Sum(POTR_3) as Mar, Sum(POTR_4) as Apr,	Sum(POTR_5) as Maj, Sum(POTR_6) as Jun, Sum(POTR_7) as Jul, Sum(POTR_8) as Avgs, Sum(POTR_9) as Sep, Sum(POTR_10) as Okt, Sum(POTR_11) as Nov,Sum(POTR_12) as Decm into GIS.MI_user."+ime_tabele+"	from GIS.MI_user.Potrosnja_za_grupu_vodomera"
+							hstmt = Server_Execute(1,	kom)
+							Server hstmt Close
+							'       
+'					print "2..."							
+							kom = "SELECT * FROM [GIS].[MI_user].["+ime_tabele+"]"
+							hstmt = Server_Execute(1, kom)
+							Server hstmt Fetch Into ime_tabele FILE s_Temp_Dir+ime_tabele 
+							Server hstmt Close
+							'   
+'					print "3..."							
+  			  	  hstmt = Server_Execute(1, "drop table [GIS].[MI_user].[Potrosnja_za_grupu_vodomera]")
+  						Server hstmt Close	
+							'
+							kom = "drop table [GIS].[MI_user].["+ime_tabele+"]"
+					    hstmt = Server_Execute(1, kom)
+							Server hstmt Close
+							'
+							Select * from ime_tabele
+	 	  	  	  tip_tabele = god+" (NAV)"
+	 	  	  	  Print ime_tabele	  	    					 
+							Call grafik_potrosnje								
+    			else
+					Note "Grupna kalkulacija potrosnje nije uspela!"		
+					End If
+			End If
+	  End If
+	  krajz:
+	Loop
+	
+Close File #1
+
+End If
+            
+					print "kraj"
+' zatvaranje tabela i kraj
+
+If OtvorenTAB ("stat_tab") then Close Table stat_tab
+else
+End If
+If OtvorenTAB("Potrosnja_za_vodomere") Then Close Table Potrosnja_za_vodomere
+else
+End If
+If OtvorenTAB("Potrosnja_za_grupu_vodomera") Then Close Table Potrosnja_za_grupu_vodomera
+else
+End If 
+
+Run Menu Command M_QUERY_UNSELECT	
+s_MatBroj = ""
+s_MatBroj2 = ""
+MZVodSelected = ""
+MZVodSelected2 = ""
+exit sub
+
+greska:
+Print "Greska: " + Error$()	
+'Note "Upit trenutno nije mogao biti procesiran ! Ponovite komandu."
+Close File #1
+Exit sub
+
+End Sub 
+     
+' ======================================================================
+
+SUB grafik_potrosnje
+'****************************************
+             
+onerror goto greska
+
+' statistika ukupne godisnje i prosecne mesecne potrosnje
+Select Jan+Feb+Mar+Apr+Maj+Jun+Jul+Avgs+Sep+Okt+Nov+Decm from ime_tabele into stat_tab
+Fetch first from stat_tab
+stat1 = stat_tab.COL1
+stat2 = stat1/12
+
+Graph "", Jan, Feb, Mar, Apr, Maj, Jun, Jul, Avgs, Sep, Okt, Nov, Decm 
+	From ime_tabele
+  Position (0.6,3) Units "cm"
+  Width 11 Units "cm" Height 8 Units "cm" 
+	Using s_MBApp_Dir+"NIVOS_GRAF_potr.3tf" Restore
+
+	graf_win = FrontWindow( )
+
+	graf_setup = "Set Graph "
+	+"Title"				+chr$(34)+kor+chr$(34)+" Font ("+chr$(34)+"Arial"+chr$(34)+",1,9,0)"
+	+"SubTitle"			+chr$(34)+"Ukupno god.: "+stat1+" m3 - Mesecni prosek: "+stat2+" m3"+chr$(34)
+	+"Footnote" 		+chr$(34)+"JKP Naissus GIS"+chr$(34)
+	+"TitleSeries" 	+chr$(34)+"TitleSeries"+chr$(34)
+	+"TitleGroup"  	+chr$(34)+"Godina "+tip_tabele+chr$(34)
+	+"TitleAxisY1"  +chr$(34)+"Ocitano (m3)"+chr$(34)	
+	+"TitleAxisY2"  +chr$(34)+"TitleAxisY2"+chr$(34)	
+
+	Run command graf_setup
+	'gr_title = " Set Graph Type Line Stacked Off Overlapped Off Droplines Off Rotated Off Show3d Off "+ "Overlap 30  Gutter 10  Angle 0  Title "+chr$(34)+graph_title(3)+chr$(34)+" Font ("+chr$(34)+"Arial"+chr$(34)+",1,9,0)"	
+
+Exit Sub
+
+greska:
+Print "Greska: " + Error$()	
+
+End Sub
+
+' ======================================================================
+
+SUB CancelButtonCalling2                  
+'****************************************
+
+s_MatBroj = ""
+Run Menu Command M_QUERY_UNSELECT
+Run Menu Command M_TOOLS_SELECTOR 
+
+END SUB
+
+' ======================================================================
+
+SUB CancelButton2
+Run Menu Command M_QUERY_UNSELECT
+END SUB
+
+' ======================================================================
+
+Sub win_pos
+
+Dim num_open_wins As SmallInt
+Dim i as SmallInt
+
+num_open_wins = NumWindows()
+
+For i = 1 to num_open_wins
+i_WinID = WindowID(i)
+	If WindowInfo(i_WinID, WIN_INFO_TYPE) <> WIN_MAPPER 
+		Then 
+		Goto sled
+	else 
+		Set Window i_WinID 
+		Position (12,0) Units "cm" 
+		Width 25 Units "cm" 
+		Height 20 Units "cm"
+		Restore 
+	End If	
+sled:
+Next	
+	
+End sub

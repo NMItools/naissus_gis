@@ -1,0 +1,614 @@
+include "mapbasic.def"
+include "menu.def"
+include "icons.def"
+include "..\Library\ERRORLib.def"
+include "..\nmiWin.def"
+include "..\nmiFunkcije.def"
+include "..\nmiDotNet.def"
+include "NAISSUS-GIS.def"
+                                                                       
+' =====================================================================================================================
+SUB Main
+
+	Onerror goto greska
+
+	Print CHR$(12)
+
+'*************************
+' verzija MBX aplikacije '
+'*************************
+	s_verzija= "1.19.1"
+	
+' - setovanje aplikacionog i privremenog foldera
+	s_TEMP_Dir = pathtodirectory$(tempfilename$(""))
+	s_MIPRO_Dir = ProgramDirectory$()
+	s_MBApp_Dir = ApplicationDirectory$()
+	
+' - setovanje naissus-gis.ini fajla
+	iniFile = s_MBApp_Dir+"naissus-gis.ini"			
+	
+' - Setovanje osnovnih informacija o MBX aplikaciji
+	f_setIni = SetIniVal(iniFile, "MBX", "IME", ApplicationName$())
+	s_MBX_IME = GetIniVal(iniFile, "MBX", "IME")
+	s_OS = GetIniVal(iniFile, "MBX", "OS")
+	
+' -	Apsolutna putanja aplikacije
+	fajlLokal = s_MBApp_Dir+s_MBX_ime
+
+' - vreme kreiranja MBX aplikacije (podverzija)
+	vremeLokal = vremefajla(fajlLokal)
+	s_MBX_VER = FormatDate$(GetDate(vremeLokal))+" - "+FormatTime$(GetTime(vremeLokal),"HH:mm:ss")
+	
+' - setovanje glavnih foldera iz INI fajla 	
+	s_FOLDER_WOR = GetIniVal(iniFile, "GIS_FOLDERI", "FOLDER_WOR")
+	s_FOLDER_TAB = GetIniVal(iniFile, "GIS_FOLDERI", "FOLDER_TAB")
+	s_FOLDER_RAD = GetIniVal(iniFile, "GIS_FOLDERI", "FOLDER_RAD")
+	s_FOLDER_PRN = GetIniVal(iniFile, "GIS_FOLDERI", "FOLDER_PRN")
+	s_FOLDER_POD = GetIniVal(iniFile, "GIS_FOLDERI", "FOLDER_POD")
+	s_FOLDER_NET = GetIniVal(iniFile, "GIS_FOLDERI", "FOLDER_NET")
+	s_FOLDER_CCTV = GetIniVal(iniFile, "GIS_FOLDERI", "FOLDER_CCTV")
+	s_FOLDER_WWW = GetIniVal(iniFile, "GIS_FOLDERI", "FOLDER_WWW")
+
+' - setovanje pomocnih eksternih aplikacija u sistemu
+
+	s_WINCAN_PROG = s_MBApp_Dir & "Viewer\WincanViewer.exe"
+'	s_WINCAN_PROG = """\\VERDI\GIS\CCTV\Viewer\WincanViewer.exe"""
+'	s_WINCAN_PROG = """C:\Program Files (x86)\MapInfo\Naissus\Viewer\WincanViewer.exe"""
+'	s_WINCAN_PROG = GetIniVal(iniFile, "GIS_FOLDERI", "WINCAN_PROG")
+
+' - Provera koji OS je kod korisnika x32 (1) ili x64 (0)
+	Dim pos As Integer
+	pos = InStr(1, s_OS, "Bit64")
+
+	Do Case pos
+		
+		Case 0
+
+			If FileExists("C:\Program Files\Mozilla Firefox\firefox.exe") 
+			Then
+				s_BROWSER_WWW = "C:\Program Files\Mozilla Firefox\firefox.exe"
+			Else
+				s_BROWSER_WWW = "C:\Program Files\Internet Explorer\iexplore.exe"
+			End If
+
+	 	Case Else
+
+			If FileExists("C:\Program Files (x86)\Mozilla Firefox\firefox.exe") 
+			Then
+				s_BROWSER_WWW = "C:\Program Files (x86)\Mozilla Firefox\firefox.exe"
+			Else
+				s_BROWSER_WWW = "C:\Program Files (x86)\Internet Explorer\iexplore.exe"
+			End If
+			
+	End Case
+		
+' - setovanje prethodno logovanog korisnika i bazu	
+	s_USER = GetIniVal(iniFile, "MSSQL_GIS_SERVER", "KOR")
+	s_DSN = GetIniVal(iniFile, "MSSQL_GIS_SERVER", "DSN")
+
+' - Prvo startovanje ili kada se INI fajl resetuje
+	If (s_FOLDER_POD or s_FOLDER_NET) = "" Then
+		Print "Prvo pokretanje programa !" + CHR$(13) + "Nakon logovanja izvrsice se podesavanje radnih foldera."
+		Print ""
+	End If
+
+'=== intro poruka
+
+	Print "-----------------------------------------------------------------------------------------"
+	Print " JKP ""Naissus"" GIS v"+s_verzija+"    ["+s_MBX_VER+"]"
+	Print " Nebojša Pešiæ, dipl.grað.ing"
+	Print "-----------------------------------------------------------------------------------------"
+
+' === setovanje osnovih kartografskih parametara 
+
+' - postavka mernih jedinica (duzine, povrsine, papir za stampu)
+	Set Distance Units "m"
+	Set Area Units "sq m"
+	Set Paper Units "cm"
+	Set Format Number "9,999.9"
+
+' - postavka prozora za informacije i poruke
+	Set Window Message position(0.6,13) width 11.5 height 6 units "cm" title "JKP ""Naissus"" GIS"
+	Set Window Info position(28,15) width 7 height 6 units "cm"
+'	Set Window Legend position(10,10)
+
+'=== pozivanje osnovnih modula                                    
+	
+'	Call MRUWor
+	Call DLG_Login
+	Call SPLASH
+	Call Login_post
+	Call Toolbar_GLAVNI
+	Call Podloge
+	Call MrezePodloga
+	Call KATASTAR
+	Call NIVOS_OBJEKTI
+	Call NIVOS_GEODETSKI
+	Call NIVOS_KORISNICI
+	Call NIVOS_POTROSNJA
+	Call NIKAS_OBJEKTI
+	Call CCTV
+	Call Labele
+	Call Tematike
+'	Call Pretraga	
+	Call Stampa
+	Call Pomocni
+
+' - EDITOR moduli
+	If s_appmod = "editor" 
+	or s_appmod = "admin" 
+	or s_appmod = "Super" 
+	then
+		Call Planovi
+		Call MrezePlanova
+	End If
+
+' - ADMIN moduli
+	If s_appmod = "Admin" 
+	or s_appmod = "Super" 
+	then
+		Call GIS_admin
+	End If
+	
+' - Zatvaranje menija
+	Alter Menu "JKP Naissus" Add
+		"Pomoc" Calling Pomoc,
+		"Izlazak iz programa" Calling Kraj_Rada
+	
+	Set Window Message title "JKP ""Naissus"" GIS v"+s_verzija+" - "+s_dbName+" ["+GetDB(i_hdbc)+": "+s_USER+" ("+s_appmod+")]"
+
+' - ispisivanje radnih parametara
+	Print ""
+	Print "- Koord.sistem: " + CoordSysName$(s_CRS)
+	Print "- Radni WOR folder: "+s_FOLDER_WOR
+	Print "- Folder za GIS tabele: "+s_FOLDER_TAB
+	Print "- Server sa podlogama: "+s_FOLDER_POD
+	Print "- Server za CCTV snimke: "+s_FOLDER_CCTV
+
+' - Ukljuèi procesiranje slike MapInfo displeja
+	Set Event Processing On
+
+	Exit Sub	
+'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "Main")
+	Call ERRShow()
+
+	End Program
+	
+End Sub
+
+Sub Login_Param_Check
+
+	Onerror goto greska
+
+' - citanje unetih parametara
+	s_USER = ReadControlValue(1)
+	s_PASS = ReadControlValue(2)
+	s_DSN = ReadControlValue(3)
+	i_Login_RG_1 = ReadControlValue(7)
+	
+	If i_Login_RG_1 = 4
+	Then 
+		print "----------------------------------------------------------------------------------------------------"
+		Print "OFFLINE mod! Sve izmene se snimaju LOKALNO."
+		Print "Nakon ponovnog povezivanja na MS SQL snimite ih i u GIS bazi !"
+		print "----------------------------------------------------------------------------------------------------" 
+		i_hdbc = 0
+		s_DSN = ""
+		s_USER = GetIniVal(iniFile, "MSSQL_GIS_SERVER", "KOR")
+		s_IME = GetIniVal(iniFile, "MSSQL_GIS_SERVER", "IME")
+		s_SEKTOR = GetIniVal(iniFile, "MSSQL_GIS_SERVER", "SEKTOR")
+		s_SLUZBA = GetIniVal(iniFile, "MSSQL_GIS_SERVER", "SLUZBA")
+		s_ODELJENJE = GetIniVal(iniFile, "MSSQL_GIS_SERVER", "ODELJENJE")
+		s_CRS = GetIniVal(iniFile, "MSSQL_GIS_SERVER", "CRS")
+		Exit Sub
+	Else
+	End If
+	
+' -	provera da li su uneti svi parametri za konekciju ka bazi
+	If s_USER = "" 
+		or s_PASS = "" 
+		or s_DSN = ""
+	Then 
+		Note "Nedovoljno unesenih parametara! Ponovite unos"
+		Dialog Preserve
+	Else
+		Call Login_mssql
+	End If	
+
+	Exit Sub	
+'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "Login_Param_Check")
+	Call ERRShow()
+	
+End Sub	
+
+' =====================================================================================================================	
+Sub Login_mssql
+	
+	Onerror goto greska
+	
+	Dim am_stat as Integer
+
+' - konekcija ka bazi
+	i_hdbc = Server_Connect("ODBC",
+	"DSN="+s_DSN+					
+'	";DATABASE="+s_BAZA+
+	";UID="+s_USER+
+	";PWD="+s_PASS+
+	";MARS_Connection=Yes"+
+	";")    
+
+' - podaci o konektovanom korisniku, bazi i DSN 
+	s_dbName=Server_ConnectInfo(i_hdbc, SRV_CONNECT_INFO_DB_NAME)
+	s_dbUser=Server_ConnectInfo(i_hdbc, SRV_CONNECT_INFO_SQL_USER_ID)
+	s_DSN=Server_ConnectInfo(i_hdbc, SRV_CONNECT_INFO_DS_NAME)
+	
+	Print "Korisnik ''"+s_dbUser+"'' uspesno ulogovan na "+s_dbName
+	Print "Aktivna baza: "+GetDB(i_hdbc)	
+
+		f_setIni = SetIniVal(iniFile, "MSSQL_GIS_SERVER", "KOR", s_USER)
+		f_setIni = SetIniVal(iniFile, "MSSQL_GIS_SERVER", "DSN", s_DSN)
+
+' - Mod rada aplikacije /tip korisnika / podaci o korisniku
+	s_kom = "exec mbx.sp_AppMode '"+s_dbUser+"'"
+	i_hstmt = Server_Execute(i_hdbc,s_kom) 
+	Server i_hstmt Bind Column 1 To s_appmod, am_stat
+	Server i_hstmt Bind Column 2 To s_IME, am_stat
+	Server i_hstmt Bind Column 3 To s_SEKTOR, am_stat
+	Server i_hstmt Bind Column 4 To s_SLUZBA, am_stat
+	Server i_hstmt Bind Column 5 To s_ODELJENJE, am_stat
+	Server i_hstmt Bind Column 6 To s_Obavestenje, am_stat
+	Server i_hstmt Bind Column 7 To s_OS, am_stat
+	Server i_hstmt Fetch First
+	
+	Print "Mod rada: ("+s_appmod+")"
+			
+			f_setIni = SetIniVal(iniFile, "MSSQL_GIS_SERVER", "IME", s_IME)
+			f_setIni = SetIniVal(iniFile, "MSSQL_GIS_SERVER", "SEKTOR", s_SEKTOR)
+			f_setIni = SetIniVal(iniFile, "MSSQL_GIS_SERVER", "SLUZBA", s_SLUZBA)
+			f_setIni = SetIniVal(iniFile, "MSSQL_GIS_SERVER", "ODELJENJE", s_ODELJENJE)
+			f_setIni = SetIniVal(iniFile, "MBX", "OS", s_OS)
+			
+	Print "- "+s_IME
+	Print "  "+s_SEKTOR+" \ "+s_SLUZBA
+	Print "  "+s_ODELJENJE
+	
+	Server i_hstmt Close
+
+' - Otvaranje sekcije 'Sta je novo ? ako ima novosti u uputstvu
+	
+	If s_Obavestenje = 1 
+	Then
+		Call Pomoc
+	Else
+	End If
+
+' - Upis u tabelu korisnika: Instalirani tip Operativnog Sistema, verzija MapInfo na racunaru korisnika, otvoren Help
+	s_kom = "EXEC mbx.sp_OSInfo '"+s_dbUser+"','"+OSName()+"','"+SystemInfo(SYS_INFO_MIFULLVERSION)+"',"+0
+	i_hstmt = Server_Execute(i_hdbc,s_kom) 
+	Server i_hstmt Close
+
+' - Preuzimanje i setovanje mreznih lokacija u INI fajl ( SQL tabela GIS.mbx.NET_LOKACIJE )
+
+	Call POD_aktivni_folderi
+
+' - postavka koordinatnog sistema
+	i_hstmt = Server_Execute(i_hdbc,"exec mbx.sp_CRS") 
+	Server i_hstmt Bind Column 1 To s_CRS, am_stat
+	Server i_hstmt Fetch First
+	Server i_hstmt Close
+
+    CRS = "Set Coordsys "+s_CRS
+	Run Command CRS
+	
+			f_setIni = SetIniVal(iniFile, "MSSQL_GIS_SERVER", "CRS", s_CRS)
+
+' - instalacija WinCan Viewer i ažuriranje NAISSUS-GIS_UPDATE.MBX + STARTUP.WOR
+	Call gisUpdate	
+	
+	Exit Sub
+'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "Login_mssql")
+	Call ERRShow()
+
+	Dialog preserve
+
+ End Sub     
+
+' =====================================================================================================================
+Sub MRUWor
+
+	Onerror goto greska
+	
+	dim i,n as smallint
+	dim ws as string
+	
+	n=1
+
+	For i = 151 to 159
+		If MenuitemInfoByHandler(i,MENUITEM_INFO_HELPMSG) = "Open this file." 
+		Then
+			ws = MenuitemInfoByHandler(i,MENUITEM_INFO_TEXT)
+			If Right$(ws, 3) = "WOR"
+			Then
+				If Left$(ws,1) <> "1"
+				Then
+					zameni = replace(Right$(ws,Len(ws)-4),"\\","\")
+				'	print zameni
+					ReDim WorArr(n)
+					WorArr(n)=zameni
+					n=n+1
+				End If
+			End If
+		End If
+	Next
+
+	Exit Sub
+'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "MRUWor")
+	Call ERRShow()
+
+End Sub
+
+' =====================================================================================================================
+Sub SPLASH
+
+	Onerror goto greska
+	
+	Dim tlen,tend as integer
+	
+	Open Table s_MBApp_Dir+"naissus-gis.TAB" As GIS Interactive
+	Map From GIS 
+	Set Window FrontWindow() ScrollBars Off Autoscroll On
+	
+	tlen =2
+	tend=timer()+tlen
+	
+	while timer()<tend
+	tlen=tlen+1
+	wend
+	
+	close table GIS
+	Exit Sub
+
+'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "SPLASH")
+	Call ERRShow()
+
+End Sub     
+
+' =====================================================================================================================	
+Sub Login_post
+
+	onError goto greska
+
+' - aktiviranje korisnickog izbora nakon konekcije
+	Do Case i_Login_RG_1
+		
+		Case 2
+'		Call DLG_MRUWor
+		Print "Nije moguæe pronaæi skoro otvarani .WOR!"
+			
+		Case 3
+	
+			i_Start = 1
+			
+			If s_appmod = "editor" or s_appmod = "admin" or s_appmod = "Super" 
+			Then
+				Call WOR_naissus_GIS
+			Else
+				Call WOR_naissus
+			End If
+
+'		Case 4	
+'		s_OpenDLG = FileOpenDLG("","","WOR","Otvori .WOR")
+'		Run Application s_OpenDLG
+				
+		Case else
+		Exit Sub
+	
+	End Case
+
+	Exit Sub
+'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "Login_post")
+	Call ERRShow()
+	
+End Sub
+
+' =====================================================================================================================
+Sub Open_WOR
+
+	onError goto greska
+	
+	dim s_MruWOR as string
+	
+	s_MruWOR = WorArr(ReadControlValue(11))
+	Run Application s_MruWOR
+
+	Exit Sub	
+'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "Open_WOR")
+	Call ERRShow()
+	
+End Sub
+
+' =====================================================================================================================
+Sub Login_CANCEL
+	
+	Onerror goto greska
+	
+	Set Window Message title "Message"
+	Close window message
+	
+	End Program
+
+'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "Login_CANCEL")
+	Call ERRShow()
+	
+End Sub
+
+' =====================================================================================================================
+Sub Login_HELP
+	
+	onError goto greska
+
+	Call Pomoc
+	Dialog Preserve
+
+	Exit Sub
+'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "Login_HELP")
+	Call ERRShow()
+	
+End Sub
+
+' =====================================================================================================================
+Sub gisUpdate
+	
+	Onerror goto greska
+	
+	Dim sErr as string
+	Dim rep as Integer
+	
+' -	Provera da li postoji instalacija WinCan viewer-a
+	If FileExists(s_WINCAN_PROG) 
+	Then 
+		Print "- WinCan viewer je instaliran." 
+	Else 
+		Note "WinCan viewer nije instaliran. Kliknite na OK za nastavak instalacije."
+		Call WinCan_instalacija
+	End If
+
+' -	Ažuriranje STARTUP.WOR + NAISSUS-GIS_UPDATE.MBX
+
+	Open File ApplicationDirectory$()+"gis_update2.bat" For OUTPUT As #1
+		Print #1, "@echo Ažuriranje STARTUP.WOR + NAISSUS-GIS_UPDATE.MBX"
+		Print #1, "@echo off"
+		Print #1, "@xcopy """ + s_Update_MBX + "STARTUP.WOR"" """ + s_MIPRO_Dir & "STARTUP.WOR"" /r /h /y /e"
+		Print #1, "@xcopy """ + s_Update_MBX + "naissus-gis_update.MBX"" """ + ApplicationDirectory$() & "naissus-gis_update.MBX"" /r /h /y /e" 		
+	'	Print #1, "@pause" 
+	Close File #1                                               
+
+	rep = ExecuteAndWait(ApplicationDirectory$()+"gis_update2.bat")
+	
+				'	.NET naèin
+				
+				'	If FILE_Copy(s_Update_MBX+"STARTUP.WOR", s_MIPRO_Dir & "STARTUP.WOR", 1, sErr) = 0
+				'	Then
+				'		Print "Greška prilikom ažuriranja [STARTUP.WOR]: " & sErr
+				'	Else
+				'	 	Print "- Uspešno ažuriran [STARTUP.WOR]"
+				'	End If
+					
+				'	If FILE_Copy(s_Update_MBX+"naissus-gis_update.MBX", ApplicationDirectory$() & "naissus-gis_update.MBX", 1, sErr) = 0
+				'	Then
+				'		Print "Greška prilikom ažuriranja [naissus-gis_update.MBX]: " & sErr
+				'	Else
+				'	 	Print "- Uspešno ažuriran [naissus-gis_update.MBX]"
+				'	End If
+	
+	
+' - Èišæenje	
+	If FileExists(s_MBApp_Dir+"\gis_update2.bat") 
+	Then
+		Kill s_MBApp_Dir+"\gis_update2.bat"
+	End If
+
+	If FileExists(s_MBApp_Dir+"\update.bat") 
+	Then
+		Kill s_MBApp_Dir+"\update.bat"
+	End If
+	
+	If FileExists(s_MBApp_Dir+"\naissus-gis_upd.MBX") 
+	Then
+		Kill s_MBApp_Dir+"\naissus-gis_upd.MBX"
+	End If
+
+	
+	Exit Sub
+'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "gisUpdate")
+	Call ERRShow()
+			
+End Sub
+
+' =====================================================================================================================
+Sub WinCan_instalacija
+	 
+	Onerror goto greska
+	
+	Dim rep as Integer
+	Dim return as integer
+	Dim sErr as string
+	
+' -	Kreiranje foldera za WinCan 
+	return = FOLDER_Create(s_MBApp_Dir & "Viewer", sErr)
+	
+	If return > 0 
+	Then 
+		
+		Print "Uspešno kreiran folder za WinCan viewer!"
+	
+	'	Kreiranje BAT fajla za instalaciju WinCan
+		Open File ApplicationDirectory$()+"WinCan.bat" For OUTPUT As #1
+			Print #1, "@echo 'WinCan Viewer' - instalacija u toku ..."
+			Print #1, "@echo off"
+			Print #1, "@xcopy """ + s_FOLDER_CCTV + "Viewer\*.*"" """ + s_MBApp_Dir + "Viewer\"" /r /h /y /e > WinCanInstal.log" 
+			'	Print #1, "@pause" 
+		Close File #1                                               
+
+		rep = ExecuteAndWait(ApplicationDirectory$()+"WinCan.bat")
+		
+	Else
+		
+		Note "Greška (proveriti prava korisnika nad aplikacionim folderom ?): " & sErr
+	
+	End If
+
+	If FileExists(s_WINCAN_PROG) Then Note "WinCan viewer je uspešno instaliran !" End If
+		
+'	If FileExists(s_MBApp_Dir+"\WinCanInstal.log") Then Kill s_MBApp_Dir+"\WinCanInstal.log" End If
+	If FileExists(s_MBApp_Dir+"\WinCan.bat") Then Kill s_MBApp_Dir+"\WinCan.bat" End If
+			
+	Exit Sub
+
+'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "Login_CANCEL")
+	Call ERRShow()
+	
+End Sub
+
+Sub Pomoc
+
+'	Note "Od nas je i bog digao ruke..."
+'	Run Program "C:\Program Files\Internet Explorer\iexplore.exe http://verdi/help/"
+'	Run Program "C:\Program Files (x86)\Internet Explorer\iexplore.exe C:\Program Files (x86)\MapInfo\Naissus\help.url"
+'	Run Program "C:\Program Files (x86)\Internet Explorer\iexplore.exe http://verdi/help/"
+	
+	s_kom = "Run Program """+s_BROWSER_WWW+" "+s_FOLDER_WWW+"help/"""
+'	print s_kom
+	Run Command s_kom
+	
+	Exit Sub
+
+'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "Pomoc")
+	Call ERRShow()
+	
+End Sub
+	
