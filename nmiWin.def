@@ -1,0 +1,183 @@
+
+Define MAX_PATH							260
+Define INVALID_HANDLE_VALUE	     		-1
+
+' Definicije poziva ka funkcijama u WINDOWS OS
+
+Type FILETIME
+	dwLowDateTime As Integer
+	dwHighDateTime As Integer
+End Type
+
+Type STARTUPINFO
+	cb As Integer
+	lpReserved As String
+	lpDesktop As String
+	lpTitle As String
+	dwX As Integer
+	dwY As Integer
+	dwXSize As Integer
+	dwYSize As Integer
+	dwXCountChars As Integer
+	dwYCountChars As Integer
+	dwFillAttribute As Integer
+	dwFlags As Integer
+	wShowWindow As Smallint
+	cbReserved2 As Smallint
+	lpReserved2 As Integer
+	hStdInput As Integer
+	hStdOutput As Integer
+	hStdError As Integer
+End Type
+
+Type PROCESS_INFORMATION
+	hProcess As Integer
+	hThread As Integer
+	dwProcessID As Integer
+	dwThreadID As Integer
+End Type
+
+Type SYSTEMTIME
+	wYear As Smallint
+	wMonth As Smallint
+	wDayOfWeek As Smallint
+	wDay As Smallint
+	wHour As Smallint
+	wMinute As Smallint
+	wSecond As Smallint
+	wMilliseconds As Smallint
+End Type
+
+Type SECURITY_ATTRIBUTES
+	nLength As Integer
+	lpSecurityDescriptor As Integer
+	bInheritHandle As Logical
+End Type
+        
+        
+Type WIN32_FIND_DATA
+	dwFileAttributes	As Integer
+	ftCreationTime  	As FILETIME
+	ftLastAccessTime	As FILETIME
+	ftLastWriteTime	As FILETIME
+	nFileSizeHigh		As Integer
+	nFileSizeLow		As Integer
+	dwReserved0		As Integer
+	dwReserved1		As Integer
+	cFileName			As String * MAX_PATH
+	cAlternate		As String * 14
+End Type
+
+        
+'------------------------------------------------------------------------
+' Rad sa Windows REGISTRY funkcijama
+'------------------------------------------------------------------------
+
+Define NORMAL_PRIORITY_CLASS &H20
+Define INFINITE -1
+
+Define HKEY_CLASSES_ROOT 					&H80000000
+Define HKEY_CURRENT_CONFIG 					&H80000005
+Define HKEY_CURRENT_USER 					&H80000001
+Define HKEY_LOCAL_MACHINE 					&H80000002
+Define HKEY_USERS 							&H80000003
+Define REG_SZ 								1
+Define REG_DWORD 							4
+Define PS_SIZE 								256
+Define ERROR_SUCCESS 						0&
+Define ERROR_FILE_NOT_FOUND 				2&			' Registry path does not exist
+Define ERROR_ACCESS_DENIED 					5&			' Requested permissions not available 
+Define ERROR_INVALID_HANDLE 				6&			' Invalid handle or top-level key 
+Define ERROR_BAD_NETPATH 					53			' Network path not found 
+Define ERROR_INVALID_PARAMETER 				87			' Bad parameter to a Win32 API function 
+Define ERROR_CALL_NOT_IMPLEMENTED 			120&		' Function valid only in WinNT/2000?XP 
+Define ERROR_INSUFFICIENT_BUFFER 			122			' Buffer too small to hold data 
+Define ERROR_BAD_PATHNAME 					161			' Registry path does not exist 
+Define ERROR_NO_MORE_ITEMS 					259&		' Invalid enumerated value 
+Define ERROR_BADDB 							1009		' Corrupted registry 
+Define ERROR_BADKEY 						1010		' Invalid registry key 
+Define ERROR_CANTOPEN 						1011&		' Cannot open registry key 
+Define ERROR_CANTREAD 						1012&		' Cannot read from registry key 
+Define ERROR_CANTWRITE 						1013&		' Cannot write to registry key 
+Define ERROR_REGISTRY_RECOVERED 			1014&		' Recovery of part of registry successful 
+Define ERROR_REGISTRY_CORRUPT 				1015&		' Corrupted registry
+Define ERROR_REGISTRY_IO_FAILED 			1016&		' Input/output operation failed 
+Define ERROR_NOT_REGISTRY_FILE 				1017&		' Input file not in registry file format 
+Define ERROR_KEY_DELETED 					1018&		' Key already deleted
+Define ERROR_KEY_HAS_CHILDREN 				1020&		' Key has subkeys & cannot be deleted 
+Define KEY_READ 							&H20019
+Define KEY_SET_VALUE 						&H2
+Define KEY_QUERY_VALUE 						&H1
+
+Declare Function RegCloseKey Lib "advapi32.dll" (ByVal hKey As Integer) As Integer 
+Declare Function RegOpenKeyEx Lib "advapi32.dll" Alias "RegOpenKeyExA" (ByVal hKey As Integer, ByVal SubKey As String, ByVal Reserved as Integer, ByVal Options as Integer, pResult As Integer) As Integer		
+Declare Function RegEnumKeyEx Lib "advapi32.dll" Alias "RegEnumKeyExA" (ByVal hKey As Integer, ByVal dwIndex As Integer, lpName As String, lpcbName As Integer, ByVal lpReserved As Integer, ByVal lpClass As String, lpcbClass As Integer, lpftLastWriteTime As FILETIME) As Integer 
+Declare Function RegSetValueEx Lib "advapi32.dll" Alias "RegSetValueExA" (ByVal hKey As Integer, ByVal ValueName As String, ByVal Res1 As Integer, ByVal EntryType As Integer, ByVal EntryVal As String, ByVal lpcbData As Integer) As Integer 
+Declare Function RegSetNumberEx Lib "advapi32.dll" Alias "RegSetValueExA" (ByVal hKey As Integer, ByVal ValueName As String, ByVal Res1 As Integer, ByVal EntryType As Integer, EntryVal As Integer, ByVal lpcbData As Integer) As Integer 
+Declare Function RegQueryInfoKey Lib "advapi32.dll" Alias "RegQueryInfoKeyA" (ByVal hKey As Integer, ByVal lpClass As String, lpcbClass As Integer, ByVal lpRes As Integer, lpcSubKeys As Integer, lpcMaxSubKeyLen As Integer, lpcMaxClassLen As Integer, lpcValues As Integer, lpcMaxValueNameLen As Integer, lpcMaxValueLen As Integer, lpcbSecurityDescriptor As Integer, lpftLastWriteTime As FILETIME) As Integer 
+Declare Function RegQueryValueEx Lib "advapi32.dll" Alias "RegQueryValueExA" (ByVal hKey As Integer, ByVal ValueName As String, ByVal Res1 As Integer, EntryType As Integer, EntryVal As String*PS_SIZE, lpcbData As Integer) As Integer 
+Declare Function RegQueryNumberEx Lib "advapi32.dll" Alias "RegQueryValueExA" (ByVal hKey As Integer, ByVal ValueName As String, ByVal Res1 As Integer, EntryType As Integer, NumVal As Integer, lpcbData As Integer) As Integer 
+Declare Function RegQueryValueType Lib "advapi32.dll" Alias "RegQueryValueExA" (ByVal hKey As Integer, ByVal ValueName As String, ByVal Res1 As Integer, EntryType As Integer, ByVal EntryVal As Integer, lpcbData As Integer) As Integer 
+
+'------------------------------------------------------------------------
+' Windows Kernel32 funkcije
+'------------------------------------------------------------------------
+
+Declare Function ExecuteAndWait(ByVal cmdLine as string) as integer
+'Declare Function CloseHandle Lib "kernel32" (hObject As Integer) As smallint
+Declare Function WaitForSingleObject Lib "kernel32" (ByVal hHandle As Integer,ByVal dwMilliseconds As Integer) As Integer
+Declare Function CreateProcessA Lib "kernel32"(ByVal lpApplicationName As Integer, ByVal lpCommandLine As String, ByVal lpProcessAttributes As Integer, ByVal lpThreadAttributes As Integer, ByVal bInheritHandles As Integer, ByVal dwCreationFlags As Integer, ByVal lpEnvironment As Integer, ByVal lpCurrentDirectory As Integer, lpStartupInfo As STARTUPINFO, lpProcessInformation As PROCESS_INFORMATION) As Integer
+Declare Function CreateFile Lib "kernel32.dll" Alias "CreateFileA" (ByVal lpFileName As String, ByVal dwDesiredAccess As Integer, ByVal dwShareMode As Integer, lpSecurityAttributes As SECURITY_ATTRIBUTES, ByVal dwCreationDisposition As Integer,ByVal dwFlagsAndAttributes As Integer, ByVal hTemplateFile As Integer) As Integer
+Declare Function CloseHandle Lib "kernel32.dll" (ByVal hObject As Integer) As Integer
+Declare Function FileTimeToLocalFileTime Lib "kernel32.dll" (lpFileTime As FILETIME, lpLocalFileTime As FILETIME) As integer
+Declare Function FileTimeToSystemTime Lib "kernel32.dll" ( lpFileTime As FILETIME, lpSystemTime As SYSTEMTIME) As Integer
+Declare Function GetFileTime Lib "kernel32.dll" (ByVal hFile As Integer, lpCreationTime As FILETIME, lpLastAccessTime As FILETIME, lpLastWriteTime As FILETIME) As Integer
+Declare Function SystemTimeToFileTime Lib "kernel32" (lpSystemTime As SYSTEMTIME, lpFileTime As FILETIME) As Integer
+Declare Function FindFirstFile Lib "kernel32" Alias "FindFirstFileA" (ByVal lpFileName As String, lpFindFileData As WIN32_FIND_DATA) As Integer
+Declare Function FindNextFile Lib "kernel32" Alias "FindNextFileA" (ByVal hFindFile As Integer, lpFindFileData As WIN32_FIND_DATA) As Integer
+Declare Function FindClose Lib "kernel32" Alias "FindClose" (ByVal hFindFile As Integer) As Integer
+
+Declare Function GetDB(BYVAL hdbc AS INTEGER) AS STRING		
+
+'------------------------------------------------------------------------
+' Windows *.INI funkcije - za rad sa INI fajlovima
+'------------------------------------------------------------------------
+
+Declare Function GetPrivateProfileString32 Lib KERNEL32 alias "GetPrivateProfileStringA"
+	(ByVal lpApplicationName As String, 
+	ByVal lpKeyName As String,
+	ByVal lpDefault As String,
+	lpReturnedString As String, 
+	ByVal nSize As Smallint, 
+	ByVal lpFileName As String) As Smallint
+	
+Declare Function WritePrivateProfileString32 Lib KERNEL32 alias "WritePrivateProfileStringA" 
+   (ByVal lpApplicationName As String,
+	ByVal lpKeyName As String, 
+	ByVal lpString As String,
+	ByVal lplFileName As String) As Smallint
+	
+Declare Function GetIniVal(ByVal iniFile as string, ByVal iniSection as string, ByVal iniKey as string) as String
+Declare Function SetIniVal(ByVal iniFile as string, ByVal iniSection as string, ByVal iniKey as string, ByVal iniVal as string) as string
+	
+'------------------------------------------------------------------------
+' citanje Windows Registry 
+'------------------------------------------------------------------------
+
+Declare Function GetRegistryString(ByVal hKey As Integer, ByVal sEntry As String) As String
+Declare Function GetRegVal(ByVal regHive as integer, ByVal regKljuc As String, ByVal regString as string) As String
+
+'------------------------------------------------------------------------------------------------------------------------------------------
+' funkcije za vremenske atribute nastanka fajla 
+
+Declare Function vremeFajla(byVal afile as string) as DateTime    
+'Declare Function vremeFajla(byVal afile as string) as string
+
+'------------------------------------------------------------------------------------------------------------------------------------------
+' Browse for folder (stari Win32)
+Declare Function SelectDirectory1 Lib "selectdir.dll" (byval caption as string*250, byval root as string*250) as string
+Declare Function SelectDirectory2 Lib "selectdir.dll" (byval root as string*250) as string 
+
+
+Declare Function FILEAttributeIsDirectory(ByVal nFileAttributes As Integer) As Logical
+		

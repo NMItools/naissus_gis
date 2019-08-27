@@ -1,0 +1,84 @@
+'------------------------------------------------------------------------------------------------------------------------------------------
+' DEFINICIJE FUNKCIJA
+'------------------------------------------------------------------------------------------------------------------------------------------
+
+Declare Function MapWinID(byVal Win as Integer) As Integer
+Declare Function MapWinIme(byVal Ime as String) As Integer
+Declare Function CosmeticIme(byVal Ime as String) As String
+Declare Function MapWinSTATUS(byVal W as Integer) as Integer
+Declare Function GroupLayer_ID(byVal GrupaLejera as String) as Integer
+Declare Function GroupLayerInfo_ID(byVal GrupaLejera as String, ByVal ButtID as SmallInt) as Integer
+Declare Function LayerID(ByVal ImeTabele as String) As Integer
+Declare Function TemLayerID(ByVal ImeTabele as String) As Integer
+Declare Function vidLejer(ByVal Lejer as Integer) As Integer
+Declare Function vidToolbar (ByVal imeToolbar as string) As Logical
+Declare Function OtvorenTAB (Byval ImeTabele as String) As Logical
+Declare Function OtvoriTabSQL(ByVal ImeTabele as String, ByVal sAlias as String) As Logical
+Declare Function OtvoriRaster(ByVal FoldPut, ByVal ImeTabele as String, ByVal sAlias as String) As Logical
+Declare Function setTabGroup(ByVal ImeGrupe as string, ByVal imeLejera as string) As String
+Declare Function setTabSQL(ByVal ImeTabele as string, ByVal ButtonID As Integer) As String
+Declare Function setRaster(ByVal FoldPut as String, ByVal ImeTabele as string, ByVal ButtonID As Integer) As String
+Declare Function temLejerOff(ByVal osnovniLejer as String) As Integer
+Declare Function temLejerOn(ByVal osnovniLejer as String) As Integer 
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+Declare Function LejerOn(ByVal imeLejera as string) as Integer
+Declare Function LejerOff(ByVal imeLejera as string) as Integer
+Declare Function LayThemID(ByVal Lejer as String) As Integer
+Declare Function promenaStilaTacke(ByVal oTacke As Object, ByVal tNovi As Symbol) as Symbol
+Declare Function promenaStilaLinije(ByVal oLinije As Object, ByVal lNovi As Pen) as Pen
+Declare Function promenaStilaRegiona(ByVal oRegion As Object, ByVal rNovi As Brush) as Brush
+Declare Function dcIsTableOpen(ByVal sTable as String) as Logical                                                       
+Declare Function dcOpenTable(ByVal sTabName As String, ByVal sAlias as String) As Logical
+Declare Function ToolB_CHECK (ByVal t_Lejer as string, ByVal t_id as Integer) As Logical
+Declare Function dcCheckOrCreateColumn( ByVal sTabname as String, ByVal sColname as string, ByVal sColType as string) as Logical
+Declare Function dcIsColumnThere(ByVal sTable as String, sColName as String) as Logical
+
+Declare Function GIS_ID(ByVal s_lejer as string, ByVal i_row_id as integer) as string
+Declare Function DMS(ByVal DD as Float) As String
+
+' odbacuju se -> !
+declare Function ProzorID(byVal W as Integer) as Integer
+declare Function setLejer(ByVal imeLejera as string, ByVal ButtonID As Integer) As String
+declare Function setLejerSQL(ByVal imeLejera as string, ByVal ButtonID As Integer) As String
+declare Function IsTableOpen (Byval szTablename as String) As Logical
+Declare Function dcOpenTableSQL(ByVal sTabName as String, ByVal sAlias as String) As Logical
+Declare Function chk_lejer(byVal n as smallint) as smallint
+Declare Function setRasterPL(ByVal imeLejera as string, ByVal ButtonID As Integer) As String 
+Declare Function dcOpenRasterTable(ByVal sTabName as String, ByVal sAlias as String) As Logical
+Declare Function dcOpenRasterPLTable(ByVal sTabName as String, ByVal sAlias as String) As Logical
+'Declare Function setRaster(ByVal imeLejera as string, ByVal ButtonID As Integer) As String
+
+' <-- !!
+
+'------------------------------------------------------------------------------------------------------------------------------------------
+' Putanje za sistemske direktorijume
+
+Declare Function GetWinDir () As String
+Declare Function GetTempDir () As String
+Declare Function GetMBAppDir () As String
+Declare Function GetMIAppDir () As String
+
+'------------------------------------------------------------------------------------------------------------------------------------------
+' funkcije za rad sa stringovima
+
+Declare Function ProveriString(byval str as string) as Logical	
+Declare Function Replace(ByVal _full_string As String, ByVal _remove_string As String, ByVal _replacement_string As String) As String
+
+'------------------------------------------------------------------------------------------------------------------------------------------
+' funkcije za rad sa Grid (MIG) fajlom
+' Note: All MapBasic function variables are passed by reference unless  explicitly defined to be passed directly with the 'ByVal' key word.
+
+Declare Function GE_OpenGrid Lib "Migrid.dll" (lpszFilename As String, ByVal lCacheSize As Integer, hGrid As Integer) As Logical
+Declare Function GE_GetCoordSysInfo Lib "Migrid.dll" (ByVal hGrid As Integer, ptchCoordSys As String, pdMinXVal As Float, pdMinYVal As Float, pdMaxXVal As Float, pdMaxYVal As Float) As Logical
+Declare Function GE_GetContinuousMinMax Lib "Migrid.dll" (ByVal hGrid As Integer, pdMinZVal As Float, pdMaxZVal As Float) As Logical 
+Declare Function GE_GetDimensions Lib "Migrid.dll" (ByVal hGrid As Integer, plWidth As Integer, plHeight As Integer) As Logical
+Declare Function GE_StartRead Lib "Migrid.dll" ( ByVal hGrid As Integer) As Logical
+Declare Function GE_GetContinuousValue Lib "Migrid.dll" (ByVal hGrid As Integer, ByVal lCol As Integer, ByVal lRow As Integer, pdValue As Float, puchIsNull As SmallInt) As Logical
+Declare Function GE_EndRead Lib "Migrid.dll" (ByVal hGrid As Integer) As Logical
+Declare Function GE_CloseGrid Lib "Migrid.dll" (hGrid As Integer) As Logical
+
+'------------------------------------------------------------------------------------------------------------------------------------------
+' SQL Server Spatial - kreiranje WKT stringova od objekata u MapInfo
+
+Declare Function WKT_Tacka(ByVal X as Float, ByVal Y as Float) As String
+Declare Function WKT_Poligon(ByVal pgObj as Object) As String

@@ -1,0 +1,106 @@
+'	------------------------------------------------------------------------
+' 	.NET metode
+'	------------------------------------------------------------------------
+
+'	=============================================================================
+'	FOLDERI i FAJLOVI
+'	=============================================================================
+
+' - izbor vise fajlova
+	Declare Method ChooseMultiFiles   
+		Class "nmiDotNet.MBFilesAndFolders" 
+		Lib "nmiDotNet.dll" (byval str As String) As Integer
+
+	Declare Method GetChosenFileNames 
+		Class "nmiDotNet.MBFilesAndFolders" 
+		Lib "nmiDotNet.dll" (str() As String) 
+
+' - izbor vise fajlova sa naznacenim tipom fajla         
+	Declare Method OpenFilesDlg 
+		Class "nmiDotNet.MBFilesAndFolders"
+		Lib "nmiDotNet.dll" (byval str As String, byVal ftype as String) as Integer
+		
+' - izbor foldera 
+	Declare Method BrowseForFolder 
+		Class "nmiDotNet.MBFilesAndFolders"
+		Lib "nmiDotNet.dll" (ByVal sFolder As String) As String
+
+' - broj fajlova u datom folderu sa navedenom ekstenzijom (*.*; *.TXT; *.AVI, itd)
+	Declare Method BrojFajlovaUFolderu
+		Class "nmiDotNet.MBFilesAndFolders" 
+		Lib "nmiDotNet.dll" (ByVal sFolder As String, byVal ftype as String, sErr as String) As Integer
+
+' - lista imena fajlova sa kompletnom putanjom za dati folder (mora se pozvati odmah nakon "BrojFajlovaUFolderu")
+	Declare Method ListaFajlovaUFolderu 
+		Class "nmiDotNet.MBFilesAndFolders" 
+		Lib "nmiDotNet.dll" (paths() As String) as Integer
+		
+' - testira postojanje foldera 
+	Declare Method FOLDER_Exists
+		Class "nmiDotNet.MBFilesAndFolders" 
+		Lib "nmiDotNet.dll" (ByVal path as String) as Integer
+
+' - kreira folder
+	Declare Method FOLDER_Create 
+		Class "nmiDotNet.MBFilesAndFolders" 
+		Lib "nmiDotNet.dll" (ByVal path as String, sErr as String) as Integer
+
+' - kopira fajl 
+	Declare Method FILE_Copy 
+	Class "nmiDotNet.MBFilesAndFolders" 
+	Lib "nmiDotNet.dll" (ByVal curpath as String, ByVal newpath as String, ByVal overwrite as Integer, sErr as String) as Integer
+
+'	=============================================================================
+'	DATUMI
+'	=============================================================================
+
+' - lokalni datum (Regional Settings) 
+	Declare Method RegionalLongDate	
+		Class "nmiDotNet.MBDateAndTime"	
+		Lib "nmiDotNet.dll" (ByVal sDateString as string) As String
+
+' - lokalni mesec (Regional Settings) 
+	Declare Method RegionalMonth 
+		Class "nmiDotNet.MBDateAndTime"
+		Lib "nmiDotNet.dll" (ByVal sDateString as string) As String
+		
+' - lokalni dan u nedelji (Regional Settings) 
+	Declare Method RegionalWeekday 
+		Class "nmiDotNet.MBDateAndTime"
+		Lib "nmiDotNet.dll" (ByVal sDateString as string) As String
+		
+' - konverzija MapBasic datuma
+'	/* The input string sDateString which comes from your MapBasic app 
+'	will be either a Date (i.e. YYYYMMDD) or a DateTime (i.e. YYYYMMDDHHMMSSFFF) */
+	Declare Method ConvertMBDate 
+		Class "nmiDotNet.MBDateAndTime"
+		Lib "nmiDotNet.dll" (ByVal sDateString as string) As String
+	
+'	=============================================================================
+'	PRINTERI
+'	=============================================================================
+
+' - broj instaliranih stampaca
+	Declare Method NumPrinters 
+		Class "nmiDotNet.MBPrinters" 
+		Lib "nmiDotNet.dll" () As Integer
+
+' - lista instaliranih stampaca (niz stringova)
+	Declare Method GetPrinters 
+		Class "nmiDotNet.MBPrinters" 
+		Lib "nmiDotNet.dll" (printers() as String) As Integer
+
+	
+'	=============================================================================
+'	OS verzija
+'	=============================================================================
+
+' - informacije o operativnom sistemu
+	Declare Method OSName
+		Class "nmiDotNet.MBOSinfo" 
+		Lib "nmiDotNet.dll" () As String	
+		
+
+
+
+		
