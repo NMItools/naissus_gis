@@ -106,6 +106,14 @@ Sub Toolbar_GLAVNI
 			HelpMsg "Podesavanje layouta za stampu \nPriprema za stampu"
 		
 		SEPARATOR
+
+		PushButton
+			Calling MapperPriprema
+			ID 10
+			Icon MI_ICON_NUMBERS_14
+			HelpMsg "Priprema izvestaja o polozaju cevovoda\nIzvestaj o polozaju"
+		
+		SEPARATOR
 		
 		PushButton
 			Calling DLG_Podesavanja

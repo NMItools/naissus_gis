@@ -21,6 +21,7 @@ Module=09-LABELE.MBO
 Module=10-TEMATSKE_MAPE.MBO
 Module=12-STAMPA.MBO
 Module=dialogs\12-Dialog1.MBO
+Module=dialogs\12-Dialog2.MBO
 Module=13-LEGENDA.MBO
 Module=14-POMOCNI.MBO
 Module=15-CCTV.MBO

@@ -1,0 +1,138 @@
+Include "MAPBASIC.DEF"
+Include "ICONS.DEF"
+Include "MENU.DEF"
+include "..\Library\ERRORLib.def"
+include "..\nmiFunkcije.def"
+include "..\nmiDotNet.def"
+include "..\nmiWin.def"
+include "..\NAISSUS-GIS.def"
+
+Sub DLG_print_2
+
+	onerror goto Greska  
+
+	Call Printers
+
+	nPrinter = GetIniVal(iniFile, "STAMPA", "nPrinter")
+	i_Dpi = GetIniVal(iniFile, "STAMPA", "DPI")
+	
+	Call PapInfo(1)
+	
+	
+'***** DIALOG DESIGNER GENERATED CODE. DO NOT EDIT OR REMOVE THIS LINE OR BELOW THIS LINE! *****
+
+Dialog
+	Title "Priprema za štampu izveštaja o položaju cevovoda"
+	Width 267 Height 130
+	
+Control GroupBox
+	Id 3
+	Position 8, 30
+	Width 252 Height 45
+	Title "Podešavanje papira i layout-a"
+	
+Control PopupMenu
+	Id 2
+	Position 39, 14
+	Width 220
+	Title From Variable printerList
+	Value nPrinter
+	Into sPrinterName
+	
+Control StaticText
+	Id 1
+	Position 8, 16
+	Width 27 Height 8
+	Title "Printer:"
+	
+Control OKButton
+	Title "OK"
+	Id 32
+	Position 209, 112
+	Width 51 Height 14
+	Calling DLG_printOK
+	
+Control RadioGroup
+	Id 7
+	Position 177, 48
+	Title "Landscape;Portrait"
+	Calling DLG_printPolozaj
+	Value n_Polozaj
+	Into n_Polozaj
+	
+Control StaticText
+	Id 6
+	Position 141, 48
+	Width 30 Height 8
+	Title "Položaj:"
+	
+Control RadioGroup
+	Id 5
+	Position 49, 48
+	Title "A4;A3;"
+	Calling DLG_printFormati
+	Value 1
+	Into n_Papir
+	
+Control StaticText
+	Id 4
+	Position 16, 48
+	Width 29 Height 8
+	Title "Format:"
+	
+Control EditText
+	Id 19
+	Position 46, 89
+	Width 56 Height 12
+	Value "s_mapScale"
+	
+Control GroupBox
+	Id 17
+	Position 9, 79
+	Width 252 Height 29
+	Title "Opcije"
+	
+Control StaticText
+	Id 18
+	Position 17, 91
+	Width 29 Height 8
+	Title "R = 1 : "
+	
+Control CancelButton
+	Title "Cancel"
+	Id 31
+	Position 8, 112
+	Width 51 Height 14
+	
+Control CheckBox
+	Id 24
+	Position 107, 88
+	Width 36
+	Title "JPEG"
+	Calling JPEG_checkbox
+	Value False
+	Into l_PrintSlika
+	
+Control EditText
+	Id 27
+	Position 147, 88
+	Width 25 Height 12
+	Disable
+	Value "i_Dpi"
+	Into i_Dpi
+	
+Control StaticText
+	Id 28
+	Position 175, 89
+	Width 14 Height 8
+	Title "dpi"
+	
+
+Exit Sub
+'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "DLG_print_2")
+	Call ERRShow()
+		
+End Sub			
+		

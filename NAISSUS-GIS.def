@@ -562,7 +562,7 @@
 	Declare Sub Legenda_checkbox
 	Declare Sub JPEG_checkbox
 	
-	Declare Sub DLG_print
+	Declare Sub DLG_print_1
 	Declare Sub DLG_print_2
 			
 		Global printerList() as String

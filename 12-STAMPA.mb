@@ -134,7 +134,8 @@ SUB MapperPriprema
 		n_Polozaj = 1
 	End If
 
-	Call DLG_print
+'	Call DLG_print_1
+	Call DLG_print_2
 	
 	Exit Sub
 '	-------------------------
