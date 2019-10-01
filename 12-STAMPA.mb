@@ -15,9 +15,9 @@ Sub STAMPA
 	onerror goto Greska  
 	
 	Create Menu "Stampa" as
-		"Podesavanja" Calling MapperPriprema,
+		"Podesavanja" ID 9 Calling MapperPriprema,
 		"(-",
-		"Izveštaj o položaju cevovoda" Calling Izvestaj_1
+		"Izveštaj o položaju cevovoda" ID 10 Calling MapperPriprema
 		
 '	Create ButtonPad "Stampa" As
 '	PushButton
@@ -134,9 +134,18 @@ SUB MapperPriprema
 		n_Polozaj = 1
 	End If
 
-'	Call DLG_print_1
-	Call DLG_print_2
-	
+' - Izbor layout-a
+	Do Case CommandInfo(CMD_INFO_TOOLBTN)
+		
+		Case 9
+		Note "Print 1 - Standardni sablon NAISSUS"
+		Call DLG_print_1
+		
+		Case 10
+		Note "Print 2 - Izvestaj o polozaju cevi"
+		Call DLG_print_2
+	End Case
+			
 	Exit Sub
 '	-------------------------
 	Greska:
@@ -149,9 +158,10 @@ End Sub
 
 'Ocitavanje podesavanja odabranog formata papira (margine, visina, sirina, polozaj)
 
-Sub DLG_printFormati
 
-	onerror goto Greska  
+Sub DLG_print_1_Formati
+	
+	onerror goto Greska
 	
 ' - Format papira koji je odabrao korisnik
 	n_Papir = ReadControlValue(5)
@@ -176,25 +186,66 @@ Sub DLG_printFormati
 	Exit Sub
 '	-------------------------
 	Greska:
-	Call ERRCreate(Err(), Error$(), "DLG_printFormati")
+	Call ERRCreate(Err(), Error$(), "DLG_print_1_Formati")
+	Call ERRShow()	
+	
+End Sub
+
+Sub DLG_print_2_Formati
+
+	onerror goto Greska  
+	
+' - Format papira koji je odabrao korisnik
+	n_Papir = ReadControlValue(5)
+	n_Polozaj = ReadControlValue(7)	
+	
+' - Citanje osnovnih parametra za format papira iz .ini fajla
+	Call PapInfo(n_Papir)
+	Print s_Papir+" ("+s_Polozaj+")"
+
+' - prilagodjavanje razmere u layout prozoru odabranog papira i ispisivanje u tekst polju
+	map_R = Int((mapZoom*100)/w_Pap)
+'	print "map_R = Int((mapZoom*100)/w_Pap) = "+map_R+SessionInfo(SESSION_INFO_PAPER_UNITS)
+		
+	Alter Control 19 Value str$(map_R) Active
+	
+	Exit Sub
+'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "DLG_print_2_Formati")
 	Call ERRShow()
 		
 End Sub
 
 
-Sub DLG_printPolozaj
+Sub DLG_print_1_Polozaj
 
 	onerror goto Greska  
 	
-	Call DLG_printFormati
+	Call DLG_print_1_Formati
 	
 	Exit Sub
 '	-------------------------
 	Greska:
-	Call ERRCreate(Err(), Error$(), "DLG_printPolozaj")
+	Call ERRCreate(Err(), Error$(), "DLG_print_1_Polozaj")
 	Call ERRShow()
 			
 End Sub
+
+Sub DLG_print_2_Polozaj
+
+	onerror goto Greska  
+	
+	Call DLG_print_2_Formati
+	
+	Exit Sub
+'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "DLG_print_2_Polozaj")
+	Call ERRShow()
+			
+End Sub
+
 
 '=====================================================================================================================
 ' [PapInfo] Osnovne informacije o formatima papira iz INI fajla.
@@ -261,8 +312,16 @@ Sub PapInfo(byVal i as Integer)
 	pT.y = GetIniVal(iniFile, iniPapir, "pTy")
 
 ' - Visina tablice u cm	
-	h_Tablica = GetIniVal(iniFile, iniPapir, "hTab")
+	Do Case print_sablon
+		
+		Case 1
+		h_Tablica = GetIniVal(iniFile, iniPapir, "hTab")
+		
+		Case 2
+		h_Tablica = GetIniVal(iniFile, iniPapir, "hTab2")
 	
+	End Case
+		
 	Exit Sub
 '	-------------------------
 	Greska:
@@ -270,7 +329,6 @@ Sub PapInfo(byVal i as Integer)
 	Call ERRShow()
 	
 End Sub
-
 
 Sub Legenda_checkbox
 	
@@ -297,7 +355,7 @@ End Sub
 '===================================================================================================================== 
 'Kreiranje layout prozora
 
-SUB DLG_printOK
+SUB DLG_print_1_OK
 	
 	onerror goto Greska
 	
@@ -650,11 +708,263 @@ Layout
 	Exit Sub
 '	-------------------------
 	Greska:
-	Call ERRCreate(Err(), Error$(), "DLG_printOK")
+	Call ERRCreate(Err(), Error$(), "DLG_print_1_OK")
 	Call ERRShow()
 	
 End Sub	
 
-Sub Izvestaj_1
-	Print "hey! ho! lets go!"
-End Sub
+SUB DLG_print_2_OK
+	
+	onerror goto Greska
+	
+' - Izbor stampaca
+	sPrinterName = printerList(ReadControlValue(2))
+	nPrinter = ReadControlValue(2)
+
+	f_setIni = SetIniVal(iniFile, "STAMPA", "nPrinter", ReadControlValue(2))
+	f_setIni = SetIniVal(iniFile, "STAMPA", "DPI", ReadControlValue(27))
+
+' - proracun elemenata tablice i zaglavlja crteža na osnovu formata	
+	w_Tablica = w_Pap-2*pT.x
+	h_MapFrame = h_Pap-2*pT.y-h_Tablica
+	w_MapFrame = w_Pap-2*pT.x
+	w_Logo = h_Tablica*2.25
+
+' - printanje informacija	
+	Print "xF = "+mr
+	Print "Margine (hor/ver) ="+pT.x+" / "+pT.y
+	Print "Visina tablice = "+h_Tablica
+	Print "Sirina papira / layout = "+w_Pap+"/"+(w_Pap-mr*2)+" cm"
+	Print "Visina papira / layout = "+h_Pap+"/"+(h_Pap-mr*2)+" cm"		
+'	Print "w_MapFrame/h_MapFrame/w_Tablica = "+w_MapFrame+"/"+h_MapFrame+"/"+w_Tablica
+	
+' - Razmera iz Map prozora
+	print_R = ReadControlValue(19)
+	Print "R = 1 : "+print_R
+
+' - Èekboks opcije za dodatne objekte
+	l_PrintSlika = ReadControlValue(24)
+	i_Dpi = ReadControlValue(27)
+	
+' - Datum u lokalnom formatu
+	sPrintDate = CurDate()
+	sPrintDate = RegionalLongDate(sPrintDate)
+
+' - podesavanje zeljene razmere za Layout
+'	print "Zoom (Window Width) = w_MapFrame*(print_R/100) = "+w_MapFrame*(print_R/100)+MapperInfo(iMapWindowID,MAPPER_INFO_DISTUNITS)
+	Set Map Window iMapWindowID Zoom w_MapFrame*(print_R/100) Units "m"
+	
+	minX = MapperInfo(iMapWindowID,MAPPER_INFO_MINX)
+	maxX = MapperInfo(iMapWindowID,MAPPER_INFO_MAXX)
+	minY = MapperInfo(iMapWindowID,MAPPER_INFO_MINY)
+	maxY = MapperInfo(iMapWindowID,MAPPER_INFO_MAXY)
+
+' - Kalkulacija min i max Y koordinate za Layout 
+	
+	dX = maxX - minX
+	dY = maxY - minY
+	
+	b1 = dY/print_R*100
+	b2 = (h_MapFrame-b1)/2
+	Yp = b2*print_R/100
+										'	print "b1 = "+b1
+										'	print "b2 = "+b2
+										'	print "Yp = "+Yp		
+	LmaxY = maxY + Yp
+	LminY = minY - Yp
+
+'==============================================================
+'	Kreiranje print okvira u Map prozoru
+'==============================================================	
+	If l_Okvir 
+	Then
+		Set Map Window iMapWindowID Layer 0 Editable On
+		Create Rect (minX,LmaxY) (maxX,LminY)
+	    Pen (1,48,16711680) 
+	    Brush (1,0,16777215)
+		Create Point (minX,LmaxY) Symbol (69,16711680,48,"MapInfo Cartographic",16,0)
+		Create Point (maxX,LmaxY) Symbol (69,16711680,48,"MapInfo Cartographic",16,0)
+		Create Point (maxX,LminY) Symbol (69,16711680,48,"MapInfo Cartographic",16,0)
+		Create Point (minX,LminY) Symbol (69,16711680,48,"MapInfo Cartographic",16,0)		
+	End If
+
+'==============================================================		
+' - Karakteristicne tacke layouta
+'==============================================================	
+
+' - Tacke na frejmu
+	f1.x = pT.x
+	f1.y = pT.y
+
+	f2.x = pT.x+w_MapFrame
+	f2.y = pT.y
+
+	f3.x = pT.x
+	f3.y = pT.y+h_MapFrame
+
+	f4.x = pT.x+w_MapFrame
+	f4.y = pT.y+h_MapFrame
+
+' - Tacke na tablici
+	t1.x = f3.x 
+	t1.y = f3.y
+
+	t2.x = f4.x 
+	t2.y = f4.y
+
+	t3.x = t1.x
+	t3.y = t1.y+h_Tablica
+
+	t4.x = t1.x+w_Tablica
+	t4.y = t2.y+h_Tablica
+
+'==============================================================
+'	Kreiranje Layout prozora
+'==============================================================
+
+Layout
+	Position (0,0) Units "cm"
+	Width (w_Pap-mr*2) Units "cm" 
+	Height (h_Pap-mr*2) Units "cm"
+	Max
+  
+ 	iLayoutWindowID = WindowID(FrontWindow())
+
+	Set CoordSys Layout Units "cm"
+
+'== Logo firme
+
+	If OtvorenTAB("Logo") = False Then 
+		Print "Logo nije otvoren"
+		Open Table ApplicationDirectory$()+"naissus-logo.TAB" As Logo Interactive
+		Map From Logo
+		Set Window FrontWindow() ScrollBars Off Autoscroll On
+	else
+		If MapWinIme("Logo Map") = 0
+		Then Map From Logo
+		End If
+	End If  
+
+	iLogoWindowID = WindowID(MapWinIme("Logo Map"))
+	
+''	Print "MapWinIme(Logo)="+MapWinIme("Logo Map")
+		
+	Set Window iLayoutWindowID Front
+	
+	Create Frame (t1.x, t1.y) (t1.x + w_Logo/1.8, t1.y + h_Tablica/2)
+		Pen (1,1,0) 
+		Brush (1,16777215,16777215)
+		Title "Logo Map"
+		From Window iLogoWindowID
+		FillFrame On
+		
+'==	Kreiranje okvira tablice 
+
+	Create Rect (t1.x, t1.y) (t4.x, t4.y)
+		Pen (20,2,3158064) 
+		Brush (1,16777215,16777215)
+
+'== Kreiranje tablice	
+	
+'	prva vertikalna s leva ka desnoj strani
+	Create Line (t1.x+w_Logo/1.8, t1.y) (t1.x+w_Logo/1.8, t1.y + h_Tablica) Pen (15,2,8421504)
+
+'	druga vertikalna s leva ka desnoj strani
+	Create Line (t1.x + w_Logo/1.8 + w_Logo * 1.4, t1.y) (t1.x + w_Logo/1.8 + w_Logo * 1.4, t4.y) Pen (15,2,8421504) 
+
+'	treca vertikalna s leva ka desnoj strani
+	Create Line (t4.x - w_Logo/1.8 * 0.75, t1.y) (t4.x - w_Logo/1.8 * 0.75, t4.y) Pen (15,2,8421504) 	
+
+'	1. horizontalna linija ispod logotipa
+	Create Line (t1.x, t1.y + 4 * h_Tablica/6) (t1.x + w_Logo/1.8, t1.y + 4 * h_Tablica/6) Pen (15,2,8421504) 
+
+'	2. horizontalna linija ispod logotipa
+	Create Line (t1.x, t1.y + 5 * h_Tablica/6) (t1.x + w_Logo/1.8, t1.y + 5 * h_Tablica/6) Pen (15,2,8421504) 
+
+'  1. horizontalna sa desne
+	Create Line (t2.x-w_Logo/1.8*0.75, t2.y+h_Tablica*0.5) (t2.x, t2.y+h_Tablica*0.5) Pen (15,2,8421504) 
+
+'  2. horizontalna sa desne	
+	Create Line (t4.x-w_Logo/1.8*0.75, t4.y-h_Tablica*0.25) (t4.x, t4.y-h_Tablica*0.25) Pen (15,2,8421504) 
+
+'==	Kreiranje map frejma u Layout prozoru		
+
+	Create Frame (f1.x,f1.y) (f4.x, f4.y)
+		Pen (20,65,16777215) 
+		Brush (2,16777215,16777215)
+		From Window iMapWindowID
+		FillFrame On
+
+'=== TEKST: Osnovne informacije
+
+	Create Text
+		s_SEKTOR
+		(t1.x + mr/7, t1.y + mr/7 + 1.5*h_Tablica/3) (t1.x + w_Logo*1.25, t1.y + mr*10 + 2*h_Tablica/3)
+		Font ("Arial Narrow",0,8,0)
+	Create Text
+		s_SLUZBA+" ("+s_ODELJENJE+")"
+		(t1.x + mr/7, t1.y + mr/7 + 2*h_Tablica/3) (t1.x + w_Logo*1.25, t1.y + mr*10 + 2*h_Tablica/3)
+		Font ("Arial Narrow",0,8,0)
+	Create Text
+		"Priprema: "+s_IME
+		(t1.x + mr/7, t1.y + mr/7 + 2.5*h_Tablica/3) (t1.x + w_Logo*1.25, t1.y + mr*10 + h_Tablica)
+		Font ("Arial Narrow",0,8,0)
+
+'	Naslov printa
+'	Create Text
+'		s_Naslov
+'		(t1.x+w_Logo+w_Logo*1.25+mr/7, t1.y+mr/7+0.25*h_Tablica) (t4.x-w_Logo*0.75-mr/7, t1.y+mr*10+0.25*h_Tablica)
+'		Font ("Arial Narrow",1,14,0,16777215)
+
+'	Podaci o mapi
+'	Create Text
+'		"R =  1 : "+str$(print_R)
+'		(t2.x-w_Logo*0.75+mr/3, t2.y+h_Tablica*0.1) (t2.x, t2.y+h_Tablica*0.1)
+'		Font ("Arial Narrow",1,12,0)
+'	Create Text
+'		"Format:    "+  s_Papir
+'		(t2.x-w_Logo*0.75+mr/3, t2.y+h_Tablica*0.52) (t2.x, t2.y+h_Tablica*0.52)
+'		Font ("Arial Narrow",0,8,0,16777215)
+'	Create Text
+'		"Datum:    "+sPrintDate
+'		(t2.x-w_Logo*0.75+mr/3, t2.y+h_Tablica*0.77) (t2.x, t2.y+h_Tablica*0.77)
+'		Font ("Arial Narrow",0,8,0,16777215)
+ 
+ '=== kopirajt
+	 
+	Create Text
+		"© 2014 - GIS odeljenje"
+		(f3.x+mr/7-0.48 , f1.y+(h_MapFrame/2+1.5)) (f3.x+mr*4-0.48 , f1.y+(h_MapFrame/2+1.5))
+		Font ("Arial Narrow",0,8,6316128,16777215)
+		Angle 90
+		
+'== Finalno podešavanje
+
+	Set Layout Ruler On Pagebreaks On Frame Contents On 'Zoom 82.0466 Center (3.98168,5.6053) Extents To Fit
+	Set Window iLayoutWindowID Autoscroll On Snap Mode On Enhanced On
+  
+  	s_PrintNaslov = "["+s_Papir+"-"+s_Polozaj+"] "+s_Naslov+" (R=1:"+str$(print_R)+")"
+	Set Window iLayoutWindowID Title s_PrintNaslov
+'	Set Layout Extents (1, 1)
+'	Set Layout Zoom To Fit
+
+	s_kom = "Set Window "+iLayoutWindowID+" Printer Name """+sPrinterName+""" Orientation "+s_Polozaj+" Copies 1 Papersize "+i_Papir+""
+	run command s_kom
+	
+	CRS = "Set Coordsys "+s_CRS
+	Run Command CRS
+	
+'=== Snimanje printa kao JPG	
+
+	If l_PrintSlika 
+	Then
+		Save Window iLayoutWindowID As s_FOLDER_PRN+Replace(s_PrintNaslov, chr$(58), chr$(95))+".jpg" Type "JPEG" Width 29.7 Units "cm" Height 21 Units "cm" Resolution i_Dpi
+	End If
+	
+	Exit Sub
+'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "DLG_print_2_OK")
+	Call ERRShow()
+	
+End Sub	

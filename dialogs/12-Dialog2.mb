@@ -16,6 +16,8 @@ Sub DLG_print_2
 	nPrinter = GetIniVal(iniFile, "STAMPA", "nPrinter")
 	i_Dpi = GetIniVal(iniFile, "STAMPA", "DPI")
 	
+	print_sablon = 2
+	
 	Call PapInfo(1)
 	
 	
@@ -50,13 +52,13 @@ Control OKButton
 	Id 32
 	Position 209, 112
 	Width 51 Height 14
-	Calling DLG_printOK
+	Calling DLG_print_2_OK
 	
 Control RadioGroup
 	Id 7
 	Position 177, 48
 	Title "Landscape;Portrait"
-	Calling DLG_printPolozaj
+	Calling DLG_print_2_Polozaj
 	Value n_Polozaj
 	Into n_Polozaj
 	
@@ -70,7 +72,7 @@ Control RadioGroup
 	Id 5
 	Position 49, 48
 	Title "A4;A3;"
-	Calling DLG_printFormati
+	Calling DLG_print_2_Formati
 	Value 1
 	Into n_Papir
 	
@@ -84,7 +86,7 @@ Control EditText
 	Id 19
 	Position 46, 89
 	Width 56 Height 12
-	Value "s_mapScale"
+	Value s_mapScale
 	
 Control GroupBox
 	Id 17
@@ -118,7 +120,7 @@ Control EditText
 	Position 147, 88
 	Width 25 Height 12
 	Disable
-	Value "i_Dpi"
+	Value i_Dpi
 	Into i_Dpi
 	
 Control StaticText

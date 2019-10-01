@@ -344,12 +344,19 @@ SUB WOR_naissus_GIS
 	Open Table s_FOLDER_POD+"set_vt_1973_25000" As set_vt_1973_25000 Interactive
 	Open Table s_FOLDER_POD+"set_vt_1983_50000" As set_vt_1983_50000 Interactive
 	
-' - GeoSrbija (WMS)
+' - GeoSrbija (WMS) ORTOFOTO
 
 	Open Table s_FOLDER_POD+"2010_of_GS\set_ORTOFOTO_2010_GS.TAB" As set_ORTOFOTO_2010_GS Interactive
 	Open Table s_FOLDER_POD+"2013_of_GS\set_ORTOFOTO_2013_GS.TAB" As set_ORTOFOTO_2013_GS Interactive
 	Open Table s_FOLDER_POD+"2016_sat_GS_30cm\2016_sat_GS_30cm.TAB" As _2016_sat_GS_30cm Interactive
 	Open Table s_FOLDER_POD+"2016_sat_GS_40cm\2016_sat_GS_40cm.TAB" As _2016_sat_GS_40cm Interactive
+
+' - GeoSrbija (WMS) KATASTAR NEPOKRETNOSTI
+
+	Open Table s_FOLDER_POD+"KN\Kbr.TAB" As Kbr Interactive
+	Open Table s_FOLDER_POD+"KN\Objekti.TAB" As Objekti Interactive
+	Open Table s_FOLDER_POD+"KN\Parcele.TAB" As Parcele Interactive
+	Open Table s_FOLDER_POD+"KN\Ulice.TAB" As Ulice Interactive
 	
 '	Finalna mapa
 	
@@ -377,7 +384,7 @@ Map From GroupLayer("NIVOS",GroupLayer("[Pomoæni]",Detekcija_VM_tacke,Detekcija_
   ,SNIMLJENO_KABLOVI,SNIMLJENO_OBJEKTI,SNIMLJENO_ATM_SLIVNIK,SNIMLJENO_ATM_SAHT,SNIMLJENO_ATM_PRIKLJUCAK,SNIMLJENO_ATMOSFERSKA
   ,SNIMLJENO_FEK_KAN_SLIVNIK,SNIMLJENO_FEK_KAN_SAHT,SNIMLJENO_FEK_KAN_PRIKLJUCAK,SNIMLJENO_FEKALNA,SNIMLJENO_ZATVARAC,SNIMLJENO_HIDRANT
   ,SNIMLJENO_VODOMER_SAHT,SNIMLJENO_PRIKLJUCAK,SNIMLJENO_CEVOVODNI_SAHT,SNIMLJENO_CEVOVOD),GroupLayer("Katastar",GroupLayer("Izohipse"),GroupLayer("Administrativne granice",ADMJ_NASELJA_KO,ADMJ_OPSTINE,ADMJ_GRAD_NIS),REKE,KATASTAR_OBJEKTI,KATASTAR_PARCELE
-  ),GroupLayer("Podloge",GroupLayer("_mreze"),GroupLayer("Planovi"),set_ORTOFOTO_2013_GS
+  ,GroupLayer("GeoSrbija",Kbr,Objekti,Ulice,Parcele)),GroupLayer("Podloge",GroupLayer("_mreze"),GroupLayer("Planovi"),set_ORTOFOTO_2013_GS
   ,set_ORTOFOTO_2010_GS,set_OF_Doljevac_2010,set_ORTOFOTO_2006,_2016_sat_GS_30cm,_2016_sat_GS_40cm,set_fg_1963_1000
   ,set_fg_1963_2500,set_fg_1989_1000,set_fg_1989_5000,set_pr_1939_1000,set_pr_1939_2500,set_pr_1955_00_500
   ,set_pr_1955_00_1000,set_vt_1973_25000,set_vt_1983_50000)
@@ -385,10 +392,10 @@ Map From GroupLayer("NIVOS",GroupLayer("[Pomoæni]",Detekcija_VM_tacke,Detekcija_
   Width 12.9375 Units "in" Height 4.04167 Units "in" 
 Set Window FrontWindow() ScrollBars Off Autoscroll On Snap Mode On Enhanced On Smooth Text Antialias Image High Vector Antialias
 Set Map
-  CoordSys Earth Projection 8, 9999, 10, 485.017844, 254.040967, 490.850757, -6.25099249, -3.40102363, 15.57471608, 3.12980309, 0, "m", 21, 0, 0.9999, 7500000, 0
-  Center (7573210.935,4797878.263)
-  Zoom 2400 Units "m"
-  Preserve Zoom Display Scale Cartographic
+  CoordSys Earth Projection 8, 104, "m", 21, 0, 0.9996, 500000, 0
+  Center (572659.4543,4796877.78)
+  Zoom 999.458494 Units "m"
+  Preserve Zoom Display Zoom
   Distance Units "m" Area Units "sq m" XY Units "m"
   Distance Type Cartesian
 shade 60 with NADLEZNOST values 
@@ -405,7 +412,7 @@ shade 59 with DN_mm ranges apply all use all Line (18,2,45056)
   800: 999 Line (40,2,45056) ,
   1000: 3000 Line (50,2,45056) 
   default Line (20,2,10526880) 
-  ' # use 1 round 1 inflect off Line (1,2,0) at 0 by 0 color 1 # 
+  ' # use 1 round 1 inflect off Line (0,0,0) at 0 by 0 color 1 # 
 shade 60 with CCTV values 
   0 Line (1,1,16711680) ,
   1 Line (2,75,57344) 
@@ -426,7 +433,7 @@ shade 52 with DN_mm ranges apply all use all Line (56,2,14694400)
   800: 999 Line (40,2,14694400) ,
   1000: 3200 Line (50,2,14694400) 
   default Line (20,2,10526880) 
-  ' # use 1 round 1 inflect off Line (1,2,0) at 0 by 0 color 1 # 
+  ' # use 1 round 1 inflect off Line (0,0,0) at 0 by 0 color 1 # 
 shade 41 with VRSTA ignore "" values 
   "+CEV ZA HL" Brush (2,16752800,16777215) ,
   "Cevovodni šaht" Brush (1,14680064,16777215) Pen (1,2,8421504) ,
@@ -461,7 +468,7 @@ shade 39 with DN_MM ranges apply all use all Line (50,2,4227327)
   800: 1000 Line (44,2,4223216) ,
   1000: 1200 Line (50,2,4227327) 
   default Line (1,2,16576) 
-  ' # use 1 round 1 inflect off Line (1,2,0) at 0 by 0 color 1 # 
+  ' # use 1 round 1 inflect off Line (0,0,0) at 0 by 0 color 1 # 
 shade 40 with IZVOR_INFORMACIJE values 
   "" Line (2,2,9474192) ,
   "-" Line (2,2,32960) ,
@@ -1176,36 +1183,36 @@ Set Map
       Parallel On Auto Off Overlap Off Duplicates On Offset 2
       Visibility On
   Layer 96
-    Display Graphic
-    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (35,0,12) Line (1,2,0) Font ("Tahoma",0,9,0)
+    Display Global
+    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (157,13893520,12,"Wingdings 2",0,0) Line (1,2,0) Font ("Tahoma",0,9,0)
     Label Line Arrow Position Right Font ("Tahoma",0,9,0) Pen (1,2,0) 
       With ULICA
       Parallel On Auto Off Overlap Off Duplicates On Offset 2
       Visibility On
   Layer 97
-    Display Graphic
-    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (35,0,12) Line (1,2,0) Font ("Tahoma",0,9,0)
+    Display Global
+    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (35,0,12) Line (1,2,13893520) Font ("Tahoma",0,9,0)
     Label Line Arrow Position Above Font ("Tahoma",0,9,0) Pen (1,2,0) 
       With ULICA
       Parallel On Auto Off Overlap Off Duplicates Off Offset 2
       Visibility On
   Layer 98
-    Display Graphic
-    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (35,0,12) Line (1,2,0) Font ("Tahoma",0,9,0)
+    Display Global
+    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (128,16711935,12,"Wingdings 2",0,0) Line (1,2,0) Font ("Tahoma",0,9,0)
     Label Line Arrow Position Right Font ("Tahoma",0,9,0) Pen (1,2,0) 
       With ULICA
       Parallel On Auto Off Overlap Off Duplicates On Offset 2
       Visibility On
   Layer 99
-    Display Graphic
-    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (35,0,12) Line (1,2,0) Font ("Tahoma",0,9,0)
+    Display Global
+    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (35,0,12) Line (1,2,16711935) Font ("Tahoma",0,9,0)
     Label Line Arrow Position Above Font ("Tahoma",0,9,0) Pen (1,2,0) 
       With ULICA
       Parallel On Auto Off Overlap Off Duplicates Off Offset 2
       Visibility On
   Layer 100
-    Display Graphic
-    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (35,0,12) Line (1,2,0) Font ("Tahoma",0,9,0)
+    Display Global
+    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (35,0,12) Line (1,2,16776960) Font ("Tahoma",0,9,0)
     Label Line Arrow Position Above Font ("Tahoma",0,9,0) Pen (1,2,0) 
       With ULICA
       Parallel On Auto Off Overlap Off Duplicates Off Offset 2
@@ -1219,113 +1226,113 @@ Set Map
       Parallel On Auto On Overlap Off Duplicates On PartialSegments On Offset 2
       Visibility Zoom (0, 300) Units "m"
   Layer 102
-    Display Graphic
-    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (35,0,12) Line (1,2,0) Font ("Tahoma",0,9,0)
+    Display Global
+    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (35,0,12) Line (3,5,16711680) Font ("Tahoma",0,9,0)
     Label Line Arrow Position Above Font ("Tahoma",0,9,0) Pen (1,2,0) 
       With TIP
       Parallel On Auto Off Overlap Off Duplicates Off Offset 2
       Visibility On
   Layer 103
-    Display Graphic
-    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (35,0,12) Line (1,2,0) Font ("Tahoma",0,9,0)
+    Display Global
+    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (35,0,12) Line (3,2,0) Font ("Tahoma",0,9,0)
     Label Line Arrow Position Above Font ("Tahoma",0,9,0) Pen (1,2,0) 
       With OBJEKAT
       Parallel On Auto Off Overlap Off Duplicates Off Offset 2
       Visibility On
   Layer 104
-    Display Graphic
-    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (35,0,12) Line (1,2,0) Font ("Tahoma",0,9,0)
+    Display Global
+    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (167,65280,12,"Wingdings 2",32,0) Line (1,2,0) Font ("Tahoma",0,9,0)
     Label Line Arrow Position Right Font ("Tahoma",0,9,0) Pen (1,2,0) 
       With IZVOR_INFORMACIJE
       Parallel On Auto Off Overlap Off Duplicates On Offset 2
       Visibility On
   Layer 105
-    Display Graphic
-    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (35,0,12) Line (1,2,0) Font ("Tahoma",0,9,0)
+    Display Global
+    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (128,65280,12,"Wingdings 2",0,0) Line (1,2,0) Font ("Tahoma",0,9,0)
     Label Line Arrow Position Right Font ("Tahoma",0,9,0) Pen (1,2,0) 
       With ULICA
       Parallel On Auto Off Overlap Off Duplicates On Offset 2
       Visibility On
   Layer 106
-    Display Graphic
-    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (35,0,12) Line (1,2,0) Font ("Tahoma",0,9,0)
+    Display Global
+    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (35,0,12) Line (1,2,65280) Font ("Tahoma",0,9,0)
     Label Line Arrow Position Right Font ("Tahoma",0,9,0) Pen (1,2,0) 
       With MATERIJAL
       Parallel On Auto Off Overlap Off Duplicates On Offset 2
       Visibility On
   Layer 107
-    Display Graphic
-    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (35,0,12) Line (1,2,0) Font ("Tahoma",0,9,0)
+    Display Global
+    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (35,0,12) Line (3,2,65280) Font ("Tahoma",0,9,0)
     Label Line Arrow Position Above Font ("Tahoma",0,9,0) Pen (1,2,0) 
       With ULICA
       Parallel On Auto Off Overlap Off Duplicates Off Offset 2
       Visibility On
   Layer 108
-    Display Graphic
-    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (35,0,12) Line (1,2,0) Font ("Tahoma",0,9,0)
+    Display Global
+    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (167,16744448,12,"Wingdings 2",0,0) Line (1,2,0) Font ("Tahoma",0,9,0)
     Label Line Arrow Position Right Font ("Tahoma",0,9,0) Pen (1,2,0) 
       With IZVOR_INFORMACIJE
       Parallel On Auto Off Overlap Off Duplicates On Offset 2
       Visibility On
   Layer 109
-    Display Graphic
-    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (35,0,12) Line (1,2,0) Font ("Tahoma",0,9,0)
+    Display Global
+    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (44,16744448,10,"MapInfo Cartographic",256,0) Line (1,2,0) Font ("Tahoma",0,9,0)
     Label Line Arrow Position Right Font ("Tahoma",0,9,0) Pen (1,2,0) 
-      With ULICA
+      With LABELA
       Parallel On Auto Off Overlap Off Duplicates On Offset 2
       Visibility On
   Layer 110
-    Display Graphic
-    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (35,0,12) Line (1,2,0) Font ("Tahoma",0,9,0)
+    Display Global
+    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (35,0,12) Line (1,2,16744448) Font ("Tahoma",0,9,0)
     Label Line Arrow Position Above Font ("Tahoma",0,9,0) Pen (1,2,0) 
       With MATERIJAL
       Parallel On Auto Off Overlap Off Duplicates Off Offset 2
       Visibility On
   Layer 111
-    Display Graphic
-    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (35,0,12) Line (1,2,0) Font ("Tahoma",0,9,0)
+    Display Global
+    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (35,0,12) Line (3,2,16744448) Font ("Tahoma",0,9,0)
     Label Line Arrow Position Above Font ("Tahoma",0,9,0) Pen (1,2,0) 
       With ULICA
       Parallel On Auto Off Overlap Off Duplicates Off Offset 2
       Visibility On
   Layer 112
-    Display Graphic
-    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (35,0,12) Line (1,2,0) Font ("Tahoma",0,9,0)
+    Display Global
+    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (63,65535,12,"MapInfo Weather",0,0) Line (1,2,16711935) Font ("Tahoma",0,9,0)
     Label Line Arrow Position Right Font ("Tahoma",0,9,0) Pen (1,2,0) 
       With BROJ
       Parallel On Auto Off Overlap Off Duplicates On Offset 2
       Visibility On
   Layer 113
-    Display Graphic
-    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (35,0,12) Line (1,2,0) Font ("Tahoma",0,9,0)
+    Display Global
+    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (60,65535,12,"MapInfo Weather",0,0) Line (1,2,0) Font ("Tahoma",0,9,0)
     Label Line Arrow Position Right Font ("Tahoma",0,9,0) Pen (1,2,0) 
       With BROJ
       Parallel On Auto Off Overlap Off Duplicates On Offset 2
       Visibility On
   Layer 114
-    Display Graphic
-    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (35,0,12) Line (1,2,0) Font ("Tahoma",0,9,0)
+    Display Global
+    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (56,65535,12,"Wingdings 2",0,0) Line (1,2,0) Font ("Tahoma",0,9,0)
     Label Line Arrow Position Right Font ("Tahoma",0,9,0) Pen (1,2,0) 
       With ULICA
       Parallel On Auto Off Overlap Off Duplicates On Offset 2
       Visibility On
   Layer 115
-    Display Graphic
-    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (35,0,12) Line (1,2,0) Font ("Tahoma",0,9,0)
+    Display Global
+    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (35,0,12) Line (1,2,65535) Font ("Tahoma",0,9,0)
     Label Line Arrow Position Above Font ("Tahoma",0,9,0) Pen (1,2,0) 
       With MI_PRINX
       Parallel On Auto Off Overlap Off Duplicates Off Offset 2
       Visibility On
   Layer 116
-    Display Graphic
-    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (35,0,12) Line (1,2,0) Font ("Tahoma",0,9,0)
+    Display Global
+    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (157,65535,12,"Wingdings 2",0,0) Line (1,2,65535) Font ("Tahoma",0,9,0)
     Label Line None Position Center Font ("Tahoma",0,9,0) Pen (1,2,0) 
       With ULICA
       Parallel On Auto Off Overlap Off Duplicates On Offset 2
       Visibility On
   Layer 117
     Display Global
-    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (35,0,12) Line (1,2,16711680) Font ("Tahoma",0,9,0)
+    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (35,0,12) Line (1,2,65535) Font ("Tahoma",0,9,0)
     Label Line Arrow Position Above Font ("Tahoma",0,9,0) Pen (1,2,0) 
       With ULICA
       Parallel On Auto Off Overlap Off Duplicates Off Offset 2
@@ -1386,6 +1393,50 @@ Set Map
     Display Graphic
     Global Pen (1,2,0)  Brush (2,16777215,16777215)  Symbol (35,0,12)  Line (1,2,0)  Font ("Tahoma",0,9,0)
     Selectable Off
+    Zoom (0, 400) Units "m" 
+  contrast 50 
+  brightness 50 
+  alpha 255 
+    transparency on 
+  color 0 
+    grayscale off 
+  Layer 125
+    Display Graphic
+    Global Pen (1,2,0)  Brush (2,16777215,16777215)  Symbol (35,0,12)  Line (1,2,0)  Font ("Tahoma",0,9,0)
+    Selectable Off
+    Zoom (0, 500) Units "m" 
+  contrast 50 
+  brightness 50 
+  alpha 255 
+    transparency on 
+  color 0 
+    grayscale off 
+  Layer 126
+    Display Graphic
+    Global Pen (1,2,0)  Brush (2,16777215,16777215)  Symbol (35,0,12)  Line (1,2,0)  Font ("Tahoma",0,9,0)
+    Selectable Off
+    Zoom (0, 750) Units "m" 
+  contrast 50 
+  brightness 50 
+  alpha 255 
+    transparency on 
+  color 0 
+    grayscale off 
+  Layer 127
+    Display Graphic
+    Global Pen (1,2,0)  Brush (2,16777215,16777215)  Symbol (35,0,12)  Line (1,2,0)  Font ("Tahoma",0,9,0)
+    Selectable Off
+    Zoom (0, 750) Units "m" 
+  contrast 50 
+  brightness 50 
+  alpha 255 
+    transparency on 
+  color 0 
+    grayscale off 
+  Layer 128
+    Display Graphic
+    Global Pen (1,2,0)  Brush (2,16777215,16777215)  Symbol (35,0,12)  Line (1,2,0)  Font ("Tahoma",0,9,0)
+    Selectable Off
     Zoom (0, 1000) Units "m" 
   contrast 50 
   brightness 50 
@@ -1393,7 +1444,7 @@ Set Map
     transparency on 
   color 16777215 
     grayscale off 
-  Layer 125
+  Layer 129
     Display Off
     Global Pen (1,2,0)  Brush (2,16777215,16777215)  Symbol (35,0,12)  Line (1,2,0)  Font ("Tahoma",0,9,0)
     Selectable Off
@@ -1404,7 +1455,7 @@ Set Map
     transparency on 
   color 16777215 
     grayscale off 
-  Layer 126
+  Layer 130
     Display Global
     Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (49,16711680,12) Line (1,2,0) Font ("Tahoma",0,9,0)
   contrast 50 
@@ -1413,7 +1464,7 @@ Set Map
     transparency off 
   color 0 
     grayscale off 
-  Layer 127
+  Layer 131
     Display Global
     Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (49,16711680,12) Line (1,2,0) Font ("Tahoma",0,9,0)
     Zoom (0, 15000) Units "m" 
@@ -1423,7 +1474,7 @@ Set Map
     transparency on 
   color 16646143 
     grayscale off 
-  Layer 128
+  Layer 132
     Display Off
     Global Pen (1,2,0)  Brush (2,16777215,16777215)  Symbol (35,0,12)  Line (1,2,0)  Font ("Tahoma",0,9,0)
     Selectable On
@@ -1434,7 +1485,7 @@ Set Map
     transparency on 
   color 0 
     grayscale off 
-  Layer 129
+  Layer 133
     Display Global
     Global Pen (1,2,0)  Brush (2,16777215,16777215)  Symbol (35,0,12)  Line (1,2,0)  Font ("Tahoma",0,9,0)
     Selectable On
@@ -1443,42 +1494,6 @@ Set Map
   brightness 57 
   alpha 255 
     transparency on 
-  color 0 
-    grayscale off 
-  Layer 130
-    Display Off
-    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (49,16711680,12) Line (1,2,0) Font ("Tahoma",0,9,0)
-  contrast 50 
-  brightness 50 
-  alpha 255 
-    transparency off 
-  color 0 
-    grayscale off 
-  Layer 131
-    Display Off
-    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (49,16711680,12) Line (1,2,0) Font ("Tahoma",0,9,0)
-  contrast 50 
-  brightness 50 
-  alpha 255 
-    transparency off 
-  color 0 
-    grayscale off 
-  Layer 132
-    Display Off
-    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (49,16711680,12) Line (1,2,0) Font ("Tahoma",0,9,0)
-  contrast 50 
-  brightness 50 
-  alpha 255 
-    transparency off 
-  color 0 
-    grayscale off 
-  Layer 133
-    Display Off
-    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (49,16711680,12) Line (1,2,0) Font ("Tahoma",0,9,0)
-  contrast 50 
-  brightness 50 
-  alpha 255 
-    transparency off 
   color 0 
     grayscale off 
   Layer 134
@@ -1535,6 +1550,42 @@ Set Map
     transparency off 
   color 0 
     grayscale off 
+  Layer 140
+    Display Off
+    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (49,16711680,12) Line (1,2,0) Font ("Tahoma",0,9,0)
+  contrast 50 
+  brightness 50 
+  alpha 255 
+    transparency off 
+  color 0 
+    grayscale off 
+  Layer 141
+    Display Off
+    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (49,16711680,12) Line (1,2,0) Font ("Tahoma",0,9,0)
+  contrast 50 
+  brightness 50 
+  alpha 255 
+    transparency off 
+  color 0 
+    grayscale off 
+  Layer 142
+    Display Off
+    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (49,16711680,12) Line (1,2,0) Font ("Tahoma",0,9,0)
+  contrast 50 
+  brightness 50 
+  alpha 255 
+    transparency off 
+  color 0 
+    grayscale off 
+  Layer 143
+    Display Off
+    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (49,16711680,12) Line (1,2,0) Font ("Tahoma",0,9,0)
+  contrast 50 
+  brightness 50 
+  alpha 255 
+    transparency off 
+  color 0 
+    grayscale off 
   GroupLayer 1
     Display On Title "NIVOS"
   GroupLayer 2
@@ -1564,10 +1615,12 @@ Set Map
   GroupLayer 14
     Display On Title "Administrativne granice"
   GroupLayer 15
-    Display On Title "Podloge"
+    Display Off Title "GeoSrbija"
   GroupLayer 16
-    Display Off Title "_mreze"
+    Display On Title "Podloge"
   GroupLayer 17
+    Display Off Title "_mreze"
+  GroupLayer 18
     Display On Title "Planovi"
 Set Map Layer 13 Editable
 set legend 
@@ -2044,7 +2097,7 @@ Set Map
 shade 60 with NADLEZNOST values 
   "" Line (1,1,14694400) ,
   "U PRIJEMU" Line (4,2,65280) 
-  default Line (1,2,0)   '# color 1 # 
+  default Line (1,2,0)   ' # color 1 # 
 shade 59 with DN_mm ranges apply all use all Line (18,2,45056) 
   0: 1 Line (14,2,45056) ,
   1: 199 Line (18,2,45056) ,
@@ -2055,17 +2108,17 @@ shade 59 with DN_mm ranges apply all use all Line (18,2,45056)
   800: 999 Line (40,2,45056) ,
   1000: 3000 Line (50,2,45056) 
   default Line (20,2,10526880) 
-  '# use 1 round 1 inflect off Line (0,0,0) at 0 by 0 color 1 # 
+  ' # use 1 round 1 inflect off Line (0,0,0) at 0 by 0 color 1 # 
 shade 60 with CCTV values 
   0 Line (1,1,16711680) ,
   1 Line (2,75,57344) 
-  default Line (1,2,0)   '# color 1 # 
+  default Line (1,2,0)   ' # color 1 # 
 shade 53 with NADLEZNOST values 
   "" Line (1,2,16711680) ,
   "JKP NAISSUS" Line (1,1,65280) ,
   "Kucni savet" Line (1,2,16734240) ,
   "U PRIJEMU" Line (4,2,16711935) 
-  default Line (1,2,0)   '# color 1 # 
+  default Line (1,2,0)   ' # color 1 # 
 shade 52 with DN_mm ranges apply all use all Line (56,2,14694400) 
   0: 1 Line (15,2,14694400) ,
   1: 199 Line (18,2,14694400) ,
@@ -2076,7 +2129,7 @@ shade 52 with DN_mm ranges apply all use all Line (56,2,14694400)
   800: 999 Line (40,2,14694400) ,
   1000: 3200 Line (50,2,14694400) 
   default Line (20,2,10526880) 
-  '# use 1 round 1 inflect off Line (0,0,0) at 0 by 0 color 1 # 
+  ' # use 1 round 1 inflect off Line (0,0,0) at 0 by 0 color 1 # 
 shade 41 with VRSTA ignore "" values 
   "+CEV ZA HL" Brush (2,16752800,16777215) ,
   "Cevovodni šaht" Brush (1,14680064,16777215) Pen (1,2,8421504) ,
@@ -2093,12 +2146,12 @@ shade 41 with VRSTA ignore "" values
   "Sabirna komora" Brush (2,16752848,16777215) ,
   "Trafo stanica" Brush (2,16720016,16777215) ,
   "Vodomerni šaht" Brush (2,10551295,16777215) 
-  default Brush (2,0,16777215)   '# color 1 # 
+  default Brush (2,0,16777215)   ' # color 1 # 
 shade 40 with Zona_sanitarne_zastite values 
   "Neposredna" Brush (1,16711680,16777215) Pen (1,111,16711680) ,
   "Šira" Brush (1,65280,16777215) Pen (1,5,65280) ,
   "Uža" Brush (1,255,16777215) Pen (1,48,16711680) 
-  default Brush (1,0,16777215) Pen (1,2,0)   '# color 1 # 
+  default Brush (1,0,16777215) Pen (1,2,0)   ' # color 1 # 
 shade 39 with DN_MM ranges apply all use all Line (50,2,4227327) 
   10: 80 Line (15,2,12416) ,
   80: 100 Line (22,2,1065104) ,
@@ -2110,7 +2163,7 @@ shade 39 with DN_MM ranges apply all use all Line (50,2,4227327)
   800: 1000 Line (44,2,4223216) ,
   1000: 1200 Line (50,2,4227327) 
   default Line (1,2,16576) 
-  '# use 1 round 1 inflect off Line (0,0,0) at 0 by 0 color 1 # 
+  ' # use 1 round 1 inflect off Line (0,0,0) at 0 by 0 color 1 # 
 shade 40 with IZVOR_INFORMACIJE values 
   "" Line (2,2,9474192) ,
   "-" Line (2,2,32960) ,

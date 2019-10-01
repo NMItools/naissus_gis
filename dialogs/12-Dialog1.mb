@@ -30,6 +30,8 @@ Sub DLG_print_1
 	s_TipLgd = GetIniVal(iniFile, "STAMPA", "LEGENDA")
 	i_Dpi = GetIniVal(iniFile, "STAMPA", "DPI")
 	
+	print_sablon = 1
+	
 	Call PapInfo(1)
 
 '***** DIALOG DESIGNER GENERATED CODE. DO NOT EDIT OR REMOVE THIS LINE OR BELOW THIS LINE! *****
@@ -67,7 +69,7 @@ Control RadioGroup
 	Id 5
 	Position 49, 48
 	Title "A4;A3;A2;A1;A0;"
-	Calling DLG_printFormati
+	Calling DLG_print_1_Formati
 	Value 1
 	Into n_Papir
 	
@@ -81,7 +83,7 @@ Control RadioGroup
 	Id 7
 	Position 177, 48
 	Title "Landscape;Portrait"
-	Calling DLG_printPolozaj
+	Calling DLG_print_1_Polozaj
 	Value n_Polozaj
 	Into n_Polozaj
 	
@@ -258,7 +260,7 @@ Control OKButton
 	Id 32
 	Position 209, 208
 	Width 51 Height 14
-	Calling DLG_printOK
+	Calling DLG_print_1_OK
 
 	Exit Sub
 '	-------------------------

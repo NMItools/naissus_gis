@@ -551,13 +551,15 @@
 
 	declare sub STAMPA
 	Declare Sub Printers
-	Declare Sub MapperPriprema
-	Declare Sub Izvestaj_1
-	Declare Sub DLG_printFormati
-	Declare Sub DLG_printPolozaj
+	Declare SUB MapperPriprema
+	Declare Sub DLG_print_1_Formati
+	Declare Sub DLG_print_2_Formati
+	Declare Sub DLG_print_1_Polozaj
+	Declare Sub DLG_print_2_Polozaj
 '	Declare Sub DLG_printMargine
 	Declare Sub PapInfo(byVal i as Integer)
-	Declare Sub DLG_printOK
+	Declare Sub DLG_print_1_OK
+	Declare Sub DLG_print_2_OK
 
 	Declare Sub Legenda_checkbox
 	Declare Sub JPEG_checkbox
@@ -600,6 +602,7 @@
 		Global a, b, b1, b2, Yp as Float	
 		Global pT, f1, f2, f3, f4, t1, t2, t3, t4, Lgd as Tacka	
 		Global iniPapir as string
+		Global print_sablon as smallint
 
 '	13-LEGENDA.MB ===========================================================================			
 
