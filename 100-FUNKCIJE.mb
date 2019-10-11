@@ -9,6 +9,21 @@ include "NAISSUS-GIS.def"
 include "C:\Program Files (x86)\MapInfo\MapBasic\Samples\MAPBASIC\DATABASE\ODBCPLUS.DEF"
 
 ' =====================================================================================================================
+'		[SetCRS] Postavka aktivnog koordinatnog sistema
+' =====================================================================================================================
+Function SetCRS() as String
+	
+	i_hstmt = Server_Execute(i_hdbc,"exec mbx.sp_CRS")
+	Server i_hstmt Bind Column 1 To s_CRS, am_stat
+	Server i_hstmt Fetch First
+	Server i_hstmt Close
+
+    CRS = "Set Coordsys "+s_CRS
+	Run Command CRS
+
+	
+End Function
+' =====================================================================================================================
 '		[MapWinID] ID aktivnog Map prozora
 ' =====================================================================================================================
 Function MapWinID(byVal Win as Integer) As Integer
@@ -998,4 +1013,63 @@ Dim SECS as Float
 
 	DMS = DEG & "° " & MINS & "' " & SECS & "''"
 	
+End Function
+
+
+Function GetValFromTable(ByVal s_lejer as string, ByVal s_col_1 as string, ByVal s_col_2 as string, ByVal i_col2_val as integer) As String
+
+
+'	Select NAZIV_LATIN2 from ADMJ_NASELJA_KO where MATICNI_BROJ=729795 into mat_br_ko
+	
+	dim sql as String
+	sql = "Select " + s_col_1 + " from " + s_lejer + " where " + s_col_2 + " = " + i_col2_val + " into mat_br_ko"
+	
+	Run Command sql
+	
+	Fetch rec 1 From mat_br_ko
+	GetValFromTable = mat_br_ko + ".col1"
+	
+	
+End Function
+
+
+Function PronadjiKO(ByVal s_lejer as string, ByVal s_col as string, ByVal x As Integer, ByVal y As Integer) As String
+	
+	Dim	i, i_found, i_rowid As Integer,
+		s_table, as_KO_naziv, as_KO_matbr as Alias
+	
+		
+	i_found = SearchPoint(FrontWindow( ), x, y)
+	
+	If i_found = 0 Then
+		
+		Print "Ne postoji parcela na lokaciji!"
+	
+	Else
+' - Procesiranje rezultata
+		For i = 1 to i_found
+	'	ime tabele koja je "pogodjena" ispod klika.
+			s_table = SearchInfo(i, SEARCH_INFO_TABLE)
+		'	pronadji row ID objekta koji je kliknut.
+			i_rowid = SearchInfo(i, SEARCH_INFO_ROW)
+			
+'			print i_found + " (" + s_table + "/" + i_rowid + ")"
+
+		Do Case s_table
+		
+			Case s_lejer
+			
+				Fetch rec i_rowid From s_table
+				as_KO_naziv = s_table + ".col3"
+				as_KO_matbr = s_table + ".col1"	
+'				Print "Pronaðena KO '" + as_KO_naziv + "' (Mat. broj: " + as_KO_matbr + ")"
+				PronadjiKO = as_KO_naziv 
+'			Case Else
+'				
+'				Print ""
+
+		End case
+		Next
+	End If
+
 End Function

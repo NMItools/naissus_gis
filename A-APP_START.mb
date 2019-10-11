@@ -296,15 +296,9 @@ Sub Login_mssql
 	Call POD_aktivni_folderi
 
 ' - postavka koordinatnog sistema
-	i_hstmt = Server_Execute(i_hdbc,"exec mbx.sp_CRS") 
-	Server i_hstmt Bind Column 1 To s_CRS, am_stat
-	Server i_hstmt Fetch First
-	Server i_hstmt Close
-
-    CRS = "Set Coordsys "+s_CRS
-	Run Command CRS
-	
-			f_setIni = SetIniVal(iniFile, "MSSQL_GIS_SERVER", "CRS", s_CRS)
+    
+    CRS = SetCRS()
+	f_setIni = SetIniVal(iniFile, "MSSQL_GIS_SERVER", "CRS", s_CRS)
 
 ' - instalacija WinCan Viewer i ažuriranje NAISSUS-GIS_UPDATE.MBX + STARTUP.WOR
 	Call gisUpdate	

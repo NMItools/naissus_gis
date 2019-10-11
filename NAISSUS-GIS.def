@@ -247,6 +247,11 @@
 	Declare Sub GridInfo
 	Declare Sub GRID
 
+	Declare Sub ULICA_UNOS
+	Declare Sub ULICA_IZBOR
+	Declare Sub ULICA_PARCELA
+	Declare Sub ULICA_UKLONI
+
 	'   03-Dialog1.MB
 
 		Declare Sub DLG_Izohipse_1
@@ -264,6 +269,16 @@
 			global kota_min as string
 			global kota_max as string
 			global gsPath As String
+			
+			Global as_broj_Parcele As Alias		
+			Global as_mat_broj_KO As Alias
+			
+			Global s_Ulica_ID As Integer
+			Global s_Ulica_Ime As String
+			Global b_parcela_def As Brush
+			Global p_parcela_def As Pen
+			Global b_parcela As Brush
+			Global p_parcela As Pen
 
 '	04-NIVOS ===========================================================================
 	

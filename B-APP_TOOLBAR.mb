@@ -550,9 +550,38 @@ Sub Kraj_Rada
 		Print "Zatvaranje svih tabela..."
 	
 '	Close All Interactive
+
+'	Brisanje toolbara
+
+		Alter ButtonPad "Katastar, Izohipse, DTM" Destroy		
+		Alter ButtonPad "Katastarske, topografske i geografske podloge" Destroy
+		Alter ButtonPad "NIVOS Potrosaci" Destroy
+		Alter ButtonPad "NIVOS objekti" Destroy
+		Alter ButtonPad "NIVOS Geodetski" Destroy
+		Alter ButtonPad "NIKAS objekti" Destroy
+		Alter ButtonPad "NIKAS CCTV" Destroy
+				
+	' - EDITOR moduli
+		If s_appmod = "editor" 
+		or s_appmod = "admin" 
+		or s_appmod = "Super" 
+		then
+			Alter ButtonPad "Mreze podloga" Destroy		
+			Alter ButtonPad "Planovi" Destroy
+		End If
 	
-		Print "Zatvaranje konekcija ka MS SQL serveru..."
+	' - ADMIN moduli
+		If s_appmod = "Admin" 
+		or s_appmod = "Super" 
+		then
+			Alter ButtonPad "Novi vodomeri" Destroy
+			Alter ButtonPad "Razno" Destroy
+			Alter ButtonPad "GIS Admin" Destroy
+		End If		
 	
+	
+	Print "Zatvaranje konekcija ka MS SQL serveru..."
+
 	Server i_hdbc Disconnect
 	
 		print "Kraj rada."
