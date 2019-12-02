@@ -121,7 +121,6 @@ SUB Main
 	Call Toolbar_GLAVNI
 	Call Podloge
 	Call MrezePodloga
-	Call KATASTAR
 	Call NIVOS_OBJEKTI
 	Call NIVOS_GEODETSKI
 	Call NIVOS_KORISNICI
@@ -141,6 +140,7 @@ SUB Main
 	then
 		Call Planovi
 		Call MrezePlanova
+		Call KATASTAR		
 	End If
 
 ' - ADMIN moduli

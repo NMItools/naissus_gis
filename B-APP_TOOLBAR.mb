@@ -553,7 +553,6 @@ Sub Kraj_Rada
 
 '	Brisanje toolbara
 
-		Alter ButtonPad "Katastar, Izohipse, DTM" Destroy		
 		Alter ButtonPad "Katastarske, topografske i geografske podloge" Destroy
 		Alter ButtonPad "NIVOS Potrosaci" Destroy
 		Alter ButtonPad "NIVOS objekti" Destroy
@@ -566,6 +565,7 @@ Sub Kraj_Rada
 		or s_appmod = "admin" 
 		or s_appmod = "Super" 
 		then
+			Alter ButtonPad "Katastar, Izohipse, DTM" Destroy		
 			Alter ButtonPad "Mreze podloga" Destroy		
 			Alter ButtonPad "Planovi" Destroy
 		End If
