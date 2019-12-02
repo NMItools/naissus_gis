@@ -241,7 +241,7 @@ Sub Koordinate
 '	Print "y = " & CentroidY(objTmp)
 '	
 '	"Drzavni Koordinatni Sistem - Gauss Krüger 7. zona (JKP ''Naissus'' tr.) - EPSG: 31277"	
-    Run Command CRS
+    CRS = SetCRS()
 	Print "------------------------------------"
 	Print CoordSysName$(s_CRS)
 	Print "x = " & CentroidX(objTmp)
