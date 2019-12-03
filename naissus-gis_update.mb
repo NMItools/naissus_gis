@@ -1,8 +1,8 @@
 include "mapbasic.def"
 include "menu.def"
 include "icons.def"
-include "..\nmiWin.def"
-include "..\nmiFunkcije.def"
+include "nmiWin.def"
+include "nmiFunkcije.def"
 
 ' POTREBNO ZA RAD:
 '
