@@ -138,11 +138,11 @@ SUB MapperPriprema
 	Do Case CommandInfo(CMD_INFO_TOOLBTN)
 		
 		Case 9
-		Note "Print 1 - Standardni sablon NAISSUS"
+		'Note "Print 1 - Standardni sablon NAISSUS"
 		Call DLG_print_1
 		
 		Case 10
-		Note "Print 2 - Izvestaj o polozaju cevi"
+		'Note "Print 2 - Izvestaj o polozaju cevi"
 		Call DLG_print_2
 	End Case
 			
@@ -869,8 +869,19 @@ Layout
 '	prva vertikalna s leva ka desnoj strani
 	Create Line (t1.x+w_Logo/1.8, t1.y) (t1.x+w_Logo/1.8, t1.y + h_Tablica) Pen (15,2,8421504)
 
-'	druga vertikalna s leva ka desnoj strani
-	Create Line (t1.x + w_Logo/1.8 + w_Logo * 1.4, t1.y) (t1.x + w_Logo/1.8 + w_Logo * 1.4, t4.y) Pen (15,2,8421504) 
+	Do Case n_Polozaj
+	
+		Case 1 ' LANDSCAPE
+		
+		'	druga vertikalna s leva ka desnoj strani
+			Create Line (t1.x + w_Logo/1.8 + w_Logo * 1.4, t1.y) (t1.x + w_Logo/1.8 + w_Logo * 1.4, t4.y) Pen (15,2,8421504) 
+		
+		Case 2 ' PORTRAIT
+		
+		'	druga vertikalna s leva ka desnoj strani
+			Create Line (t1.x + w_Logo/1.8 + w_Logo*0.7, t1.y) (t1.x + w_Logo/1.8 + w_Logo * 0.7, t4.y) Pen (15,2,8421504) 
+			
+	End Case
 
 '	treca vertikalna s leva ka desnoj strani
 	Create Line (t4.x - w_Logo/1.8 * 0.75, t1.y + h_Tablica/2) (t4.x - w_Logo/1.8 * 0.75, t4.y) Pen (15,2,8421504) 	
@@ -910,39 +921,98 @@ Layout
 		(t1.x + mr/7, t1.y + mr/7 + 2.5*h_Tablica/3) (t1.x + w_Logo*1.25, t1.y + mr*10 + h_Tablica)
 		Font ("Arial Narrow",0,8,0)
 
-
 '	Naslov printa
 	Create Text
-	"Izveštaj o položaju cevovoda na osnovu intervencije RN _____"
-	(f1.x + w_MapFrame/3, f1.y + mr) (f1.x + w_MapFrame/3 + 4, f1.y + mr - 0.2)
-	Font ("Arial Narrow",1,12,0,16777215)
+		"Izveštaj o položaju cevovoda na osnovu intervencije RN _____"
+		(f1.x + w_MapFrame/3, f1.y + mr) (f1.x + w_MapFrame/3 + 4, f1.y + mr - 0.2)
+		Font ("Arial Narrow",1,12,0,16777215)
 
-'	Opisni tekst
-	Create Text
-    "Prilikom intrevencije na cevovodu utvrðeno je da položaj ili opis cevovoda \n\n1. - ODGOVARA stanju unetom u GIS\n\n2. - NE ODGOVARA stanju unešenom u GIS i prilažemo skicu položaja \n      cevovoda sa prateæim podacima koje je potrebno izmeniti."
-	(t1.x + w_Logo/1.8 + mr/4, t1.y + mr/4) (t1.x + w_Logo/1.8 + 4, t1.y + mr)
-	Font ("Arial Narrow",0,10,0,16777215)
+	Do Case n_Polozaj
+		
+		Case 1 ' LANDSCAPE
+	
+	'	Opisni tekst
+		Create Text
+		    "Prilikom intrevencije na cevovodu utvrðeno je da položaj ili opis cevovoda \n\n1. - ODGOVARA stanju unetom u GIS\n\n2. - NE ODGOVARA stanju unešenom u GIS i prilažemo skicu položaja \n      cevovoda sa prateæim podacima koje je potrebno izmeniti."
+			(t1.x + w_Logo/1.8 + mr/4, t1.y + mr/4) (t1.x + w_Logo/1.8 + 4, t1.y + mr)
+			Font ("Arial Narrow",0,10,0,16777215)
+	
+	'	Podaci o ispravkama
+		Create Text
+			"Materijal:_______ Preènik: _________mm Dubina: ______ m"
+			(t1.x + w_Logo/1.8 + w_Logo * 1.4 + mr/4, t1.y + mr/4) (t1.x + w_Logo/1.8 + w_Logo * 1.4 + 5, t1.y + mr)
+			Font ("Tahoma",0,9,0)
+		Create Text
+			"Ulica:_____________________________________________"
+			(t1.x + w_Logo/1.8 + w_Logo * 1.4 + mr/4, t1.y + mr/4 + 1.2) (t1.x + w_Logo/1.8 + w_Logo * 1.4 + 5, t1.y + mr + 0.2)
+			Font ("Tahoma",0,9,0)
+		Create Text
+			"Podatke dao poslovoða: ______________________________"
+			(t1.x + w_Logo/1.8 + w_Logo * 1.4 + mr/4, t1.y + mr/4 + 2.4) (t1.x + w_Logo/1.8 + w_Logo * 1.4 + 5, t1.y + mr + 0.8)
+			Font ("Tahoma",0,9,0)
+		Create Text
+			"Napomene:"
+			(t1.x + w_Logo/1.8 + w_Logo * 1.4 + mr/4, t1.y + mr/4 + 3.6) (t1.x + w_Logo/1.8 + w_Logo * 1.4 + 5, t1.y + mr + 1.4)
+			Font ("Arial Narrow",0,10,0,16777215)
+	
+	'	Podaci o mapi
+		Create Text
+			"R =  1 : "+str$(print_R)
+			(t2.x-w_Logo/1.8*0.75, t2.y-h_Tablica*0.15) (t2.x, t2.y-h_Tablica*0.3)
+			Font ("Arial Narrow",1,12,0)
+		Create Text
+			"Format:    "+  s_Papir
+			(t2.x-w_Logo/1.8*0.75 + mr/7, t2.y+h_Tablica*0.5) (t2.x, t2.y+h_Tablica*0.52)
+			Font ("Arial Narrow",0,8,0,16777215)
+		Create Text
+			"Datum:    "+sPrintDate
+			(t4.x-w_Logo/1.8*0.75 + mr/7, t4.y-h_Tablica*0.25) (t2.x, t2.y+h_Tablica*0.77)
+			Font ("Arial Narrow",0,8,0,16777215)
+		
+		Case 2 ' POTRAIT
+		
+		'	Opisni tekst
+		Create Text
+	        "Prilikom intrevencije na cevovodu utvrðeno je da \npoložaj ili opis cevovoda:\n\n1. - ODGOVARA stanju unetom u GIS\n\n2. - NE ODGOVARA stanju unešenom u GIS\n      i prilažemo skicu položaja  cevovoda sa\n      prateæim podacima koje je potrebno izmeniti."
+			(t1.x + w_Logo/1.8 + mr/4, t1.y + mr/4) (t1.x + w_Logo/1.8 + 4, t1.y + mr)
+			Font ("Arial Narrow",0,8,0,16777215)
+	
+	'	Podaci o ispravkama
+		Create Text
+			"Materijal:_______ Preènik: _________mm Dubina: ______ m"
+			(t1.x + w_Logo/1.8 + w_Logo * 0.7 + mr/4, t1.y + mr/4) (t1.x + w_Logo/1.8 + w_Logo * 0.7 + 5, t1.y + mr)
+			Font ("Tahoma",0,9,0)
+		Create Text
+			"Ulica:_____________________________________________"
+			(t1.x + w_Logo/1.8 + w_Logo * 0.7 + mr/4, t1.y + mr/4 + 1.2) (t1.x + w_Logo/1.8 + w_Logo * 0.7 + 5, t1.y + mr + 0.2)
+			Font ("Tahoma",0,9,0)
+		Create Text
+			"Podatke dao poslovoða: ______________________________"
+			(t1.x + w_Logo/1.8 + w_Logo * 0.7 + mr/4, t1.y + mr/4 + 2.4) (t1.x + w_Logo/1.8 + w_Logo * 0.7 + 5, t1.y + mr + 0.8)
+			Font ("Tahoma",0,9,0)
+		Create Text
+			"Napomene:"
+			(t1.x + w_Logo/1.8 + w_Logo * 0.7 + mr/4, t1.y + mr/4 + 3.6) (t1.x + w_Logo/1.8 + w_Logo * 0.7 + 5, t1.y + mr + 1.4)
+			Font ("Arial Narrow",0,10,0,16777215)
+	
+	'	Podaci o mapi
+		Create Text
+			"R =  1 : "+str$(print_R)
+			(t2.x-w_Logo/1.8*0.75, t2.y-h_Tablica*0.15) (t2.x, t2.y-h_Tablica*0.3)
+			Font ("Arial Narrow",1,12,0)
+		Create Text
+			"Format:    "+  s_Papir
+			(t2.x-w_Logo/1.8*0.75 + mr/7, t2.y+h_Tablica*0.5) (t2.x, t2.y+h_Tablica*0.52)
+			Font ("Arial Narrow",0,8,0,16777215)
+		Create Text
+			"Datum:    "+sPrintDate
+			(t4.x-w_Logo/1.8*0.75 + mr/7, t4.y-h_Tablica*0.25) (t2.x, t2.y+h_Tablica*0.77)
+			Font ("Arial Narrow",0,8,0,16777215)
+		
+		
+	End Case
 
-'	Podaci o ispravkama
-	Create Text
-	"Materijal:_______ Preènik: _________mm Dubina: ______ m"
-	(t1.x + w_Logo/1.8 + w_Logo * 1.4 + mr/4, t1.y + mr/4) (t1.x + w_Logo/1.8 + w_Logo * 1.4 + 5, t1.y + mr)
-	Font ("Tahoma",0,9,0)
-	Create Text
-	"Ulica:_____________________________________________"
-	(t1.x + w_Logo/1.8 + w_Logo * 1.4 + mr/4, t1.y + mr/4 + 1.2) (t1.x + w_Logo/1.8 + w_Logo * 1.4 + 5, t1.y + mr + 0.2)
-'	(6.5931,6.6778) (9.9931,6.8278)
-	Font ("Tahoma",0,9,0)
-	Create Text
-	"Podatke dao poslovoða: ______________________________"
-	(t1.x + w_Logo/1.8 + w_Logo * 1.4 + mr/4, t1.y + mr/4 + 2.4) (t1.x + w_Logo/1.8 + w_Logo * 1.4 + 5, t1.y + mr + 0.8)
-	Font ("Tahoma",0,9,0)
-	Create Text
-	"Napomene:"
-	(t1.x + w_Logo/1.8 + w_Logo * 1.4 + mr/4, t1.y + mr/4 + 3.6) (t1.x + w_Logo/1.8 + w_Logo * 1.4 + 5, t1.y + mr + 1.4)
-	Font ("Arial Narrow",0,10,0,16777215)
 
- 
  '=== kopirajt
 	 
 	Create Text
