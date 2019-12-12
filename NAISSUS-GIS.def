@@ -247,10 +247,6 @@
 	Declare Sub GridInfo
 	Declare Sub GRID
 
-	Declare Sub ULICA_UNOS
-	Declare Sub ULICA_IZBOR
-	Declare Sub ULICA_PARCELA
-	Declare Sub ULICA_UKLONI
 
 	'   03-Dialog1.MB
 
@@ -270,15 +266,6 @@
 			global kota_max as string
 			global gsPath As String
 			
-			Global as_broj_Parcele As Alias		
-			Global as_mat_broj_KO As Alias
-			
-			Global s_Ulica_ID As Integer
-			Global s_Ulica_Ime As String
-			Global b_parcela_def As Brush
-			Global p_parcela_def As Pen
-			Global b_parcela As Brush
-			Global p_parcela As Pen
 
 '	04-NIVOS ===========================================================================
 	
@@ -595,7 +582,8 @@
 		Global l_Upozorenje as logical
 		Global l_Okvir as logical
 		Global l_Legenda as logical
-		Global l_PrintSlika as logical
+		Global l_PrintSlika_1 as logical
+		Global l_PrintSlika_2 as logical
 		Global l_Markeri as logical
 		
 		Global i_Dpi as Smallint
@@ -650,7 +638,26 @@
 
 		Global s_cctv_ID as String
 		
+'	16-REGISTAR ULICA
 		
+	Declare Sub REGISTAR_ULICA		
+	Declare Sub ULICA_UNOS
+	Declare Sub ULICA_IZBOR
+	Declare Sub ULICA_PARCELA
+	Declare Sub ULICA_UKLONI
+	
+		Global as_broj_Parcele As Alias		
+		Global as_mat_broj_KO As Alias
+		
+		Global s_Ulica_ID As Integer
+		Global s_Ulica_Ime As String
+		Global b_parcela_def As Brush
+		Global p_parcela_def As Pen
+		Global b_parcela As Brush
+		Global p_parcela As Pen
+
+	
+	
 '	99-ADMIN.MB ===========================================================================
 	
 	Declare Sub GIS_admin

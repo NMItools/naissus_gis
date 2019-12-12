@@ -1,0 +1,251 @@
+include "mapbasic.def"
+include "menu.def"
+include "icons.def"
+include "Library\ERRORLib.def"
+include "nmiWin.def"
+include "nmiFunkcije.def"
+include "nmiDotNet.def"
+include "NAISSUS-GIS.def"
+
+'===================================================================================================================== 
+'	Alati za rad sa adresnim registrom (unos novih ulica i povezivanje sa parcelama)
+
+Sub REGISTAR_ULICA
+	
+	onerror goto Greska
+
+	Create Menu "Registar ulica" As
+		"Registar ulica" HelpMsg "Submenu Item" Calling ULICA_UNOS,
+		"Izaberi ulicu za unos..." HelpMsg "Submenu Item" Calling ULICA_IZBOR,
+		"Dodeli naziv ulice parceli" HelpMsg "Submenu Item" Calling ULICA_PARCELA,
+		"Ukloni naziv ulice parceli" HelpMsg "Submenu Item" Calling ULICA_UKLONI
+
+	Alter Menu "JKP Naissus" Add 
+		"Registar ulica" As "Registar Ulica",
+		"(-"
+	
+	Create ButtonPad "Registar ulica" As
+			
+		PushButton
+			Calling ULICA_UNOS
+			Icon MI_ICON_ADDTOLIBRARY
+			HelpMsg "Registar Ulica (Izmena, Unos, Brisanje)\nRegistar Ulica"
+		
+		SEPARATOR
+		
+		PushButton
+			Calling ULICA_IZBOR
+			Icon MI_ICON_COMPASS_EXPAND
+			HelpMsg "Aktiviranje ulice za unos\nAktiviranje ulice za unos"
+			
+		ToolButton Calling ULICA_PARCELA
+			ID 311
+			Icon MI_ICON_MAPSYMB_5
+			Cursor MI_CURSOR_ARROW
+			DrawMode DM_CUSTOM_POINT
+			HelpMsg "Dodeli ulicu parcelama\nDodeli ulicu parcelama"
+		
+		SEPARATOR
+		
+		ToolButton Calling ULICA_UKLONI
+			ID 312
+			Icon MI_ICON_SIGNS_11
+			Cursor MI_CURSOR_ARROW
+			DrawMode DM_CUSTOM_POINT
+			HelpMsg "Ukloni ulicu sa parcela\nUkloni ulicu sa parcela"
+
+	
+	Alter ButtonPad "Registar ulica" 
+		Position(12,6) Units "cm"
+'		ToolbarPosition (1,4)
+		Float
+		Title "Registar ulica"
+		Width 25
+		Show
+
+
+	Exit Sub
+	'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "REGISTAR_ULICA")
+	Call ERRShow()	 	
+	
+End Sub
+
+
+Sub ULICA_UNOS
+
+	onerror goto Greska  
+	
+	Note "Unesi ulicu u bazu!"
+	
+	Exit Sub
+	'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "ULICA_UNOS")
+	Call ERRShow()
+
+End Sub
+
+Sub ULICA_IZBOR
+
+	onerror goto Greska  
+		
+	Alter Button ID 311 Uncheck
+	
+'	Iz selekcije izvuèi ID ulice i ime
+	Fetch First From Selection
+	s_Ulica_ID = kn_ulice_nazivi.ID_IME_UL
+	s_Ulica_Ime = str$(kn_ulice_nazivi.NAZIV_LATIN2)
+	Print "Ume ulice " & kn_ulice_nazivi.NAZIV_LATIN2 & " aktivno za povezivanje sa parcelom"
+	Run Menu Command M_QUERY_UNSELECT
+
+	Exit Sub
+	'	-------------------------
+	Greska:
+'	Print "Da li je odabrano ime ulice za unos u tabeli?"
+	Call ERRCreate(Err(), Error$(), "Da li je odabrano ime ulice za unos u tabeli?")
+	Call ERRShow()
+
+	
+End Sub
+
+
+Sub ULICA_PARCELA
+
+	onerror goto Greska  
+	
+	Dim x, y, x2, y2 As Float,
+		i, i_found, i_rowid As Integer,
+		s_table As Alias,
+		KO as String,
+		o_parc as Object
+	
+	CRS = SetCRS()
+
+'	stil za parcelu	koja je završena
+	b_parcela = MakeBrush(2,16752800,16711680)
+	p_parcela = MakePen (2,2,16711680) 
+	
+	iMapWindowID = WindowID(FrontWindow())
+	
+	' - Odredjivanje koordinata gde je kliknuo korisnik.
+	x = CommandInfo(CMD_INFO_X)
+	y = CommandInfo(CMD_INFO_Y)
+	
+	KO = PronadjiKO("ADMJ_NASELJA_KO", "NAZIV_LATIN2", x ,y)
+	
+	i_found = SearchPoint(FrontWindow( ), x, y)
+
+	If i_found = 0 Then
+			Note "Ne postoji parcela na lokaciji!"
+		Else
+	' - Procesiranje rezultata
+		For i = 1 to i_found
+		'	ime tabele koja je "pogodjena" ispod klika.
+			s_table = SearchInfo(i, SEARCH_INFO_TABLE)
+		'	pronadji row ID objekta koji je kliknut.
+			i_rowid = SearchInfo(i, SEARCH_INFO_ROW)
+			
+			print i_found + " (" + s_table + "/" + i_rowid + ")"
+			
+			If s_table = "KATASTAR_PARCELE" Then
+			'	Fetch-uj redove za sve atribute
+				Fetch rec i_rowid From s_table
+				as_broj_Parcele = s_table + ".col1"
+				as_mat_broj_KO = s_table + ".col7"
+				o_parc = KATASTAR_PARCELE.obj
+				
+				Print "Pronaðena parcela broj " + as_broj_Parcele + " (" + KO + " / " + as_mat_broj_KO + ")"
+				
+				Update KATASTAR_PARCELE Set ULICA = s_Ulica_ID Where Rowid = i_rowid
+				Alter Object o_parc Info OBJ_INFO_BRUSH, b_parcela
+				Alter Object o_parc Info OBJ_INFO_PEN, p_parcela
+				Update KATASTAR_PARCELE Set obj = o_parc Where Rowid = i_rowid				
+				
+				Print "Ulica  povezana..."
+
+				Exit For
+			End If
+		Next		
+		
+	End If
+
+	Exit Sub
+	'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "ULICA_PARCELA")
+	Call ERRShow()
+
+End Sub
+
+
+Sub ULICA_UKLONI
+
+	onerror goto Greska  
+	
+'	Note"Ukloni ulicu"
+	
+	Dim x, y, x2, y2 As Float,
+		i, i_found, i_rowid As Integer,
+		s_table As Alias,
+		KO as String,
+		o_parc as Object
+	
+	CRS = SetCRS()
+
+'	defautl stil za parcelu
+	b_parcela_def = MakeBrush(17,65280, -1)
+	p_parcela_def = MakePen(1,2,65280)
+	
+	iMapWindowID = WindowID(FrontWindow())
+	
+	' - Odredjivanje koordinata gde je kliknuo korisnik.
+	x = CommandInfo(CMD_INFO_X)
+	y = CommandInfo(CMD_INFO_Y)
+	
+	i_found = SearchPoint(FrontWindow( ), x, y)
+
+	If i_found = 0 Then
+			Note "Ne postoji parcela na lokaciji!"
+		Else
+	' - Procesiranje rezultata
+		For i = 1 to i_found
+		'	ime tabele koja je "pogodjena" ispod klika.
+			s_table = SearchInfo(i, SEARCH_INFO_TABLE)
+		'	pronadji row ID objekta koji je kliknut.
+			i_rowid = SearchInfo(i, SEARCH_INFO_ROW)
+			
+			print i_found + " (" + s_table + "/" + i_rowid + ")"
+			
+			If s_table = "KATASTAR_PARCELE" Then
+			'	Fetch-uj redove za sve atribute
+				Fetch rec i_rowid From s_table
+				as_broj_Parcele = s_table + ".col1"
+				as_mat_broj_KO = s_table + ".col7"
+				o_parc = KATASTAR_PARCELE.obj
+				
+				Print "Pronaðena parcela broj " + as_broj_Parcele + " (" + KO + " / " + as_mat_broj_KO + ")"
+				
+				Update KATASTAR_PARCELE Set ULICA = 0 Where Rowid = i_rowid
+				Alter Object o_parc Info OBJ_INFO_BRUSH, b_parcela_def
+				Alter Object o_parc Info OBJ_INFO_PEN, p_parcela_def
+				Update KATASTAR_PARCELE Set obj = o_parc Where Rowid = i_rowid				
+				
+				Print "Ulica obrisana..."
+				
+				Exit For
+			End If
+		Next		
+		
+	End If
+
+	Alter Button ID 312 Uncheck
+	
+	Exit Sub
+	'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "ULICA_UKLONI")
+	Call ERRShow()
+
+End Sub

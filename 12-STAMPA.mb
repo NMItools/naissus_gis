@@ -217,7 +217,6 @@ Sub DLG_print_2_Formati
 		
 End Sub
 
-
 Sub DLG_print_1_Polozaj
 
 	onerror goto Greska  
@@ -402,7 +401,7 @@ SUB DLG_print_1_OK
 	l_Okvir = ReadControlValue(21)
 	l_Sever = ReadControlValue(22)	
 	l_Legenda = ReadControlValue(23)	
-	l_PrintSlika = ReadControlValue(24)
+	l_PrintSlika_1 = ReadControlValue(24)
 	l_Markeri = ReadControlValue(25)
 
 	s_TipLgd = ReadControlValue(26)	
@@ -700,8 +699,9 @@ Layout
 	
 '=== Snimanje printa kao JPG	
 
-	If l_PrintSlika 
+	If l_PrintSlika_1
 	Then
+		Print "Kreiranje slike u " + s_FOLDER_PRN+Replace(s_PrintNaslov, chr$(58), chr$(95))+".jpg"
 		Save Window iLayoutWindowID As s_FOLDER_PRN+Replace(s_PrintNaslov, chr$(58), chr$(95))+".jpg" Type "JPEG" Width 29.7 Units "cm" Height 21 Units "cm" Resolution i_Dpi
 	End If
 	
@@ -743,7 +743,7 @@ SUB DLG_print_2_OK
 	Print "R = 1 : "+print_R
 
 ' - Èekboks opcije za dodatne objekte
-	l_PrintSlika = ReadControlValue(24)
+	l_PrintSlika_2 = ReadControlValue(24)
 	i_Dpi = ReadControlValue(27)
 	
 ' - Datum u lokalnom formatu
@@ -1039,7 +1039,7 @@ Layout
 	
 '=== Snimanje printa kao JPG	
 
-	If l_PrintSlika 
+	If l_PrintSlika_2
 	Then
 		Save Window iLayoutWindowID As s_FOLDER_PRN+Replace(s_PrintNaslov, chr$(58), chr$(95))+".jpg" Type "JPEG" Width 29.7 Units "cm" Height 21 Units "cm" Resolution i_Dpi
 	End If

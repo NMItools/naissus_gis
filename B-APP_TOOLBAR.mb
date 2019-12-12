@@ -568,6 +568,7 @@ Sub Kraj_Rada
 			Alter ButtonPad "Katastar, Izohipse, DTM" Destroy		
 			Alter ButtonPad "Mreze podloga" Destroy		
 			Alter ButtonPad "Planovi" Destroy
+			Alter ButtonPad "Registar ulica" Destroy
 		End If
 	
 	' - ADMIN moduli

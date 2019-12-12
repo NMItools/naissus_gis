@@ -27,8 +27,10 @@ SUB Main
 ' - setovanje naissus-gis.ini fajla
 	iniFile = s_MBApp_Dir+"naissus-gis.ini"			
 	
-' - Setovanje osnovnih informacija o MBX aplikaciji
+' - Setovanje osnovnih informacija o MBX aplikaciji u .INI fajl
 	f_setIni = SetIniVal(iniFile, "MBX", "IME", ApplicationName$())
+	f_setIni = SetIniVal(iniFile, "MBX", "DIR", ApplicationDirectory$())
+	
 	s_MBX_IME = GetIniVal(iniFile, "MBX", "IME")
 	s_OS = GetIniVal(iniFile, "MBX", "OS")
 	
@@ -39,11 +41,35 @@ SUB Main
 	vremeLokal = vremefajla(fajlLokal)
 	s_MBX_VER = FormatDate$(GetDate(vremeLokal))+" - "+FormatTime$(GetTime(vremeLokal),"HH:mm:ss")
 	
-' - setovanje glavnih foldera iz INI fajla 	
-	s_FOLDER_WOR = GetIniVal(iniFile, "GIS_FOLDERI", "FOLDER_WOR")
-	s_FOLDER_TAB = GetIniVal(iniFile, "GIS_FOLDERI", "FOLDER_TAB")
-	s_FOLDER_RAD = GetIniVal(iniFile, "GIS_FOLDERI", "FOLDER_RAD")
-	s_FOLDER_PRN = GetIniVal(iniFile, "GIS_FOLDERI", "FOLDER_PRN")
+' - setovanje glavnih foldera iz INI fajla 
+	
+	If GetIniVal(iniFile, "GIS_FOLDERI", "FOLDER_WOR") = ""
+		
+		Then
+		' - Ako je došlo do ažuriranja INI fajla glavni folder i korisnièko ime se èitaj iz Registry kljuèa 
+		'   a ostali se kreriraju konkatenacijom
+		s_FOLDER_WOR = GetRegVal(HKEY_CURRENT_USER,"Software\MapInfo\Mapinfo\NMItools\naissus-GIS","Folder_GIS") + "\"
+		s_FOLDER_TAB = s_FOLDER_WOR + "SQL\"
+		s_FOLDER_RAD = s_FOLDER_WOR + "_radni\"
+		s_FOLDER_PRN = s_FOLDER_WOR + "Print\"
+		
+		f_setIni = SetIniVal(iniFile, "GIS_FOLDERI", "FOLDER_WOR", s_FOLDER_WOR)
+		f_setIni = SetIniVal(iniFile, "GIS_FOLDERI", "FOLDER_TAB", s_FOLDER_TAB)
+		f_setIni = SetIniVal(iniFile, "GIS_FOLDERI", "FOLDER_RAD", s_FOLDER_RAD)
+		f_setIni = SetIniVal(iniFile, "GIS_FOLDERI", "FOLDER_PRN", s_FOLDER_PRN)
+		
+		s_USER = GetRegVal(HKEY_CURRENT_USER,"Software\MapInfo\Mapinfo\NMItools\naissus-GIS","MSSQLUsername")
+		f_setIni = SetIniVal(iniFile, "MSSQL_GIS_SERVER", "KOR", s_USER)
+
+	Else
+	
+		s_FOLDER_WOR = GetIniVal(iniFile, "GIS_FOLDERI", "FOLDER_WOR")
+		s_FOLDER_TAB = GetIniVal(iniFile, "GIS_FOLDERI", "FOLDER_TAB")
+		s_FOLDER_RAD = GetIniVal(iniFile, "GIS_FOLDERI", "FOLDER_RAD")
+		s_FOLDER_PRN = GetIniVal(iniFile, "GIS_FOLDERI", "FOLDER_PRN")
+
+	End If
+	
 	s_FOLDER_POD = GetIniVal(iniFile, "GIS_FOLDERI", "FOLDER_POD")
 	s_FOLDER_NET = GetIniVal(iniFile, "GIS_FOLDERI", "FOLDER_NET")
 	s_FOLDER_CCTV = GetIniVal(iniFile, "GIS_FOLDERI", "FOLDER_CCTV")
@@ -121,6 +147,7 @@ SUB Main
 	Call Toolbar_GLAVNI
 	Call Podloge
 	Call MrezePodloga
+	Call KATASTAR
 	Call NIVOS_OBJEKTI
 	Call NIVOS_GEODETSKI
 	Call NIVOS_KORISNICI
@@ -140,7 +167,8 @@ SUB Main
 	then
 		Call Planovi
 		Call MrezePlanova
-		Call KATASTAR		
+		Call REGISTAR_ULICA
+		
 	End If
 
 ' - ADMIN moduli
@@ -568,7 +596,7 @@ Sub WinCan_instalacija
 		
 	Else
 		
-		Note "Greška (proveriti prava korisnika nad aplikacionim folderom ?): " & sErr
+		Print "Folder za WinCAN viewer je veæ kreiran."
 	
 	End If
 
@@ -581,7 +609,7 @@ Sub WinCan_instalacija
 
 '	-------------------------
 	Greska:
-	Call ERRCreate(Err(), Error$(), "Login_CANCEL")
+	Call ERRCreate(Err(), Error$(), "WinCan_instalacija")
 	Call ERRShow()
 	
 End Sub

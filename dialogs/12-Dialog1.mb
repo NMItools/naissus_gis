@@ -203,7 +203,7 @@ Control CheckBox
 	Title "JPEG"
 	Calling JPEG_checkbox
 	Value False
-	Into l_PrintSlika
+	Into l_PrintSlika_1
 	
 Control CheckBox
 	Id 25
@@ -265,7 +265,7 @@ Control OKButton
 	Exit Sub
 '	-------------------------
 	Greska:
-	Call ERRCreate(Err(), Error$(), "DLG_print")
+	Call ERRCreate(Err(), Error$(), "DLG_print_1")
 	Call ERRShow()
 		
 End Sub			
