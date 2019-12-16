@@ -17,7 +17,7 @@ SUB Main
 '*************************
 ' verzija MBX aplikacije '
 '*************************
-	s_verzija= "1.19.4"
+	s_verzija= "1.19.5"
 	
 ' - setovanje aplikacionog i privremenog foldera
 	s_TEMP_Dir = pathtodirectory$(tempfilename$(""))
