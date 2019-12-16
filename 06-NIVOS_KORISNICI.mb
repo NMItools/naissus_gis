@@ -190,7 +190,7 @@ Sub arrZone
 		Wend
 		
 	Print "---------------------------------------------------"
-	Print "Pronaðeno je "+n+" Inkaso Reona"
+	Print "Pronaðeno je "+(n-1)+" Inkaso Reona"
 	
 	Server i_hstmt Close		
 	

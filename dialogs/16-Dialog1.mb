@@ -1,0 +1,141 @@
+Include "MAPBASIC.DEF"
+Include "ICONS.DEF"
+Include "MENU.DEF"
+include "..\Library\ERRORLib.def"
+include "..\nmiFunkcije.def"
+include "..\nmiDotNet.def"
+include "..\nmiWin.def"
+include "..\NAISSUS-GIS.def"
+
+Sub reg_ulica
+	
+	reg_ulica_izbor = ReadControlValue(2)
+	
+	Do Case reg_ulica_izbor
+		
+	Case 1
+	
+		Alter Control 6 Hide
+		Alter Control 6 Disable
+		
+		Alter Control 7 Hide
+		Alter Control 7 Disable
+		
+		Alter Control 8 Show
+		Alter Control 8 Enable
+	
+	Case 2
+	
+		Alter Control 6 Show
+		Alter Control 6 Enable
+		
+		Alter Control 7 Show
+		Alter Control 7 Enable
+		
+		Alter Control 8 Show
+		Alter Control 8 Enable	
+		
+	End Case
+	
+End Sub
+
+
+Sub DLG_REGISTAR_ULICA
+	
+	Call arrKO
+
+	onerror goto Greska  
+	
+'	Exit Sub
+'	'	-------------------------
+'	Greska:
+'	Call ERRCreate(Err(), Error$(), "DLG_REGISTAR_ULICA")
+'	Call ERRShow()
+'	
+'End Sub	
+
+'***** DIALOG DESIGNER GENERATED CODE. DO NOT EDIT OR REMOVE THIS LINE OR BELOW THIS LINE! *****
+
+Dialog
+	Title "Registar ulica"
+	Width 229 Height 131
+	
+Control StaticText
+	Id 6
+	Position 14, 72
+	Width 40 Height 8
+	Disable
+	Title "Stari naziv:"
+	Hide
+	
+Control RadioGroup
+	Id 2
+	Position 14, 21
+	Title "Novi naziv;Izmena postojeæeg naziva"
+	Calling reg_ulica
+	Value 1
+	Into i_reg_ulica_izbor
+	
+Control GroupBox
+	Id 1
+	Position 8, 9
+	Width 211 Height 43
+	Title "Izbor akcije i KO"
+	
+Control PopupMenu
+	Id 7
+	Position 56, 71
+	Width 158
+	Disable
+	Into s_stari_naziv_ul
+	
+Control StaticText
+	Id 3
+	Position 115, 21
+	Width 71 Height 8
+	Title "Katastarska Opština:"
+	
+Control StaticText
+	Id 8
+	Position 14, 90
+	Width 41 Height 8
+	Title "Novi naziv:"
+	
+Control GroupBox
+	Id 5
+	Position 8, 59
+	Width 211 Height 49
+	Title "Ažuriranje"
+	
+Control EditText
+	Id 9
+	Position 56, 87
+	Width 159 Height 14
+	Into s_novi_naziv_ul
+	
+Control OKButton
+	Title "OK"
+	Position 170, 112
+	Width 51 Height 14
+	
+Control PopupMenu
+	Id 4
+	Position 115, 31
+	Width 99
+	Title From Variable arr_KO()
+	Calling arrUlice1
+	Value 1
+	Into sn_KO
+	
+Control CancelButton
+	Title "Cancel"
+	Position 8, 112
+	Width 51 Height 14
+
+	Exit Sub
+	'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "DLG_REGISTAR_ULICA")
+	Call ERRShow()
+	
+End Sub		

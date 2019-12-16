@@ -1,0 +1,75 @@
+Sub snKO
+
+	Note "nista!"
+	
+End Sub
+
+
+Sub snULICE
+
+	Note i_ULICE
+	
+End Sub
+
+
+Sub arrKO_Ulice1
+
+	OnError goto Greska
+	
+	Call arrULICE(ReadControlValue(4))	
+		Alter Control 7 Title from Variable arr_Ulice() 
+		Alter Control 7 Value 1
+	
+	Exit Sub
+'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "arrKO_Ulice1")
+	Call ERRShow()
+	
+End Sub
+
+Sub arrULICE(byVal s as string)
+
+	dim n as smallint
+	
+	OnError goto Greska
+	
+	s_MBKO = arr_MBKO(s)
+	Note s_MBKO
+
+' - Spisak ULICA u odabranoj KO 
+	s_kom = "SELECT [ID_IME_UL], [NAZIV_LATIN2] FROM [GIS].[data].[kn_ulice_nazivi] WHERE MAT_BR_KO = " + s_MBKO + " ORDER BY [NAZIV_LATIN2]"
+	
+' - Izvrsavanje SQL StoredProc/query 
+	i_hstmt = Server_Execute(i_hdbc,s_kom) 
+		Server i_hstmt Bind Column 1 To s_ID_IME_UL, am_stat
+		Server i_hstmt Bind Column 2 To s_NAZIV_LATIN2, am_stat
+		Server i_hstmt Fetch First
+
+' - Kreiraj niz od svih KO = arrKO() 
+		n=1
+		While Not Server_EOT(i_hstmt)
+
+			ReDim arr_ID_IME_UL(n)
+			arr_ID_IME_UL(n) = i_ID_IME_UL
+			ReDim arr_Ulice(n)
+			arr_Ulice(n) = s_NAZIV_LATIN2
+	
+			Server i_hstmt Fetch Next
+			n=n+1
+		Wend
+		
+	Print "---------------------------------------------------"
+	Print "Pronadjeno je "+n+" ulica u KO " + arr_KO(s)
+	
+	Server i_hstmt Close		
+	
+	Exit Sub
+'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "arrULICE")
+	Call ERRShow()
+
+End Sub
+
+
