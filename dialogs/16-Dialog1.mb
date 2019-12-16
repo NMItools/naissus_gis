@@ -88,6 +88,7 @@ Control PopupMenu
 	Width 158
 	Disable
 	Into s_stari_naziv_ul
+	Hide
 	
 Control StaticText
 	Id 3

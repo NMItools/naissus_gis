@@ -668,25 +668,20 @@
 		Global s_stari_naziv_ul as string
 		Global s_novi_naziv_ul as string
 		
-		Global sn_KO as string
-		Global sn_MBKO as string
-		
-	
-		Global s_KO as string
-		Global arr_KO() as string
-
 		Global i_MBKO as integer
 		Global arr_MBKO() as integer
-		
-'		Global arr_ULICE() as string
-'		
-'		Global arr_ID_IME_UL() as string
-'		Global arr_NAZIV_LATIN2() as string
-'	 	
-'	 	Global s_ID_IME_UL as integer
-'	 	Global s_NAZIV_LATIN2 as string
+		Global sn_MBKO as string
 
-	
+		Global s_KO as string
+		Global arr_KO() as string
+		Global sn_KO as string
+		
+	 	Global i_ID_IME_UL as integer
+	 	Global s_NAZIV_LATIN2 as string
+
+		Global arr_ID_UL() as string
+		Global arr_NAZIV_UL() as string
+
 	 	
 	
 '	Declare Sub arrKO_Ulice1
