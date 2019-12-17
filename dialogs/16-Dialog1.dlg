@@ -49,12 +49,10 @@
         <Property name="Size">233, 21</Property>
         <Property name="Title">
         </Property>
-        <Property name="FromVariable">
-        </Property>
-        <Property name="Calling">
-        </Property>
+        <Property name="FromVariable">arr_NAZIV_UL()</Property>
+        <Property name="Calling" />
         <Property name="Disable">True</Property>
-        <Property name="Value" />
+        <Property name="Value">1</Property>
         <Property name="Into">s_stari_naziv_ul</Property>
         <Property name="TabIndex">1</Property>
         <Property name="TabIndexSet">False</Property>
@@ -153,7 +151,7 @@
         <Property name="FromVariable">arr_KO()</Property>
         <Property name="Calling">arrUlice1</Property>
         <Property name="Disable">False</Property>
-        <Property name="Value">1</Property>
+        <Property name="Value">128</Property>
         <Property name="Into">sn_KO</Property>
         <Property name="TabIndex">4</Property>
         <Property name="TabIndexSet">False</Property>
@@ -210,12 +208,12 @@
       <Property name="Name">MapBasicGroupBox1</Property>
       <Property name="Position">12, 15</Property>
       <Property name="Size">310, 70</Property>
-      <Property name="Title">Izbor akcije i KO</Property>
+      <Property name="Title">Vrsta unosa i izbor KO</Property>
       <Property name="Hide">False</Property>
       <Property name="TabIndex">1</Property>
       <Property name="TabIndexSet">False</Property>
       <Property name="TabStop">False</Property>
-      <Property name="Text">Izbor akcije i KO</Property>
+      <Property name="Text">Vrsta unosa i izbor KO</Property>
       <Property name="DataBindings">
         <Property name="DefaultDataSourceUpdateMode">OnValidation</Property>
       </Property>

@@ -26,11 +26,14 @@ Sub reg_ulica
 	
 	Case 2
 	
+		Call arrUlice2(ReadControlValue(4))
+		
 		Alter Control 6 Show
 		Alter Control 6 Enable
 		
 		Alter Control 7 Show
 		Alter Control 7 Enable
+		Alter Control 7 Title From Variable arr_NAZIV_UL()
 		
 		Alter Control 8 Show
 		Alter Control 8 Enable	
@@ -43,6 +46,7 @@ End Sub
 Sub DLG_REGISTAR_ULICA
 	
 	Call arrKO
+	Call arrUlice2(128)
 
 	onerror goto Greska  
 	
@@ -80,13 +84,15 @@ Control GroupBox
 	Id 1
 	Position 8, 9
 	Width 211 Height 43
-	Title "Izbor akcije i KO"
+	Title "Vrsta unosa i izbor KO"
 	
 Control PopupMenu
 	Id 7
 	Position 56, 71
 	Width 158
+	Title From Variable arr_NAZIV_UL()
 	Disable
+	Value 1
 	Into s_stari_naziv_ul
 	Hide
 	
@@ -125,18 +131,19 @@ Control PopupMenu
 	Width 99
 	Title From Variable arr_KO()
 	Calling arrUlice1
-	Value 1
+	Value 128
 	Into sn_KO
 	
 Control CancelButton
 	Title "Cancel"
 	Position 8, 112
 	Width 51 Height 14
-
+	
 	Exit Sub
 	'	-------------------------
 	Greska:
 	Call ERRCreate(Err(), Error$(), "DLG_REGISTAR_ULICA")
 	Call ERRShow()
 	
-End Sub		
+End Sub	
+	

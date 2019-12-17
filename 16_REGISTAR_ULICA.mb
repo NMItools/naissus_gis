@@ -150,10 +150,10 @@ Sub arrUlice2(byVal s as integer)
 	
 	OnError goto Greska
 	
-	print "s = " + s
+'	print "s = " + s
 	
 	sn_MBKO = arr_MBKO(s)
-	Print sn_MBKO
+'	Print sn_MBKO
 
 ' - Spisak ULICA u odabranoj KO 
 	s_kom = "SELECT [ID_IME_UL], [NAZIV_LATIN2] FROM [GIS].[data].[kn_ulice_nazivi] WHERE MAT_BR_KO = " + sn_MBKO + " ORDER BY [NAZIV_LATIN2]"
@@ -166,8 +166,6 @@ Sub arrUlice2(byVal s as integer)
 		Server i_hstmt Fetch First
 
 ' - Kreiraj niz od svih naziva lica u zadatoj KO
-		
-		
 		
 		n=1
 		While Not Server_EOT(i_hstmt)
