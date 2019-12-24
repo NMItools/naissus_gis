@@ -73,7 +73,7 @@
         <Property name="Disable">False</Property>
         <Property name="Hide">False</Property>
         <Property name="Value">False</Property>
-        <Property name="Into">l_PrintSlika</Property>
+        <Property name="Into">l_PrintSlika_2</Property>
         <Property name="TabIndex">15</Property>
         <Property name="TabIndexSet">False</Property>
         <Property name="Text">JPEG</Property>
@@ -148,7 +148,7 @@
       <Property name="Name">MapBasicOKButton1</Property>
       <Property name="Position">308, 181</Property>
       <Property name="Size">75, 23</Property>
-      <Property name="Calling">DLG_printOK</Property>
+      <Property name="Calling">DLG_print_2_OK</Property>
       <Property name="Disable">False</Property>
       <Property name="Hide">False</Property>
       <Property name="TabIndex">1</Property>
@@ -188,7 +188,7 @@
         <Property name="Position">60, 28</Property>
         <Property name="Title">A4;A3;</Property>
         <Property name="FromVariable" />
-        <Property name="Calling">DLG_printFormati</Property>
+        <Property name="Calling">DLG_print_2_Formati</Property>
         <Property name="Disable">False</Property>
         <Property name="Hide">False</Property>
         <Property name="Value">1</Property>
@@ -229,7 +229,7 @@
         <Property name="Position">248, 28</Property>
         <Property name="Title">Landscape;Portrait</Property>
         <Property name="FromVariable" />
-        <Property name="Calling">DLG_printPolozaj</Property>
+        <Property name="Calling">DLG_print_2_Polozaj</Property>
         <Property name="Disable">False</Property>
         <Property name="Hide">False</Property>
         <Property name="Value">n_Polozaj</Property>
@@ -307,7 +307,7 @@
     <Property name="MaximizeBox">False</Property>
     <Property name="MinimizeBox">False</Property>
     <Property name="ShowIcon">False</Property>
-    <Property name="Text">Priprema za štampu izveštaja o položaju cevovoda<Reference name="Form1" /></Property>
+    <Property name="Text">Izveštaj o stepenu ažurnosti GIS podataka<Reference name="Form1" /></Property>
     <Property name="DataBindings">
       <Property name="DefaultDataSourceUpdateMode">OnValidation</Property>
     </Property>

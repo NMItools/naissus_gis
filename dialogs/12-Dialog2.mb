@@ -20,11 +20,18 @@ Sub DLG_print_2
 	
 	Call PapInfo(1)
 	
+'Exit Sub
+''	-------------------------
+'	Greska:
+'	Call ERRCreate(Err(), Error$(), "DLG_print_2")
+'	Call ERRShow()
+'		
+'End Sub			
 	
 '***** DIALOG DESIGNER GENERATED CODE. DO NOT EDIT OR REMOVE THIS LINE OR BELOW THIS LINE! *****
 
 Dialog
-	Title "Priprema za štampu izveštaja o položaju cevovoda"
+	Title "Izveštaj o stepenu ažurnosti GIS podataka"
 	Width 267 Height 130
 	
 Control GroupBox
@@ -86,7 +93,7 @@ Control EditText
 	Id 19
 	Position 46, 89
 	Width 56 Height 12
-	Value s_mapScale
+	Value "s_mapScale"
 	
 Control GroupBox
 	Id 17
@@ -120,7 +127,7 @@ Control EditText
 	Position 147, 88
 	Width 25 Height 12
 	Disable
-	Value i_Dpi
+	Value "i_Dpi"
 	Into i_Dpi
 	
 Control StaticText
@@ -129,7 +136,6 @@ Control StaticText
 	Width 14 Height 8
 	Title "dpi"
 	
-
 Exit Sub
 '	-------------------------
 	Greska:
@@ -137,4 +143,4 @@ Exit Sub
 	Call ERRShow()
 		
 End Sub			
-		
+	

@@ -17,7 +17,7 @@ Sub STAMPA
 	Create Menu "Stampa" as
 		"Podesavanja" ID 9 Calling MapperPriprema,
 		"(-",
-		"Izveštaj o položaju cevovoda" ID 10 Calling MapperPriprema
+		"Izveštaj o stepenu ažurnosti GIS" ID 10 Calling MapperPriprema
 		
 '	Create ButtonPad "Stampa" As
 '	PushButton

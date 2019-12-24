@@ -2071,8 +2071,8 @@ Map From GroupLayer("NIVOS",GroupLayer("[Pomoæni]",Detekcija_VM_tacke,Detekcija_
   ,KVAROVI,KAPTAZE,PREKIDNE_KOMORE,REZERVOARI,CRPNA_STANICA
   ,PUMPE,REGULATORI_PRITISKA,MULJ_ISPUST,VAZD_VENTIL,NEPOVRATNI_VENTIL,VELIKI_VODOMERI
   ,MERNE_ZONE_ZATVARACI,MERACI_PROTOKA,VODOMERI,ZATVARAC
-  ,HIDRANT,VODOMERNI_SAHT,CEVOVODNI_SAHT,PRIKLJUCCI,CEVOVOD
-  ,CEVOVOD,Zone_sanitarne_zastite
+  ,HIDRANT,VODOMERNI_SAHT,CEVOVODNI_SAHT,PRIKLJUCCI
+  ,CEVOVOD,CEVOVOD,Zone_sanitarne_zastite
   ,OBJEKTI_VODOVOD,ZONE),GroupLayer("NIKAS",GroupLayer("Fekalna",POSTR_ZA_PREC,CS_OTPAD_VODA,ZASTIT_KANAL_CEVI
   ,SIFON,PRELIV,KORISNICKI_SAHT,FEK_KAN_IZLIV,FEK_KAN_SAHT,FEK_KAN_PRIKLJUCAK
   ,FEKALNA,FEKALNA),GroupLayer("Atmosferska",SLIVNIK
@@ -2089,15 +2089,15 @@ Map From GroupLayer("NIVOS",GroupLayer("[Pomoæni]",Detekcija_VM_tacke,Detekcija_
 Set Window FrontWindow() ScrollBars Off Autoscroll On Snap Mode On Enhanced On Smooth Text Antialias Image High Vector Antialias
 Set Map
   CoordSys Earth Projection 8, 9999, 10, 485.017844, 254.040967, 490.850757, -6.25099249, -3.40102363, 15.57471608, 3.12980309, 0, "m", 21, 0, 0.9999, 7500000, 0
-  Center (7573183.213,4797836.181)
-  Zoom 2398.52161 Units "m"
+  Center (7573153.545,4797684.495)
+  Zoom 1649.891111 Units "m"
   Preserve Zoom Display Zoom
   Distance Units "m" Area Units "sq m" XY Units "m"
   Distance Type Cartesian
 shade 60 with NADLEZNOST values 
   "" Line (1,1,14694400) ,
   "U PRIJEMU" Line (4,2,65280) 
-  default Line (1,2,0)   ' # color 1 # 
+  default Line (1,2,0)'   # color 1 # 
 shade 59 with DN_mm ranges apply all use all Line (18,2,45056) 
   0: 1 Line (14,2,45056) ,
   1: 199 Line (18,2,45056) ,
@@ -2112,13 +2112,13 @@ shade 59 with DN_mm ranges apply all use all Line (18,2,45056)
 shade 60 with CCTV values 
   0 Line (1,1,16711680) ,
   1 Line (2,75,57344) 
-  default Line (1,2,0)   ' # color 1 # 
+  default Line (1,2,0)'   # color 1 # 
 shade 53 with NADLEZNOST values 
   "" Line (1,2,16711680) ,
   "JKP NAISSUS" Line (1,1,65280) ,
   "Kucni savet" Line (1,2,16734240) ,
   "U PRIJEMU" Line (4,2,16711935) 
-  default Line (1,2,0)   ' # color 1 # 
+  default Line (1,2,0)'   # color 1 # 
 shade 52 with DN_mm ranges apply all use all Line (56,2,14694400) 
   0: 1 Line (15,2,14694400) ,
   1: 199 Line (18,2,14694400) ,
@@ -2146,12 +2146,12 @@ shade 41 with VRSTA ignore "" values
   "Sabirna komora" Brush (2,16752848,16777215) ,
   "Trafo stanica" Brush (2,16720016,16777215) ,
   "Vodomerni šaht" Brush (2,10551295,16777215) 
-  default Brush (2,0,16777215)   ' # color 1 # 
+  default Brush (2,0,16777215)'   # color 1 # 
 shade 40 with Zona_sanitarne_zastite values 
   "Neposredna" Brush (1,16711680,16777215) Pen (1,111,16711680) ,
   "Šira" Brush (1,65280,16777215) Pen (1,5,65280) ,
   "Uža" Brush (1,255,16777215) Pen (1,48,16711680) 
-  default Brush (1,0,16777215) Pen (1,2,0)   ' # color 1 # 
+  default Brush (1,0,16777215) Pen (1,2,0)'   # color 1 # 
 shade 39 with DN_MM ranges apply all use all Line (50,2,4227327) 
   10: 80 Line (15,2,12416) ,
   80: 100 Line (22,2,1065104) ,
@@ -2173,7 +2173,7 @@ shade 40 with IZVOR_INFORMACIJE values
   "KATASTAR" Brush (2,11556864,16777215) Pen (1,2,0) Line (2,2,11556864) Symbol (34,11556864,12) ,
   "Planovi" Brush (2,11559167,16777215) Pen (1,2,0) Line (2,2,11559167) Symbol (34,11559167,12) ,
   "Terenska skica" Line (2,65,65280) 
-  default Line (1,2,0)   '# color 1 # 
+  default Line (1,2,0)'   # color 1 # 
 shade 38 with NADLEZNOST values 
   "-" Line (1,1,16711680) ,
   "GR_GRADJANA" Line (3,2,14201087) ,
@@ -2181,7 +2181,7 @@ shade 38 with NADLEZNOST values
   "NEPOZNATA" Line (2,5,16711680) ,
   "Nije Naissus" Line (2,2,16711935) ,
   "U PRIJEMU" Line (4,2,16776960) 
-  default Line (1,2,0)   '# color 1 # 
+  default Line (1,2,0)'   # color 1 # 
 shade 34 with IZVOR_INFORMACIJE values 
   "" Symbol (34,16711680,12) ,
   "-" Symbol (48,8421504,10,"MapInfo Cartographic",256,0) ,
@@ -2191,7 +2191,7 @@ shade 34 with IZVOR_INFORMACIJE values
   "Iz projekta" Symbol (48,16711935,10,"MapInfo Cartographic",256,0) ,
   "KATASTAR" Brush (2,14694400,16777215) Pen (1,2,0) Line (1,2,14694400) Symbol (48,14694400,10,"MapInfo Cartographic",256,0) ,
   "Terenska Skica" Symbol (48,65280,10,"MapInfo Cartographic",16,0) 
-  default Symbol (40,0,12)   '# color 1 # 
+  default Symbol (40,0,12)'   # color 1 # 
 shade 33 with IZVOR_INFORMACIJE values 
   "" Brush (2,65535,16777215) Pen (1,2,0) Line (1,2,65535) Symbol (34,65535,12) ,
   "-" Symbol (63,8421504,10,"MapInfo Weather",256,0) ,
@@ -2199,7 +2199,15 @@ shade 33 with IZVOR_INFORMACIJE values
   "GPS" Symbol (63,16776960,10,"MapInfo Weather",16,0) ,
   "Iz projekta" Brush (15,16711935,16777215) Pen (1,2,0) Line (1,2,16711935) Symbol (63,16711935,10,"MapInfo Weather",256,0) ,
   "Terenska Skica" Symbol (63,65280,10,"MapInfo Weather",256,0) 
-  default Symbol (40,0,12)   '# color 1 # 
+  default Symbol (40,0,12)'   # color 1 # 
+shade 32 with MARKA ignore "" values 
+  "BA" Symbol (34,65280,12) ,
+  "DH" Symbol (32,16767072,7,"MapInfo Cartographic",0,0) ,
+  "EW" Symbol (32,7381247,7,"MapInfo Cartographic",0,0) ,
+  "IK" Symbol (32,16754768,7,"MapInfo Cartographic",0,0) ,
+  "IN" Symbol (32,13697023,7,"MapInfo Cartographic",0,0) ,
+  "SI" Symbol (32,16772272,7,"MapInfo Cartographic",0,0) 
+  default Symbol (40,0,12)'   # color 1 # 
 shade 19 with Status_kvara values 
   0 Symbol (133,12632256,10,"MapInfo World POI",256,0) ,
   1 Symbol (133,16711680,10,"MapInfo World POI",256,0) ,
@@ -2207,11 +2215,11 @@ shade 19 with Status_kvara values
   4 Brush (2,16711935,16777215) Pen (1,2,0) Line (1,2,16711935) Symbol (31,16711935,12) ,
   10 Brush (2,16776960,16777215) Pen (1,2,0) Line (1,2,16776960) Symbol (32,16776960,10,"MapInfo World POI",16,0) ,
   20 Brush (2,65535,16777215) Pen (1,2,0) Line (1,2,65535) Symbol (31,65535,12) 
-  default Symbol (40,0,12)   '# color 1 # 
+  default Symbol (40,0,12)'   # color 1 # 
 shade 15 with NAPOMENA values 
   "" Line (2,2,44031) ,
   "nije u funkciji" Line (1,5,4243711) 
-  default Line (1,2,0)   '# color 1 # 
+  default Line (1,2,0)'   # color 1 # 
 Set Map
   Layer 1
     Display Global
@@ -2462,6 +2470,11 @@ Set Map
       Parallel On Auto On Overlap On Duplicates On Offset 2
       Visibility Zoom (0, 10000) Units "m"
   Layer 34
+    Display Off
+    Global Pen (1,2,16711680)  Brush (17,53248)  Symbol (59,5278719,10)  Line (2,2,12432)  Font ("Arial",257,9,9584,16777215)
+    Selectable Off
+    Zoom (0, 450) Units "m" Off 
+  Layer 35
     Display Global
     Global Pen (1,2,16711680) Brush (17,53248) Symbol (59,5278719,10) Line (2,2,12432) Font ("Arial",257,9,9584,16777215)
     Zoom (0, 450) Units "m" 
@@ -2469,12 +2482,12 @@ Set Map
       With KUCNI_BROJ
       Parallel On Auto On Overlap Off Duplicates On Offset 4
       Visibility Zoom (0, 450) Units "m"
-  Layer 35
+  Layer 36
     Display Off
     Global Pen (1,2,16711680)  Brush (17,53248)  Symbol (49,16711680,12)  Line (2,2,12432)  Font ("Arial",257,9,9584,16777215)
     Selectable Off
     Zoom (0, 800) Units "m" 
-  Layer 36
+  Layer 37
     Display Global
     Global Pen (1,2,16711680) Brush (17,53248) Symbol (63,255,9,"MapInfo Weather",256,0) Line (2,2,12432) Font ("Arial",257,9,9584,16777215)
     Zoom (0, 1000) Units "m" 
@@ -2482,12 +2495,12 @@ Set Map
       With BROJ
       Parallel On Auto Off Overlap Off Duplicates On Offset 2
       Visibility On
-  Layer 37
+  Layer 38
     Display Off
     Global Pen (1,2,16711680)  Brush (17,53248)  Symbol (49,16711680,12)  Line (2,2,12432)  Font ("Arial",257,9,9584,16777215)
     Selectable Off
     Zoom (0, 1000) Units "m" 
-  Layer 38
+  Layer 39
     Display Global
     Global Pen (1,2,16711680) Brush (17,53248) Symbol (60,255,9,"MapInfo Weather",256,0) Line (2,2,255) Font ("Arial",257,9,9584,16777215)
     Zoom (0, 1000) Units "m" 
@@ -2495,14 +2508,14 @@ Set Map
       With BROJ
       Parallel On Auto Off Overlap Off Duplicates On Offset 2
       Visibility On
-  Layer 39
+  Layer 40
     Display Off
     Global Pen (1,2,208) Brush (15,12632319) Symbol (37,6343679,8,"MapInfo Cartographic",256,0) Line (2,2,32960) Font ("Arial",256,10,12432,16777215)
     Label Line Arrow Position Right Font ("Arial",256,10,12432,16777215) Pen (1,2,0) 
       With ULICA
       Parallel On Auto Off Overlap Off Duplicates On Offset 2
       Visibility On
-  Layer 40
+  Layer 41
     Display Global
     Global Pen (1,2,208) Brush (15,12632319) Symbol (37,255,9,"MapInfo Cartographic",256,0) Line (2,2,32960) Font ("Arial",256,10,12432,16777215)
     Zoom (0, 600) Units "m" 
@@ -2510,7 +2523,7 @@ Set Map
       With MI_PRINX
       Parallel On Auto Off Overlap Off Duplicates On Offset 2
       Visibility Off
-  Layer 41
+  Layer 42
     Display Graphic
     Global Pen (1,2,16711680) Brush (17,53248) Symbol (49,16711680,12) Line (20,2,3175935) Font ("Arial",257,9,9584,16777215)
     Zoom (0, 450) Units "m" 
@@ -2518,90 +2531,90 @@ Set Map
       With MATERIJAL_PRIK_CEV+PRECNIK_PRIK_CEV+Chr$(13)+Broj_RN
       Parallel On Auto On Overlap On Duplicates Off PartialSegments On Offset 2
       Visibility Zoom (0, 150) Units "m"
-  Layer 42
+  Layer 43
     Display Value
     Global Pen (1,2,0)  Brush (2,16776960,16777215)  Symbol (49,16711680,12)  Line (2,2,255)  Font ("Arial",0,9,0)
     Selectable Off
-  Layer 43
+  Layer 44
     Display Graphic
     Global Pen (1,2,0) Brush (2,16776960,16777215) Symbol (49,16711680,12) Line (2,2,255) Font ("Arial",0,9,0)
     Label Line Arrow Position Center Auto Retry On Font ("Tahoma",257,7,16777215,0) Pen (1,2,0) 
       With ULICA
       Follow Path Percent Over 45 Auto On Overlap Off Duplicates Off Offset 2
       Visibility Zoom (1000, 2500) Units "m"
-  Layer 44
+  Layer 45
     Display Off
     Global Pen (1,2,27552)  Brush (17,16711680)  Symbol (49,16711680,12)  Line (2,2,32960)  Font ("Arial CE",256,8,12432,16777215)
     Selectable Off
-  Layer 45
+  Layer 46
     Display Value
     Global Pen (1,2,27552)  Brush (17,16711680)  Symbol (49,16711680,12)  Line (1,2,27552)  Font ("Arial CE",256,8,12432,16777215)
     Selectable Off
-  Layer 46
+  Layer 47
     Display Off
     Global Pen (1,2,27552) Brush (17,16711680) Symbol (49,16711680,12) Line (2,2,32960) Font ("Arial CE",256,8,12432,16777215)
     Label Line Arrow Position Center Font ("Arial Narrow",257,9,16576,16777215) Pen (1,2,0) 
       With MATERIJAL+Left$(Str$(DN_MM), Int(DN_MM>0)*Len(Str$(DN_MM)))
       Parallel On Auto On Overlap On Duplicates On PartialSegments On Offset 2
       Visibility Zoom (0, 500) Units "m"
-  Layer 47
+  Layer 48
     Display Value
     Global Pen (1,2,0)  Brush (2,16777215,16777215)  Symbol (35,0,12)  Line (1,2,0)  Font ("Tahoma",0,9,0)
     Selectable Off
-  Layer 48
+  Layer 49
     Display Graphic
     Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (35,0,12) Line (1,2,0) Font ("Tahoma",0,9,0)
     Label Line None Position Center Font ("Tahoma",0,9,0) Pen (1,2,0) 
       With Izvoriste
       Parallel On Auto Off Overlap Off Duplicates On Offset 2
       Visibility On
-  Layer 49
+  Layer 50
     Display Value
     Global Pen (1,2,0)  Brush (2,16777215,16777215)  Symbol (49,16711680,12)  Line (1,2,0)  Font ("Tahoma",0,9,0)
     Selectable Off
-  Layer 50
+  Layer 51
     Display Graphic
     Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (49,16711680,12) Line (1,2,0) Font ("Tahoma",0,9,0)
     Label Line None Position Center Font ("Tahoma",0,9,0) Pen (1,2,0) 
       With NAZIV
       Parallel On Auto Off Overlap Off Duplicates On Offset 2
       Visibility On
-  Layer 51
+  Layer 52
     Display Off
     Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (49,16711680,12) Line (1,2,0) Font ("Tahoma",0,9,0)
     Label Line None Position Center Font ("Tahoma",0,9,0) Pen (1,2,0) 
       With SISTEM
       Parallel On Auto Off Overlap Off Duplicates On Offset 2
       Visibility On
-  Layer 52
+  Layer 53
     Display Global
     Global Pen (1,2,208) Brush (15,12632319) Symbol (44,14694400,18) Line (2,2,32960) Font ("Arial",256,10,12432,16777215)
     Label Line Arrow Position Right Font ("Arial",256,10,12432,16777215) Pen (1,2,0) 
       With NAZIV
       Parallel On Auto Off Overlap Off Duplicates On Offset 2
       Visibility On
-  Layer 53
+  Layer 54
     Display Global
     Global Pen (1,2,208) Brush (15,12632319) Symbol (45,13658112,18) Line (2,2,32960) Font ("Arial",256,10,12432,16777215)
     Label Line Arrow Position Right Font ("Arial",256,10,12432,16777215) Pen (1,2,0) 
       With LOKACIJA
       Parallel On Auto Off Overlap Off Duplicates On Offset 2
       Visibility On
-  Layer 54
+  Layer 55
     Display Global
     Global Pen (1,2,208) Brush (15,12632319) Symbol (49,16711680,12) Line (1,49,6332416) Font ("Arial",256,10,12432,16777215)
     Label Line Arrow Position Above Font ("Arial",256,10,12432,16777215) Pen (1,2,0) 
       With ULICA
       Parallel On Auto Off Overlap Off Duplicates Off Offset 2
       Visibility On
-  Layer 55
+  Layer 56
     Display Global
     Global Pen (1,2,208) Brush (15,12632319) Symbol (44,12595200,14,"MapInfo Oil&Gas",16,0) Line (2,2,32960) Font ("Arial",256,10,12432,16777215)
     Label Line Arrow Position Right Font ("Arial",256,10,12432,16777215) Pen (1,2,0) 
       With ID
       Parallel On Auto Off Overlap Off Duplicates On Offset 2
       Visibility On
-  Layer 56
+  Layer 57
     Display Global
     Global Pen (1,2,208) Brush (15,12632319) Symbol (45,16711680,12,"MapInfo Oil&Gas",257,0) Line (2,2,14694400) Font ("Arial",256,10,12432,16777215)
     Zoom (0, 1500) Units "m" 
@@ -2609,7 +2622,7 @@ Set Map
       With NAZIV
       Parallel On Auto Off Overlap Off Duplicates On Offset 2
       Visibility On
-  Layer 57
+  Layer 58
     Display Graphic
     Global Pen (1,2,208) Brush (15,12632319) Symbol (49,16711680,12) Line (2,2,32960) Font ("Arial",256,10,12432,16777215)
     Zoom (0, 600) Units "m" 
@@ -2617,14 +2630,14 @@ Set Map
       With R_BROJ
       Parallel On Auto Off Overlap Off Duplicates On Offset 2
       Visibility On
-  Layer 58
+  Layer 59
     Display Global
     Global Pen (1,2,208) Brush (15,12632319) Symbol (46,16734240,14) Line (2,2,32960) Font ("Arial",256,10,12432,16777215)
     Label Line Arrow Position Right Font ("Arial",256,10,12432,16777215) Pen (1,2,0) 
       With IZLIV
       Parallel On Auto Off Overlap Off Duplicates On Offset 2
       Visibility On
-  Layer 59
+  Layer 60
     Display Global
     Global Pen (1,2,208) Brush (15,12632319) Symbol (44,12595200,10,"MapInfo Cartographic",257,0) Line (2,2,32960) Font ("Arial",256,10,12432,16777215)
     Zoom (0, 500) Units "m" 
@@ -2632,7 +2645,7 @@ Set Map
       With "KT "+Left$(Str$(KOTA_POKLOPCA), Int(KOTA_POKLOPCA>0)*Len(Str$(KOTA_POKLOPCA)))+Chr$(13)+"KD "+Left$(Str$(KOTA_DNA), Int(KOTA_DNA>0)*Len(Str$(KOTA_DNA)))
       Parallel On Auto On Overlap Off Duplicates On Offset 5
       Visibility Zoom (0, 500) Units "m"
-  Layer 60
+  Layer 61
     Display Global
     Global Pen (1,2,208) Brush (15,12632319) Symbol (49,16711680,12) Line (2,2,16744448) Font ("Arial",256,10,12432,16777215)
     Zoom (0, 400) Units "m" 
@@ -2640,29 +2653,29 @@ Set Map
       With MATERIJAL
       Parallel On Auto Off Overlap Off Duplicates Off Offset 2
       Visibility On
-  Layer 61
+  Layer 62
     Display Value
     Global Pen (1,2,208)  Brush (15,12632319)  Symbol (49,16711680,12)  Line (2,2,32960)  Font ("Arial",256,10,12432,16777215)
     Selectable Off
-  Layer 62
+  Layer 63
     Display Global
     Global Pen (1,2,208) Brush (15,12632319) Symbol (49,16711680,12) Line (2,2,14694400) Font ("Arial",256,10,12432,16777215)
     Label Line Arrow Position Center Auto Retry On Font ("Arial Narrow",257,9,12595200,16777215) Pen (1,2,0) 
       With MATERIJAL+PRECNIK
       Parallel On Auto On Overlap Off Duplicates On Offset 2
       Visibility Zoom (0, 1000) Units "m"
-  Layer 63
+  Layer 64
     Display Value
     Global Pen (2,2,65280)  Brush (17,65280)  Symbol (35,0,12)  Line (1,2,0)  Font ("Arial",0,9,0)
     Selectable Off
-  Layer 64
+  Layer 65
     Display Off
     Global Pen (2,2,65280) Brush (17,65280) Symbol (35,0,12) Line (1,2,0) Font ("Arial",0,9,0)
     Label Line Arrow Position Above Auto Retry On Font ("Arial",257,18,16711935,0) Pen (1,2,0) 
       With Left$(NADLEZNOST, Abs(Int(Len(NADLEZNOST)-12.6))*14)
       Parallel On Auto On Overlap Off Duplicates On Offset 2
       Visibility Zoom (0, 1500) Units "m"
-  Layer 65
+  Layer 66
     Display Global
     Global Pen (1,2,208) Brush (15,12632319) Symbol (83,53248,10,"MapInfo Miscellaneous",256,0) Line (2,2,32960) Font ("Arial",256,10,12432,16777215)
     Zoom (0, 600) Units "m" 
@@ -2670,7 +2683,7 @@ Set Map
       With IZVOR_INFORMACIJE
       Parallel On Auto Off Overlap Off Duplicates On Offset 2
       Visibility On
-  Layer 66
+  Layer 67
     Display Global
     Global Pen (1,2,208) Brush (15,12632319) Symbol (49,16711680,12) Line (2,2,8245248) Font ("Arial",256,10,12432,16777215)
     Zoom (0, 600) Units "m" 
@@ -2678,14 +2691,14 @@ Set Map
       With ULICA
       Parallel On Auto Off Overlap Off Duplicates Off Offset 2
       Visibility On
-  Layer 67
+  Layer 68
     Display Global
     Global Pen (1,2,208) Brush (15,12632319) Symbol (46,53248,14) Line (2,2,32960) Font ("Arial",256,10,12432,16777215)
     Label Line Arrow Position Right Font ("Arial",256,10,12432,16777215) Pen (1,2,0) 
       With IZLIV
       Parallel On Auto Off Overlap Off Duplicates On Offset 2
       Visibility On
-  Layer 68
+  Layer 69
     Display Global
     Global Pen (1,2,208) Brush (15,12632319) Symbol (44,45056,10,"MapInfo Cartographic",257,0) Line (2,2,32960) Font ("Arial",256,10,12432,16777215)
     Zoom (0, 1000) Units "m" 
@@ -2693,7 +2706,7 @@ Set Map
       With "KT "+Left$(Str$(KOTA_POKLOPCA), Int(KOTA_POKLOPCA>0)*Len(Str$(KOTA_POKLOPCA)))+Chr$(13)+"KD "+Left$(Str$(KOTA_DNA), Int(KOTA_DNA>0)*Len(Str$(KOTA_DNA)))
       Parallel On Auto On Overlap On Duplicates On PartialSegments On Offset 2
       Visibility Zoom (0, 500) Units "m"
-  Layer 69
+  Layer 70
     Display Global
     Global Pen (1,2,208) Brush (15,12632319) Symbol (49,16711680,12) Line (2,2,12632064) Font ("Arial",256,10,12432,16777215)
     Zoom (0, 400) Units "m" 
@@ -2701,33 +2714,33 @@ Set Map
       With MATERIJAL
       Parallel On Auto Off Overlap Off Duplicates Off Offset 2
       Visibility On
-  Layer 70
-    Display Value
-    Global Pen (1,2,208)  Brush (15,12632319)  Symbol (49,16711680,12)  Line (2,2,57344)  Font ("Arial",256,10,12432,16777215)
-    Selectable Off
   Layer 71
     Display Value
     Global Pen (1,2,208)  Brush (15,12632319)  Symbol (49,16711680,12)  Line (2,2,57344)  Font ("Arial",256,10,12432,16777215)
     Selectable Off
   Layer 72
+    Display Value
+    Global Pen (1,2,208)  Brush (15,12632319)  Symbol (49,16711680,12)  Line (2,2,57344)  Font ("Arial",256,10,12432,16777215)
+    Selectable Off
+  Layer 73
     Display Global
     Global Pen (1,2,208) Brush (15,12632319) Symbol (49,16711680,12) Line (2,2,57344) Font ("Arial",256,10,12432,16777215)
     Label Line Arrow Position Center Auto Retry On Font ("Arial Narrow",257,9,5079040,16777215) Pen (1,2,0) 
       With MATERIJAL+PRECNIK
       Parallel On Auto On Overlap On Duplicates On PartialSegments On Offset 2
       Visibility Zoom (0, 1000) Units "m"
-  Layer 73
+  Layer 74
     Display Value
     Global Pen (2,2,65280)  Brush (17,65280)  Symbol (35,0,12)  Line (1,2,0)  Font ("Arial",0,9,0)
     Selectable Off
-  Layer 74
+  Layer 75
     Display Off
     Global Pen (2,2,65280) Brush (17,65280) Symbol (35,0,12) Line (1,2,0) Font ("Arial",0,9,0)
     Label Line Arrow Position Above Auto Retry On Font ("Arial",257,18,65280,0) Pen (1,2,0) 
       With Left$(NADLEZNOST, Abs(Int(Len(NADLEZNOST)-12.6))*14)
       Parallel On Auto On Overlap Off Duplicates On Offset 2
       Visibility Zoom (0, 1500) Units "m"
-  Layer 75
+  Layer 76
     Display Global
     Global Pen (1,2,208) Brush (15,12632319) Symbol (33,16776960,14) Line (2,2,32960) Font ("Arial",256,10,12432,16777215)
     Zoom (0, 6000) Units "m" 
@@ -2735,7 +2748,7 @@ Set Map
       With Broj_RN
       Parallel On Auto Off Overlap Off Duplicates On Offset 2
       Visibility On
-  Layer 76
+  Layer 77
     Display Global
     Global Pen (1,2,208) Brush (15,12632319) Symbol (49,16711680,12) Line (2,193,16776960) Font ("Arial",256,10,12432,16777215)
     Zoom (0, 6000) Units "m" 
@@ -2743,49 +2756,49 @@ Set Map
       With Broj_RN
       Parallel On Auto Off Overlap Off Duplicates Off Offset 2
       Visibility On
-  Layer 77
+  Layer 78
     Display Graphic
     Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (35,0,12) Line (1,2,0) Font ("Tahoma",0,9,0)
     Label Line Arrow Position Above Font ("Tahoma",0,9,0) Pen (1,2,0) 
       With MI_PRINX
       Parallel On Auto Off Overlap Off Duplicates Off Offset 2
       Visibility On
-  Layer 78
+  Layer 79
     Display Global
     Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (35,0,12) Line (2,5,65280) Font ("Tahoma",0,9,0)
     Label Line Arrow Position Above Font ("Tahoma",0,9,0) Pen (1,2,0) 
       With PODNOSILAC
       Parallel On Auto Off Overlap Off Duplicates Off Offset 2
       Visibility On
-  Layer 79
+  Layer 80
     Display Global
     Global Pen (2,2,8388608) Brush (16,14737408) Symbol (35,0,12) Line (1,2,0) Font ("Tahoma",0,9,0)
     Label Line None Position Center Font ("Tahoma",0,9,0) Pen (1,2,0) 
       With PODNOSILAC
       Parallel On Auto Off Overlap Off Duplicates On Offset 2
       Visibility On
-  Layer 80
+  Layer 81
     Display Graphic
     Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (35,0,12) Line (1,2,0) Font ("Tahoma",0,9,0)
     Label Line Arrow Position Above Font ("Tahoma",0,9,0) Pen (1,2,0) 
       With VRSTA
       Parallel On Auto Off Overlap Off Duplicates Off Offset 2
       Visibility On
-  Layer 81
+  Layer 82
     Display Graphic
     Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (35,0,12) Line (1,2,0) Font ("Tahoma",0,9,0)
     Label Line Arrow Position Right Font ("Tahoma",0,9,0) Pen (1,2,0) 
       With PROFIL_mm
       Parallel On Auto Off Overlap Off Duplicates On Offset 2
       Visibility On
-  Layer 82
+  Layer 83
     Display Graphic
     Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (35,0,12) Line (1,2,0) Font ("Tahoma",0,9,0)
     Label Line None Position Center Font ("Tahoma",0,9,0) Pen (1,2,0) 
       With PODNOSILAC
       Parallel On Auto Off Overlap Off Duplicates On Offset 2
       Visibility On
-  Layer 83
+  Layer 84
     Display Graphic
     Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (35,0,12) Line (1,2,0) Font ("Arial",0,9,0)
     Zoom (0, 600) Units "m" 
@@ -2793,7 +2806,7 @@ Set Map
       With Left$(Str$(Kota_terena), Int(Kota_terena>0)*Len(Str$(Kota_terena)))
       Parallel On Auto On Overlap Off Duplicates On PartialSegments On Offset 2
       Visibility Zoom (0, 300) Units "m"
-  Layer 84
+  Layer 85
     Display Global
     Global Pen (1,5,7585792) Brush (1,16777215,16777215) Symbol (35,0,12) Line (1,2,0) Font ("Tahoma",0,9,0)
     Selectable Off
@@ -2803,7 +2816,7 @@ Set Map
       Parallel On Auto On Overlap Off Duplicates On PartialSegments On Offset 2
       Visibility On
    Alpha 198
-  Layer 85
+  Layer 86
     Display Global
     Global Pen (30,2,9437184) Brush (1,16777215,16777215) Symbol (35,0,12) Line (1,2,0) Font ("Tahoma",0,9,0)
     Selectable Off
@@ -2812,7 +2825,7 @@ Set Map
       With NAZIV_LATIN2
       Parallel On Auto On Overlap Off Duplicates On PartialSegments On Offset 2
       Visibility On
-  Layer 86
+  Layer 87
     Display Global
     Global Pen (4,2,16711680) Brush (1,16777215,16777215) Symbol (35,0,12) Line (1,2,0) Font ("Tahoma",0,9,0)
     Selectable Off
@@ -2821,14 +2834,14 @@ Set Map
       With OPSTINA
       Parallel On Auto Off Overlap Off Duplicates On Offset 2
       Visibility On
-  Layer 87
+  Layer 88
     Display Off
     Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (35,0,12) Line (1,2,0) Font ("Tahoma",0,9,0)
     Label Line None Position Center Font ("Verdana",259,9,5278719,16777215) Pen (1,2,0) 
       With REKA
       Parallel On Auto On Overlap On Duplicates On PartialSegments On Offset 2
       Visibility On AutoPosition On AutoSizes 1 AutoSizeStep 50 SuppressIfNoFit Off AutoCallout Off
-  Layer 88
+  Layer 89
     Display Off
     Global Pen (1,2,8421504) Brush (31,12632256) Symbol (35,0,12) Line (1,2,0) Font ("Tahoma",0,9,0)
     Zoom (0, 1700) Units "m" 
@@ -2836,7 +2849,7 @@ Set Map
       With KUCNI_BROJ
       Parallel On Auto On Overlap Off Duplicates On Offset 2
       Visibility Zoom (0, 1000) Units "m"
-  Layer 89
+  Layer 90
     Display Off
     Global Pen (12,2,8245248) Brush (2,15790320,16777215) Symbol (35,0,12) Line (13,2,8421504) Font ("Tahoma",0,9,0)
     Zoom (0, 1700) Units "m" 
@@ -2845,19 +2858,8 @@ Set Map
       Parallel On Auto On Overlap Off Duplicates On Offset 2
       Visibility On
    Alpha 142
-  Layer 90
-    Display Graphic
-    Global Pen (1,2,0)  Brush (2,16777215,16777215)  Symbol (35,0,12)  Line (1,2,0)  Font ("Tahoma",0,9,0)
-    Selectable Off
-    Zoom (0, 1000) Units "m" 
-  contrast 50 
-  brightness 50 
-  alpha 255 
-    transparency on 
-  color 16777215 
-    grayscale off 
   Layer 91
-    Display Off
+    Display Graphic
     Global Pen (1,2,0)  Brush (2,16777215,16777215)  Symbol (35,0,12)  Line (1,2,0)  Font ("Tahoma",0,9,0)
     Selectable Off
     Zoom (0, 1000) Units "m" 
@@ -2868,6 +2870,17 @@ Set Map
   color 16777215 
     grayscale off 
   Layer 92
+    Display Off
+    Global Pen (1,2,0)  Brush (2,16777215,16777215)  Symbol (35,0,12)  Line (1,2,0)  Font ("Tahoma",0,9,0)
+    Selectable Off
+    Zoom (0, 1000) Units "m" 
+  contrast 50 
+  brightness 50 
+  alpha 255 
+    transparency on 
+  color 16777215 
+    grayscale off 
+  Layer 93
     Display Global
     Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (49,16711680,12) Line (1,2,0) Font ("Tahoma",0,9,0)
   contrast 50 
@@ -2876,7 +2889,7 @@ Set Map
     transparency off 
   color 0 
     grayscale off 
-  Layer 93
+  Layer 94
     Display Graphic
     Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (49,16711680,12) Line (1,2,0) Font ("Tahoma",0,9,0)
     Zoom (0, 15000) Units "m" 
@@ -2886,7 +2899,7 @@ Set Map
     transparency off 
   color 0 
     grayscale off 
-  Layer 94
+  Layer 95
     Display Off
     Global Pen (1,2,0)  Brush (2,16777215,16777215)  Symbol (35,0,12)  Line (1,2,0)  Font ("Tahoma",0,9,0)
     Selectable On
@@ -2897,7 +2910,7 @@ Set Map
     transparency on 
   color 0 
     grayscale off 
-  Layer 95
+  Layer 96
     Display Global
     Global Pen (1,2,0)  Brush (2,16777215,16777215)  Symbol (35,0,12)  Line (1,2,0)  Font ("Tahoma",0,9,0)
     Selectable On
@@ -2906,15 +2919,6 @@ Set Map
   brightness 57 
   alpha 255 
     transparency on 
-  color 0 
-    grayscale off 
-  Layer 96
-    Display Off
-    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (49,16711680,12) Line (1,2,0) Font ("Tahoma",0,9,0)
-  contrast 50 
-  brightness 50 
-  alpha 255 
-    transparency off 
   color 0 
     grayscale off 
   Layer 97
@@ -2998,6 +3002,15 @@ Set Map
     transparency off 
   color 0 
     grayscale off 
+  Layer 106
+    Display Off
+    Global Pen (1,2,0) Brush (2,16777215,16777215) Symbol (49,16711680,12) Line (1,2,0) Font ("Tahoma",0,9,0)
+  contrast 50 
+  brightness 50 
+  alpha 255 
+    transparency off 
+  color 0 
+    grayscale off 
   GroupLayer 1
     Display On Title "NIVOS"
   GroupLayer 2
@@ -3060,7 +3073,25 @@ set legend
       auto display on ,
       auto display on  
 set legend 
-  layer 35 
+  layer 34 
+    display on 
+    shades off 
+    symbols on 
+    lines off 
+    count on 
+    title auto Font ("Arial",0,9,0)
+    subtitle auto Font ("Arial",0,8,0)
+    order custom
+    ranges Font ("Arial",0,8,0)
+      range "IN"  auto display on ,
+      range "EW"  auto display on ,
+      range "BA"  auto display on ,
+      range "IK"  auto display on ,
+      range "DH"  auto display on ,
+      range "SI"  auto display on ,
+      range default  auto display off  
+set legend 
+  layer 36 
     display on 
     shades off 
     symbols on 
@@ -3078,7 +3109,7 @@ set legend
       auto display on ,
       auto display on  
 set legend 
-  layer 37 
+  layer 38 
     display on 
     shades off 
     symbols on 
@@ -3098,7 +3129,7 @@ set legend
       auto display on ,
       auto display on  
 set legend 
-  layer 42 
+  layer 43 
     display on 
     shades off 
     symbols off 
@@ -3113,26 +3144,6 @@ set legend
       auto display on ,
       auto display on ,
       auto display off ,
-      auto display on ,
-      auto display on  
-set legend 
-  layer 44 
-    display on 
-    shades off 
-    symbols off 
-    lines on 
-    count on 
-    title auto Font ("Arial",0,9,0)
-    subtitle auto Font ("Arial",0,8,0)
-    ascending on 
-    ranges Font ("Arial",0,8,0)
-      auto display on ,
-      auto display on ,
-      auto display on ,
-      auto display on ,
-      auto display on ,
-      auto display off ,
-      auto display on ,
       auto display on ,
       auto display on  
 set legend 
@@ -3144,6 +3155,26 @@ set legend
     count on 
     title auto Font ("Arial",0,9,0)
     subtitle auto Font ("Arial",0,8,0)
+    ascending on 
+    ranges Font ("Arial",0,8,0)
+      auto display on ,
+      auto display on ,
+      auto display on ,
+      auto display on ,
+      auto display on ,
+      auto display off ,
+      auto display on ,
+      auto display on ,
+      auto display on  
+set legend 
+  layer 46 
+    display on 
+    shades off 
+    symbols off 
+    lines on 
+    count on 
+    title auto Font ("Arial",0,9,0)
+    subtitle auto Font ("Arial",0,8,0)
     ascending off 
     ranges Font ("Arial",0,8,0)
       auto display on ,
@@ -3157,7 +3188,7 @@ set legend
       auto display on ,
       auto display on  
 set legend 
-  layer 47 
+  layer 48 
     display on 
     shades on 
     symbols off 
@@ -3172,7 +3203,7 @@ set legend
       auto display on ,
       auto display on  
 set legend 
-  layer 49 
+  layer 50 
     display on 
     shades on 
     symbols off 
@@ -3199,7 +3230,7 @@ set legend
       auto display on ,
       auto display on  
 set legend 
-  layer 61 
+  layer 62 
     display on 
     shades off 
     symbols off 
@@ -3219,7 +3250,7 @@ set legend
       auto display on ,
       auto display on  
 set legend 
-  layer 63 
+  layer 64 
     display on 
     shades off 
     symbols off 
@@ -3235,7 +3266,7 @@ set legend
       auto display on ,
       auto display on  
 set legend 
-  layer 70 
+  layer 71 
     display on 
     shades off 
     symbols off 
@@ -3249,7 +3280,7 @@ set legend
       auto display on ,
       auto display on  
 set legend 
-  layer 71 
+  layer 72 
     display on 
     shades off 
     symbols off 
@@ -3269,7 +3300,7 @@ set legend
       auto display on ,
       auto display on  
 set legend 
-  layer 73 
+  layer 74 
     display on 
     shades off 
     symbols off 
@@ -3283,6 +3314,9 @@ set legend
       auto display on ,
       auto display on  
 Set Window FrontWindow() Title "Niški vodovodni i kanalizacioni sistem - NIVOS/NIKAS"
+Set Window FrontWindow() Printer
+ Name "Generic 36C-9SeriesPCL(1)" Orientation Portrait Copies 1
+ Papersize 9
 Dim WorkspaceMaximizedWindow As Integer
 WorkspaceMaximizedWindow = Frontwindow()
 Set Window WorkspaceMaximizedWindow Max
