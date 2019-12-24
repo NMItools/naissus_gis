@@ -7,11 +7,11 @@ include "..\nmiDotNet.def"
 include "..\nmiWin.def"
 include "..\NAISSUS-GIS.def"
 
-Sub reg_ulica
+Sub rbt_REGISTAR_ULICA
 	
-	reg_ulica_izbor = ReadControlValue(2)
+	rbt_REGISTAR_ULICA_izbor = ReadControlValue(2)
 	
-	Do Case reg_ulica_izbor
+	Do Case rbt_REGISTAR_ULICA_izbor
 		
 	Case 1
 	
@@ -26,14 +26,14 @@ Sub reg_ulica
 	
 	Case 2
 	
-		Call arrUlice2(ReadControlValue(4))
+		Call arr_NAZIV_ULICE(ReadControlValue(4))
 		
 		Alter Control 6 Show
 		Alter Control 6 Enable
 		
 		Alter Control 7 Show
 		Alter Control 7 Enable
-		Alter Control 7 Title From Variable arr_NAZIV_UL()
+		Alter Control 7 Title From Variable arr_NAZIV_ULICE()
 		
 		Alter Control 8 Show
 		Alter Control 8 Enable	
@@ -45,8 +45,8 @@ End Sub
 
 Sub DLG_REGISTAR_ULICA
 	
-	Call arrKO
-	Call arrUlice2(128)
+	Call arr_KO
+	Call arr_NAZIV_ULICE(128)
 
 	onerror goto Greska  
 	
@@ -62,7 +62,7 @@ Sub DLG_REGISTAR_ULICA
 
 Dialog
 	Title "Registar ulica"
-	Width 229 Height 131
+	Width 229 Height 211
 	
 Control StaticText
 	Id 6
@@ -76,9 +76,9 @@ Control RadioGroup
 	Id 2
 	Position 14, 21
 	Title "Novi naziv;Izmena postojeæeg naziva"
-	Calling reg_ulica
+	Calling rbt_REGISTAR_ULICA
 	Value 1
-	Into i_reg_ulica_izbor
+	Into i_rbt_REGISTAR_ULICA_izbor
 	
 Control GroupBox
 	Id 1
@@ -90,7 +90,7 @@ Control PopupMenu
 	Id 7
 	Position 56, 71
 	Width 158
-	Title From Variable arr_NAZIV_UL()
+	Title From Variable arr_NAZIV_ULICE()
 	Disable
 	Value 1
 	Into s_stari_naziv_ul
@@ -102,17 +102,17 @@ Control StaticText
 	Width 71 Height 8
 	Title "Katastarska Opština:"
 	
+Control GroupBox
+	Id 5
+	Position 8, 59
+	Width 211 Height 126
+	Title "Unos naziva ulice"
+	
 Control StaticText
 	Id 8
 	Position 14, 90
 	Width 41 Height 8
 	Title "Novi naziv:"
-	
-Control GroupBox
-	Id 5
-	Position 8, 59
-	Width 211 Height 49
-	Title "Ažuriranje"
 	
 Control EditText
 	Id 9
@@ -120,24 +120,55 @@ Control EditText
 	Width 159 Height 14
 	Into s_novi_naziv_ul
 	
-Control OKButton
-	Title "OK"
-	Position 170, 112
-	Width 51 Height 14
-	
 Control PopupMenu
 	Id 4
 	Position 115, 31
 	Width 99
 	Title From Variable arr_KO()
-	Calling arrUlice1
+	Calling pop_arr_NAZIV_ULICE
 	Value 128
 	Into sn_KO
 	
+Control OKButton
+	Title "OK"
+	Position 163, 189
+	Width 51 Height 14
+	
+Control Button
+	Title "Ažuriraj"
+	Position 164, 105
+	Width 51 Height 14
+	Calling btn_REGISTAR_ULICA_azuriraj
+	
 Control CancelButton
 	Title "Cancel"
-	Position 8, 112
+	Position 5, 189
 	Width 51 Height 14
+	
+Control StaticText
+	Position 15, 121
+	Width 79 Height 8
+	Title "Primeri pravilnog unosa"
+	
+Control StaticText
+	Position 15, 130
+	Width 100 Height 8
+	Title "- Ime sadrži datum: '29. Marta'"
+	
+Control StaticText
+	Position 15, 140
+	Width 146 Height 8
+	Title "- Ime sadrži redni br. do 10: 'Devete brigade'"
+	
+Control StaticText
+	Position 15, 149
+	Width 145 Height 8
+	Title "- Ime sadrži redni br. veæi od 10: '45. divizije'"
+	
+Control StaticText
+	Position 15, 158
+	Width 156 Height 8
+	Title "- Ime sadrži titule: 'Prof. Dr Branimira Jankoviæa'"
 	
 	Exit Sub
 	'	-------------------------
@@ -146,4 +177,3 @@ Control CancelButton
 	Call ERRShow()
 	
 End Sub	
-	

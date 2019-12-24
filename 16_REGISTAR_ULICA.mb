@@ -72,7 +72,7 @@ Sub REGISTAR_ULICA
 	
 End Sub
 
-Sub arrKO		
+Sub arr_KO		
 
 	dim n as smallint
 	
@@ -87,7 +87,7 @@ Sub arrKO
 		Server i_hstmt Bind Column 2 To s_KO, am_stat
 		Server i_hstmt Fetch First
 
-' - Kreiraj niz od svih KO = arrKO() 
+' - Kreiraj niz od svih KO = arr_KO() 
 		n=1
 		While Not Server_EOT(i_hstmt)
 
@@ -109,42 +109,12 @@ Sub arrKO
 	Exit Sub
 '	-------------------------
 	Greska:
-	Call ERRCreate(Err(), Error$(), "arrKO")
+	Call ERRCreate(Err(), Error$(), "arr_KO")
 	Call ERRShow()
 	
 End Sub
 
-Sub arrUlice1
-
-	OnError goto Greska
-	
-	Do Case ReadControlValue(2)
-		
-	Case ReadControlValue(2) = 1
-
-		Alter Control 7 Hide
-		Alter Control 7 Disable
-
-	Case ReadControlValue(2) = 2
-		
-		Call arrUlice2(ReadControlValue(4))
-		Alter Control 7 Show
-		Alter Control 7 Enable
-		Alter Control 7 Title from Variable arr_NAZIV_UL() 
-		Alter Control 7 Value 1
-
-		
-	End Case
-	
-	Exit Sub
-'	-------------------------
-	Greska:
-	Call ERRCreate(Err(), Error$(), "arrKO_Ulice1")
-	Call ERRShow()
-	
-End Sub
-
-Sub arrUlice2(byVal s as integer)
+Sub arr_NAZIV_ULICE(byVal s as integer)
 	
 	dim n as smallint
 	
@@ -152,7 +122,9 @@ Sub arrUlice2(byVal s as integer)
 	
 '	print "s = " + s
 	
+	sn_KO = arr_KO(s)
 	sn_MBKO = arr_MBKO(s)
+	
 '	Print sn_MBKO
 
 ' - Spisak ULICA u odabranoj KO 
@@ -173,16 +145,16 @@ Sub arrUlice2(byVal s as integer)
 			ReDim arr_ID_UL(n)
 			arr_ID_UL(n) = i_ID_IME_UL
 
-			ReDim arr_NAZIV_UL(n)
-			arr_NAZIV_UL(n) = s_NAZIV_LATIN2
+			ReDim arr_NAZIV_ULICE(n)
+			arr_NAZIV_ULICE(n) = s_NAZIV_LATIN2
 
 			Server i_hstmt Fetch Next
 			n=n+1
 		Wend
 	
 	If n-1 = 0 
-		Then ReDim arr_NAZIV_UL(1)
-		arr_NAZIV_UL(1) = "Nema ulica za ovu KO!"
+		Then ReDim arr_NAZIV_ULICE(1)
+		arr_NAZIV_ULICE(1) = "Nema ulica za ovu KO!"
 	End If
 	
 	Print "---------------------------------------------------"
@@ -193,9 +165,83 @@ Sub arrUlice2(byVal s as integer)
 	Exit Sub
 '	-------------------------
 	Greska:
-	Call ERRCreate(Err(), Error$(), "arrUlice2")
+	Call ERRCreate(Err(), Error$(), "arr_NAZIV_ULICE")
 	Call ERRShow()
 	
+End Sub
+
+Sub pop_arr_NAZIV_ULICE
+
+	OnError goto Greska
+	
+	Do Case ReadControlValue(2)
+		
+	Case ReadControlValue(2) = 1
+
+		Alter Control 7 Hide
+		Alter Control 7 Disable
+
+	Case ReadControlValue(2) = 2
+		
+		Call arr_NAZIV_ULICE(ReadControlValue(4))
+		Alter Control 7 Show
+		Alter Control 7 Enable
+		Alter Control 7 Title from Variable arr_NAZIV_ULICE() 
+		Alter Control 7 Value 1
+
+		
+	End Case
+	
+	Exit Sub
+'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "pop_arr_NAZIV_ULICE")
+	Call ERRShow()
+	
+End Sub
+
+Sub btn_REGISTAR_ULICA_azuriraj
+	
+	OnError goto Greska
+	
+	Dim s_latin1, s_latin2, s_cir, s_kat_ops as string
+	Dim i_id, i_mbko as integer
+	
+	Do Case ReadControlValue(2)
+	
+	Case  ReadControlValue(2) = 1
+	
+		s_latin1 = ReadControlValue(9)
+		s_latin2 = ReadControlValue(9)
+		s_cir = "-"
+		i_mbko = sn_MBKO
+		s_kat_ops = sn_KO
+
+	' - Komandni string za SQL StoredProc/query UNOS NOVOG NAZIVA ULICE
+		s_kom = "EXEC [mbx].[sp_ulice_azuriranje] 'INSERT', 0 ,'" + s_latin1 + "', N'" + s_latin2 + "', N'" + s_cir + "', " + i_mbko + ", '" + s_kat_ops + "'"
+		
+	Case  ReadControlValue(2) = 2
+		
+		i_id = arr_ID_UL(ReadControlValue(7))
+		s_latin1 = ReadControlValue(9)
+		s_latin2 = ReadControlValue(9)
+		s_cir = "-"
+'		i_mbko = 
+'		s_kat_ops =
+
+	' - Komandni string za SQL StoredProc/query AŽURIRANJE POSTOJEÆEG NAZIVA ULICE (BEZ AŽURIRANJA OPŠTINA!)
+		s_kom = "EXEC [mbx].[sp_ulice_azuriranje] 'UPDATE', " + i_id + " ,'" + s_latin1 + "', N'" + s_latin2 + "', N'" + s_cir + "', 9999992, 'KUD IDIJOTI'"
+			
+	End Case
+	
+	print s_kom
+	
+	Exit Sub
+'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "btn_REGISTAR_ULICA_azuriraj")
+	Call ERRShow()
+		
 End Sub
 
 Sub ULICA_IZBOR

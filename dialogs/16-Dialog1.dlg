@@ -5,7 +5,7 @@
       <Property name="ControlCode" />
       <Property name="Id" />
       <Property name="Name">MapBasicCancelButton1</Property>
-      <Property name="Position">12, 180</Property>
+      <Property name="Position">8, 305</Property>
       <Property name="Size">75, 23</Property>
       <Property name="Calling" />
       <Property name="Disable">False</Property>
@@ -17,7 +17,7 @@
       <Property name="DataBindings">
         <Property name="DefaultDataSourceUpdateMode">OnValidation</Property>
       </Property>
-      <Property name="Location">12, 180</Property>
+      <Property name="Location">8, 305</Property>
       <Property name="Tag">Inited</Property>
     </Object>
     <Object type="DialogDesigner.ToolboxLib.MapBasicControls.MapBasicOKButton, DialogDesigner, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" name="MapBasicOKButton1" children="Controls">
@@ -25,7 +25,7 @@
       <Property name="ControlCode" />
       <Property name="Id" />
       <Property name="Name">MapBasicOKButton1</Property>
-      <Property name="Position">250, 180</Property>
+      <Property name="Position">240, 305</Property>
       <Property name="Size">75, 23</Property>
       <Property name="Calling" />
       <Property name="Disable">False</Property>
@@ -37,10 +37,125 @@
       <Property name="DataBindings">
         <Property name="DefaultDataSourceUpdateMode">OnValidation</Property>
       </Property>
-      <Property name="Location">250, 180</Property>
+      <Property name="Location">240, 305</Property>
       <Property name="Tag">Inited</Property>
     </Object>
     <Object type="DialogDesigner.ToolboxLib.MapBasicControls.MapBasicGroupBox, DialogDesigner, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" name="MapBasicGroupBox2" children="Controls">
+      <Object type="DialogDesigner.ToolboxLib.MapBasicControls.MapBasicStaticText, DialogDesigner, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" name="MapBasicStaticText8" children="Controls">
+        <Property name="ControlCode" />
+        <Property name="Id" />
+        <Property name="Name">MapBasicStaticText8</Property>
+        <Property name="Position">10, 160</Property>
+        <Property name="Size">229, 13</Property>
+        <Property name="Disable">False</Property>
+        <Property name="AutoSize">True</Property>
+        <Property name="Title">- Ime sadrži titule: 'Prof. Dr Branimira Jankovića'</Property>
+        <Property name="Hide">False</Property>
+        <Property name="TabIndex">9</Property>
+        <Property name="TabIndexSet">False</Property>
+        <Property name="Text">- Ime sadrži titule: 'Prof. Dr Branimira Jankovića'</Property>
+        <Property name="DataBindings">
+          <Property name="DefaultDataSourceUpdateMode">OnValidation</Property>
+        </Property>
+        <Property name="Location">10, 160</Property>
+        <Property name="Tag">Inited</Property>
+      </Object>
+      <Object type="DialogDesigner.ToolboxLib.MapBasicControls.MapBasicStaticText, DialogDesigner, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" name="MapBasicStaticText7" children="Controls">
+        <Property name="ControlCode" />
+        <Property name="Id" />
+        <Property name="Name">MapBasicStaticText7</Property>
+        <Property name="Position">10, 145</Property>
+        <Property name="Size">213, 13</Property>
+        <Property name="Disable">False</Property>
+        <Property name="AutoSize">True</Property>
+        <Property name="Title">- Ime sadrži redni br. veći od 10: '45. divizije'</Property>
+        <Property name="Hide">False</Property>
+        <Property name="TabIndex">8</Property>
+        <Property name="TabIndexSet">False</Property>
+        <Property name="Text">- Ime sadrži redni br. veći od 10: '45. divizije'</Property>
+        <Property name="DataBindings">
+          <Property name="DefaultDataSourceUpdateMode">OnValidation</Property>
+        </Property>
+        <Property name="Location">10, 145</Property>
+        <Property name="Tag">Inited</Property>
+      </Object>
+      <Object type="DialogDesigner.ToolboxLib.MapBasicControls.MapBasicStaticText, DialogDesigner, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" name="MapBasicStaticText6" children="Controls">
+        <Property name="ControlCode" />
+        <Property name="Id" />
+        <Property name="Name">MapBasicStaticText6</Property>
+        <Property name="Position">10, 130</Property>
+        <Property name="Size">214, 13</Property>
+        <Property name="Disable">False</Property>
+        <Property name="AutoSize">True</Property>
+        <Property name="Title">- Ime sadrži redni br. do 10: 'Devete brigade'</Property>
+        <Property name="Hide">False</Property>
+        <Property name="TabIndex">7</Property>
+        <Property name="TabIndexSet">False</Property>
+        <Property name="Text">- Ime sadrži redni br. do 10: 'Devete brigade'</Property>
+        <Property name="DataBindings">
+          <Property name="DefaultDataSourceUpdateMode">OnValidation</Property>
+        </Property>
+        <Property name="Location">10, 130</Property>
+        <Property name="Tag">Inited</Property>
+      </Object>
+      <Object type="DialogDesigner.ToolboxLib.MapBasicControls.MapBasicStaticText, DialogDesigner, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" name="MapBasicStaticText5" children="Controls">
+        <Property name="ControlCode" />
+        <Property name="Id" />
+        <Property name="Name">MapBasicStaticText5</Property>
+        <Property name="Position">10, 115</Property>
+        <Property name="Size">147, 13</Property>
+        <Property name="Disable">False</Property>
+        <Property name="AutoSize">True</Property>
+        <Property name="Title">- Ime sadrži datum: '29. Marta'</Property>
+        <Property name="Hide">False</Property>
+        <Property name="TabIndex">6</Property>
+        <Property name="TabIndexSet">False</Property>
+        <Property name="Text">- Ime sadrži datum: '29. Marta'</Property>
+        <Property name="DataBindings">
+          <Property name="DefaultDataSourceUpdateMode">OnValidation</Property>
+        </Property>
+        <Property name="Location">10, 115</Property>
+        <Property name="Tag">Inited</Property>
+      </Object>
+      <Object type="DialogDesigner.ToolboxLib.MapBasicControls.MapBasicStaticText, DialogDesigner, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" name="MapBasicStaticText2" children="Controls">
+        <Property name="ControlCode" />
+        <Property name="Id" />
+        <Property name="Name">MapBasicStaticText2</Property>
+        <Property name="Position">10, 100</Property>
+        <Property name="Size">116, 13</Property>
+        <Property name="Disable">False</Property>
+        <Property name="AutoSize">True</Property>
+        <Property name="Title">Primeri pravilnog unosa</Property>
+        <Property name="Hide">False</Property>
+        <Property name="TabIndex">5</Property>
+        <Property name="TabIndexSet">False</Property>
+        <Property name="Text">Primeri pravilnog unosa</Property>
+        <Property name="DataBindings">
+          <Property name="DefaultDataSourceUpdateMode">OnValidation</Property>
+        </Property>
+        <Property name="Location">10, 100</Property>
+        <Property name="Tag">Inited</Property>
+      </Object>
+      <Object type="DialogDesigner.ToolboxLib.MapBasicControls.MapBasicButton, DialogDesigner, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" name="MapBasicButton1" children="Controls">
+        <Property name="Title">Ažuriraj</Property>
+        <Property name="ControlCode" />
+        <Property name="Id" />
+        <Property name="Name">MapBasicButton1</Property>
+        <Property name="Position">229, 74</Property>
+        <Property name="Size">75, 23</Property>
+        <Property name="Calling">btn_REGISTAR_ULICA_azuriraj</Property>
+        <Property name="Disable">False</Property>
+        <Property name="Hide">False</Property>
+        <Property name="TabIndex">4</Property>
+        <Property name="TabIndexSet">False</Property>
+        <Property name="Text">Ažuriraj</Property>
+        <Property name="UseVisualStyleBackColor">True</Property>
+        <Property name="DataBindings">
+          <Property name="DefaultDataSourceUpdateMode">OnValidation</Property>
+        </Property>
+        <Property name="Location">229, 74</Property>
+        <Property name="Tag">Inited</Property>
+      </Object>
       <Object type="DialogDesigner.ToolboxLib.MapBasicControls.MapBasicPopupMenu, DialogDesigner, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" name="MapBasicPopupMenu2" children="Controls">
         <Property name="ControlCode" />
         <Property name="Id">7</Property>
@@ -49,7 +164,7 @@
         <Property name="Size">233, 21</Property>
         <Property name="Title">
         </Property>
-        <Property name="FromVariable">arr_NAZIV_UL()</Property>
+        <Property name="FromVariable">arr_NAZIV_ULICE()</Property>
         <Property name="Calling" />
         <Property name="Disable">True</Property>
         <Property name="Value">1</Property>
@@ -126,13 +241,13 @@
       <Property name="Id">5</Property>
       <Property name="Name">MapBasicGroupBox2</Property>
       <Property name="Position">12, 95</Property>
-      <Property name="Size">310, 79</Property>
-      <Property name="Title">Ažuriranje</Property>
+      <Property name="Size">310, 204</Property>
+      <Property name="Title">Unos naziva ulice</Property>
       <Property name="Hide">False</Property>
       <Property name="TabIndex">2</Property>
       <Property name="TabIndexSet">False</Property>
       <Property name="TabStop">False</Property>
-      <Property name="Text">Ažuriranje</Property>
+      <Property name="Text">Unos naziva ulice</Property>
       <Property name="DataBindings">
         <Property name="DefaultDataSourceUpdateMode">OnValidation</Property>
       </Property>
@@ -149,7 +264,7 @@
         <Property name="Title">
         </Property>
         <Property name="FromVariable">arr_KO()</Property>
-        <Property name="Calling">arrUlice1</Property>
+        <Property name="Calling">pop_arr_NAZIV_ULICE</Property>
         <Property name="Disable">False</Property>
         <Property name="Value">128</Property>
         <Property name="Into">sn_KO</Property>
@@ -169,11 +284,11 @@
         <Property name="Position">9, 19</Property>
         <Property name="Title">Novi naziv;Izmena postojećeg naziva</Property>
         <Property name="FromVariable" />
-        <Property name="Calling">reg_ulica</Property>
+        <Property name="Calling">rbt_REGISTAR_ULICA</Property>
         <Property name="Disable">False</Property>
         <Property name="Hide">False</Property>
         <Property name="Value">1</Property>
-        <Property name="Into">i_reg_ulica_izbor</Property>
+        <Property name="Into">i_rbt_REGISTAR_ULICA_izbor</Property>
         <Property name="TabIndex">0</Property>
         <Property name="TabIndexSet">False</Property>
         <Property name="AutoSize">True</Property>
@@ -221,7 +336,7 @@
       <Property name="Tag">Inited</Property>
     </Object>
     <Property name="AutoSize">True</Property>
-    <Property name="ClientSize">337, 212</Property>
+    <Property name="ClientSize">337, 340</Property>
     <Property name="MaximizeBox">False</Property>
     <Property name="MinimizeBox">False</Property>
     <Property name="ShowIcon">False</Property>

@@ -641,12 +641,31 @@
 '	16-REGISTAR ULICA
 		
 	Declare Sub REGISTAR_ULICA		
-	
 	Declare Sub DLG_REGISTAR_ULICA
-	Declare Sub reg_ulica
-	Declare Sub arrKO
-	Declare Sub arrUlice1
-	Declare Sub arrUlice2(byVal s as integer)
+	Declare Sub rbt_REGISTAR_ULICA
+	Declare Sub arr_KO
+	Declare Sub arr_NAZIV_ULICE(byVal s as integer)
+	Declare Sub pop_arr_NAZIV_ULICE
+
+		Global i_rbt_REGISTAR_ULICA_izbor as integer
+		Global rbt_REGISTAR_ULICA_izbor as smallint
+		Global s_stari_naziv_ul as string
+		Global s_novi_naziv_ul as string
+		
+		Global i_MBKO as integer
+		Global arr_MBKO() as integer
+		Global sn_MBKO as string
+
+		Global s_KO as string
+		Global arr_KO() as string
+		Global sn_KO as string
+		
+	 	Global i_ID_IME_UL as integer
+	 	Global s_NAZIV_LATIN2 as string
+		Global arr_ID_UL() as string
+		Global arr_NAZIV_ULICE() as string
+		
+	Declare Sub btn_REGISTAR_ULICA_azuriraj
 	
 	Declare Sub ULICA_UNOS
 	Declare Sub ULICA_IZBOR
@@ -662,34 +681,8 @@
 		Global p_parcela_def As Pen
 		Global b_parcela As Brush
 		Global p_parcela As Pen
-		
-		Global i_reg_ulica_izbor as integer
-		Global reg_ulica_izbor as smallint
-		Global s_stari_naziv_ul as string
-		Global s_novi_naziv_ul as string
-		
-		Global i_MBKO as integer
-		Global arr_MBKO() as integer
-		Global sn_MBKO as string
 
-		Global s_KO as string
-		Global arr_KO() as string
-		Global sn_KO as string
-		
-	 	Global i_ID_IME_UL as integer
-	 	Global s_NAZIV_LATIN2 as string
-
-		Global arr_ID_UL() as string
-		Global arr_NAZIV_UL() as string
-
-	 	
-	
-'	Declare Sub arrKO_Ulice1
-'	Declare Sub snKO
-'	Declare Sub snULICE
-
-	
-	
+ 	
 '	99-ADMIN.MB ===========================================================================
 	
 	Declare Sub GIS_admin
