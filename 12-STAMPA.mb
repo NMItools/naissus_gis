@@ -923,7 +923,7 @@ Layout
 
 '	Naslov printa
 	Create Text
-		"Izveštaj o položaju cevovoda na osnovu intervencije RN _____"
+		"Izveštaj o ažurnosti GIS podataka na osnovu intervencije RN _____"
 		(f1.x + w_MapFrame/3, f1.y + mr) (f1.x + w_MapFrame/3 + 4, f1.y + mr - 0.2)
 		Font ("Arial Narrow",1,12,0,16777215)
 
@@ -933,7 +933,7 @@ Layout
 	
 	'	Opisni tekst
 		Create Text
-		    "Prilikom intrevencije na cevovodu utvrðeno je da položaj ili opis cevovoda \n\n1. - ODGOVARA stanju unetom u GIS\n\n2. - NE ODGOVARA stanju unešenom u GIS i prilažemo skicu položaja \n      cevovoda sa prateæim podacima koje je potrebno izmeniti."
+		    "Prilikom intrevencije na terenu utvrðeno je da položaj ili opis instalacija \n\n1. - ODGOVARA stanju unetom u GIS\n\n2. - NE ODGOVARA stanju unešenom u GIS i prilažemo skicu položaja \n      instalacija sa prateæim podacima koje je potrebno izmeniti."
 			(t1.x + w_Logo/1.8 + mr/4, t1.y + mr/4) (t1.x + w_Logo/1.8 + 4, t1.y + mr)
 			Font ("Arial Narrow",0,10,0,16777215)
 	
@@ -973,7 +973,7 @@ Layout
 		
 		'	Opisni tekst
 		Create Text
-	        "Prilikom intrevencije na cevovodu utvrðeno je da \npoložaj ili opis cevovoda:\n\n1. - ODGOVARA stanju unetom u GIS\n\n2. - NE ODGOVARA stanju unešenom u GIS\n      i prilažemo skicu položaja  cevovoda sa\n      prateæim podacima koje je potrebno izmeniti."
+	        "Prilikom intrevencije na cevovodu utvrðeno je da \npoložaj ili opis instalacija:\n\n1. - ODGOVARA stanju unetom u GIS\n\n2. - NE ODGOVARA stanju unešenom u GIS\n      i prilažemo skicu položaja instalacija sa\n      prateæim podacima koje je potrebno izmeniti."
 			(t1.x + w_Logo/1.8 + mr/4, t1.y + mr/4) (t1.x + w_Logo/1.8 + 4, t1.y + mr)
 			Font ("Arial Narrow",0,8,0,16777215)
 	

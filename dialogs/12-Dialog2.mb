@@ -93,7 +93,7 @@ Control EditText
 	Id 19
 	Position 46, 89
 	Width 56 Height 12
-	Value "s_mapScale"
+	Value s_mapScale
 	
 Control GroupBox
 	Id 17
@@ -127,7 +127,7 @@ Control EditText
 	Position 147, 88
 	Width 25 Height 12
 	Disable
-	Value "i_Dpi"
+	Value i_Dpi
 	Into i_Dpi
 	
 Control StaticText
@@ -135,12 +135,11 @@ Control StaticText
 	Position 175, 89
 	Width 14 Height 8
 	Title "dpi"
-	
+
 Exit Sub
 '	-------------------------
 	Greska:
 	Call ERRCreate(Err(), Error$(), "DLG_print_2")
 	Call ERRShow()
 		
-End Sub			
-	
+End Sub				
