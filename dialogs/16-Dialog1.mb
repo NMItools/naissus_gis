@@ -45,6 +45,7 @@ End Sub
 
 Sub DLG_REGISTAR_ULICA
 	
+	
 	Call arr_KO
 	Call arr_NAZIV_ULICE(128)
 
