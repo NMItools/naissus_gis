@@ -204,37 +204,68 @@ Sub btn_REGISTAR_ULICA_azuriraj
 	
 	OnError goto Greska
 	
-	Dim s_latin1, s_latin2, s_cir, s_kat_ops as string
-	Dim i_id, i_mbko as integer
+	Dim s_latin1, s_latin2, s_cir, s_kat_ops, metod as string
+	Dim i_id, i_mbko, i_return_val, Col as integer
+	
+	If ReadControlValue(9) = ""
+	Then
+		Note "Prazno polje za naziv ulice!"
+		Exit Sub
+	End If
 	
 	Do Case ReadControlValue(2)
 	
-	Case  ReadControlValue(2) = 1
+		' - UNOS NOVOG NAZIVA ULICE
+		
+		Case  ReadControlValue(2) = 1
+		
+			metod = "INSERT"
+			i_id = 0
+			s_latin1 = ReadControlValue(9)
+			s_latin2 = ReadControlValue(9)
+			s_cir = "-"
+			i_mbko = sn_MBKO
+			s_kat_ops = sn_KO
 	
-		s_latin1 = ReadControlValue(9)
-		s_latin2 = ReadControlValue(9)
-		s_cir = "-"
-		i_mbko = sn_MBKO
-		s_kat_ops = sn_KO
+		' - AŽURIRANJE POSTOJEÆEG NAZIVA ULICE (BEZ AŽURIRANJA OPŠTINA!)
 
-	' - Komandni string za SQL StoredProc/query UNOS NOVOG NAZIVA ULICE
-		s_kom = "EXEC [mbx].[sp_ulice_azuriranje] 'INSERT', 0 ,'" + s_latin1 + "', N'" + s_latin2 + "', N'" + s_cir + "', " + i_mbko + ", '" + s_kat_ops + "'"
-		
-	Case  ReadControlValue(2) = 2
-		
-		i_id = arr_ID_UL(ReadControlValue(7))
-		s_latin1 = ReadControlValue(9)
-		s_latin2 = ReadControlValue(9)
-		s_cir = "-"
-'		i_mbko = 
-'		s_kat_ops =
-
-	' - Komandni string za SQL StoredProc/query AŽURIRANJE POSTOJEÆEG NAZIVA ULICE (BEZ AŽURIRANJA OPŠTINA!)
-		s_kom = "EXEC [mbx].[sp_ulice_azuriranje] 'UPDATE', " + i_id + " ,'" + s_latin1 + "', N'" + s_latin2 + "', N'" + s_cir + "', 9999992, 'KUD IDIJOTI'"
+		Case  ReadControlValue(2) = 2
 			
+			metod = "UPDATE"
+			i_id = arr_ID_UL(ReadControlValue(7))
+			s_latin1 = ReadControlValue(9)
+			s_latin2 = ReadControlValue(9)
+			s_cir = "-"
+			i_mbko = 0
+			s_kat_ops = "-"
+	
 	End Case
 	
-	print s_kom
+' - Priprema t-SQL komande	
+	s_kom = "DECLARE @return_value int;EXEC @return_value = [mbx].[sp_ulice_azuriranje] @metod = N'" + metod + "', @id_ul = " + i_id + ", @lat1 = N'" + s_latin1 + "', @lat2 = N'" + s_latin2 + "', @cir = N'" + s_cir + "', @br_ko = " + i_mbko + ", @ko = N'" + s_kat_ops + "';SELECT	'Return Value' = @return_value INTO MI_user.retval"
+
+	' - Izvršavanje SQL StoredProc/query 
+'	Server i_hdbc Begin Transaction
+	i_hstmt = Server_Execute(i_hdbc, s_kom)
+	Server i_hstmt Close
+	i_hstmt = Server_Execute(i_hdbc, "SELECT * from MI_user.retval")
+		Server i_hstmt Bind Column 1 To i_return_val, am_stat
+		Server i_hstmt Fetch First
+	Server i_hstmt Close
+	
+	
+	If i_return_val = 0 
+	Then 
+'		Server i_hdbc Commit
+		i_hstmt = Server_Execute(i_hdbc, "DROP TABLE [MI_user].[retval]")
+		Server i_hstmt Close
+		Note "Ažuriranje uspešno."
+	Else
+'		Server i_hdbc Rollback
+		Note "Došlo je do greške - ažuriranje neuspešno!"
+		print "Neuspešna t-SQL komanda: "
+		print s_kom
+	End If
 	
 	Exit Sub
 '	-------------------------
