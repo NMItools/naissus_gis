@@ -27,6 +27,7 @@ Module=14-POMOCNI.MBO
 Module=15-CCTV.MBO
 Module=16_REGISTAR_ULICA.MBO
 Module=dialogs\16-Dialog1.MBO
+Module=dialogs\16-Dialog2.MBO
 Module=99-ADMIN.MBO
 Module=dialogs\99-Dialog1.MBO
 Module=dialogs\99-Dialog2.MBO

@@ -46,6 +46,15 @@ Sub Toolbar_GLAVNI
 			
 		SEPARATOR
 
+		PushButton
+			Calling DLG_PRETRAGA_ULICA
+			Icon MI_ICON_MAPSYMB_5
+			HelpMsg "Pokreni pretragu po ulicama\nPretraga ulica"
+			Enable     		
+
+		SEPARATOR
+		
+
 		ToggleButton
 			Calling Toolbar_KN
 			Icon 8451 File "nmiIcons.dll"				

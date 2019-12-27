@@ -448,3 +448,79 @@ Sub ULICA_UKLONI
 	Call ERRShow()
 
 End Sub
+
+Sub btn_Pronadji_Ulicu
+
+	onerror goto Greska  
+	
+	dim n as smallint
+	dim br as string
+	
+'	print chr$(12)
+	print "-> Pretraga..."
+	
+	ReDim arr_RezultatPretrage_naziv(0)
+	
+	s_trazen_naziv = ReadControlValue(2)
+	
+	s_kom = "EXEC [mbx].[sp_ulice_pretraga_naziv] N'" + s_trazen_naziv + "'"
+	
+'	print s_kom
+	
+	' - Izvršavanje SQL StoredProc/query 
+	i_hstmt = Server_Execute(i_hdbc,s_kom) 
+		Server i_hstmt Bind Column 1 To s_naziv_ulice, am_stat
+		Server i_hstmt Bind Column 2 To i_naziv_id, am_stat
+		Server i_hstmt Fetch First
+
+' - Kreiraj niz od ID naziva ulice				= arr_RezultatPretrage_naziv()
+
+		n=1
+		While Not Server_EOT(i_hstmt)
+			ReDim arr_RezultatPretrage_naziv(n)
+			arr_RezultatPretrage_naziv(n) = s_naziv_ulice		
+
+			ReDim arr_RezultatPretrage_id(n)
+			arr_RezultatPretrage_id(n) = i_naziv_id
+			
+			Server i_hstmt Fetch Next
+			n=n+1
+		Wend
+	
+	br = str$(n-1)
+	
+	Alter Control 5 Title from Variable arr_RezultatPretrage_naziv 
+	Alter Control 8 Title br
+	Print "-> Broj ulica koje sadrže '" + s_trazen_naziv +"' u svom nazivu:" + br 
+	Alter Control 2 Active
+	Server i_hstmt Close
+	
+	Exit Sub
+	'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "btn_Pronadji_Ulicu")
+	Call ERRShow()
+	
+End Sub
+
+Sub btn_Prikazi_Na_Mapi
+	
+	onerror goto Greska 
+	
+	Dim i_sel_ulica_id as smallint
+	
+	i_sel_ulica_id = arr_RezultatPretrage_id(ReadControlValue(5))
+	
+	Note i_sel_ulica_id
+
+	Exit Sub
+	'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "btn_Prikazi_Na_Mapi")
+	Call ERRShow()
+	
+End Sub
+
+Sub btn_OK_PRETRAGA_ULICA
+
+End Sub

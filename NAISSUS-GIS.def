@@ -681,6 +681,19 @@
 		Global p_parcela_def As Pen
 		Global b_parcela As Brush
 		Global p_parcela As Pen
+		
+' 	Pretraga ulica		
+
+	Declare Sub DLG_PRETRAGA_ULICA
+	Declare Sub btn_Pronadji_Ulicu
+	Declare Sub btn_Prikazi_Na_Mapi
+	Declare Sub btn_OK_PRETRAGA_ULICA
+
+		Global s_trazen_naziv as string
+		Global arr_RezultatPretrage_naziv() as String
+		Global arr_RezultatPretrage_id() as smallint
+		Global s_naziv_ulice as String
+		Global i_naziv_id as Integer
 
  	
 '	99-ADMIN.MB ===========================================================================
