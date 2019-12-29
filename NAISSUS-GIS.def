@@ -694,6 +694,13 @@
 		Global arr_RezultatPretrage_id() as smallint
 		Global s_naziv_ulice as String
 		Global i_naziv_id as Integer
+		
+		global s_rez_naziv as string
+		global f_minx as float
+		global f_miny as float
+		global f_maxx as float
+		global f_maxy as float
+		global geom_ulica as object
 
  	
 '	99-ADMIN.MB ===========================================================================

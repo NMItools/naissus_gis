@@ -508,11 +508,49 @@ Sub btn_Prikazi_Na_Mapi
 	onerror goto Greska 
 	
 	Dim i_sel_ulica_id as smallint
+	Dim s_Naziv as Alias
+	Dim s_NazivKor	As String
 	
-	i_sel_ulica_id = arr_RezultatPretrage_id(ReadControlValue(5))
+	If ReadControlValue(5) = 0
+	Then 
 	
-	Note i_sel_ulica_id
+		Note "Izaberite ulicu!"
+		Dialog Preserve
+	
+	Else
+	
+		i_sel_ulica_id = arr_RezultatPretrage_id(ReadControlValue(5))
+'		Note i_sel_ulica_id
 
+		s_kom = "EXEC [mbx].[sp_ulice_pretraga_id] @id = " + i_sel_ulica_id + ""
+'		print s_kom
+		
+		i_hstmt = Server_Execute(i_hdbc,s_kom)
+		Server i_hstmt Close
+	
+		If OtvorenTAB("temp") Then
+			Server Refresh temp
+		Else
+			Server i_hdbc link Table "Select * From ""MI_USER"".""TEMP"" WHERE MI_PRINX = 1" Toolkit "ODBC" Into "temp" Autokey ON File s_FOLDER_RAD+"TEMP.TAB"
+		End If
+		
+		Fetch First from temp
+
+'		s_Naziv = temp.col1
+'		s_NazivKor = Replace(s_Naziv, chr$(32), chr$(95))
+'		s_NazivKor = Replace(s_NazivKor, chr$(40), chr$(95))
+'		s_NazivKor = Replace(s_NazivKor, chr$(41), chr$(95))
+'		print s_NazivKor
+		
+		Select * from temp into pretraga
+		Add Map Window iMapWindowID Auto Layer pretraga
+'	    Set Map Order LayerID(pretraga), 1
+       	Set Map Window iMapWindowID Layer LayerID(pretraga) Label Auto On
+   	    Set Map Window iMapWindowID Layer LayerID(pretraga) Label Font ("Tahoma",257,9,16711680,16777215)
+        Set Map Window iMapWindowID Zoom Entire Layer pretraga
+		
+	End If
+	
 	Exit Sub
 	'	-------------------------
 	Greska:
