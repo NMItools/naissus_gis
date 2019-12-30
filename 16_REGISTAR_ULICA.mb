@@ -533,21 +533,21 @@ Sub btn_Prikazi_Na_Mapi
 		Else
 			Server i_hdbc link Table "Select * From ""MI_USER"".""TEMP"" WHERE MI_PRINX = 1" Toolkit "ODBC" Into "temp" Autokey ON File s_FOLDER_RAD+"TEMP.TAB"
 		End If
-		
-		Fetch First from temp
 
-'		s_Naziv = temp.col1
-'		s_NazivKor = Replace(s_Naziv, chr$(32), chr$(95))
-'		s_NazivKor = Replace(s_NazivKor, chr$(40), chr$(95))
-'		s_NazivKor = Replace(s_NazivKor, chr$(41), chr$(95))
-'		print s_NazivKor
+		Fetch First from temp
+		
+		If OtvorenTAB("pretraga") 
+		Then
+			Close table pretraga 
+		End If
 		
 		Select * from temp into pretraga
+
 		Add Map Window iMapWindowID Auto Layer pretraga
-'	    Set Map Order LayerID(pretraga), 1
-       	Set Map Window iMapWindowID Layer LayerID(pretraga) Label Auto On
-   	    Set Map Window iMapWindowID Layer LayerID(pretraga) Label Font ("Tahoma",257,9,16711680,16777215)
-        Set Map Window iMapWindowID Zoom Entire Layer pretraga
+'		Set Map Order LayerID(pretraga), 1
+	   	Set Map Window iMapWindowID Layer LayerID(pretraga) Label Auto On
+    	Set Map Window iMapWindowID Layer LayerID(pretraga) Label Font ("Tahoma",257,9,16711680,16777215)
+    	Set Map Window iMapWindowID Zoom Entire Layer pretraga
 		
 	End If
 	

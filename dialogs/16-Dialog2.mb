@@ -9,8 +9,22 @@ include "..\NAISSUS-GIS.def"
 
 Sub DLG_PRETRAGA_ULICA
 	
-	iMapWindowID = WindowID(FrontWindow())
+	onerror goto Greska
+	
+	If MapWinSTATUS(0) = 0 
+	Then 
+		Exit Sub
+	End If
 
+	If WindowInfo( FrontWindow(), WIN_INFO_TYPE ) = WIN_MAPPER
+	Then
+		iMapWindowID = WindowID(FrontWindow())
+	Else
+		Note "Prozor sa mapom nije trenutno aktivan."
+		Exit Sub
+	End If
+
+	
 '	Exit Sub
 '	'	-------------------------
 '	Greska:

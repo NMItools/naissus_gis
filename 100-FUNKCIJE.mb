@@ -157,19 +157,18 @@ Function LayerID(ByVal ImeTabele as String) As Integer
 
 	Dim i as integer
 
-	If MapWinSTATUS(0) <> 0 Then
-		
+	If MapWinSTATUS(0) <> 0
+	Then
 		For i = 1 to mapperinfo(MapWinID(0), MAPPER_INFO_LAYERS)
 			If layerinfo(MapWinID(0), i, LAYER_INFO_NAME) = ImeTabele
 			Then
-				print i + " - " +layerinfo(MapWinID(0), i, LAYER_INFO_NAME)
+'				print i + " - " +layerinfo(MapWinID(0), i, LAYER_INFO_NAME)
 				LayerID = i
-'				Exit for
+				Exit for
 			Else
 				LayerID = 999
 			End If	
 		Next
-
 	End If
 	
 end function
