@@ -388,7 +388,7 @@ Sub SPLASH
 	Map From GIS 
 	Set Window FrontWindow() ScrollBars Off Autoscroll On
 	
-	tlen =2
+	tlen =5
 	tend=timer()+tlen
 	
 	while timer()<tend
