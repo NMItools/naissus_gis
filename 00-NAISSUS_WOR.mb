@@ -90,7 +90,7 @@ SUB MSSQL_tabele_DL
 
 '		Print "TAB postoji"
 		If s_SQL_tab = "IZOHIPSE"
-			or s_SQL_tab = "KATASTAR_PARCELE"
+			'or s_SQL_tab = "KATASTAR_PARCELE"
 			or s_SQL_tab = "IZO"
 		then 
 			goto progres_bar
