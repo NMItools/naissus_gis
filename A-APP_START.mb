@@ -17,7 +17,7 @@ SUB Main
 '*************************
 ' verzija MBX aplikacije '
 '*************************
-	s_verzija= "1.19.5"
+	s_verzija= "1.19.6"
 	
 ' - setovanje aplikacionog i privremenog foldera
 	s_TEMP_Dir = pathtodirectory$(tempfilename$(""))
@@ -160,13 +160,22 @@ SUB Main
 	Call Stampa
 	Call Pomocni
 
-' - EDITOR moduli
-	If s_appmod = "editor" 
-	or s_appmod = "admin" 
+' - UserPro Moduli
+
+	If s_appmod = "UserPro" 
+	or s_appmod = "Editor"
+	or s_appmod = "Admin" 
 	or s_appmod = "Super" 
 	then
-		Call Planovi
+		Call PLANOVI
 		Call MrezePlanova
+	End If
+
+' - EDITOR moduli
+	If s_appmod = "Editor" 
+	or s_appmod = "Admin" 
+	or s_appmod = "Super" 
+	then
 		Call REGISTAR_ULICA
 	End If
 
@@ -420,7 +429,10 @@ Sub Login_post
 	
 			i_Start = 1
 			
-			If s_appmod = "editor" or s_appmod = "admin" or s_appmod = "Super" 
+			If s_appmod = "UserPro"
+			or s_appmod = "Editor"
+			or s_appmod = "Admin" 
+			or s_appmod = "Super"
 			Then
 				Call WOR_naissus_GIS
 			Else

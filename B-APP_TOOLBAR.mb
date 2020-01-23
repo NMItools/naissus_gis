@@ -175,7 +175,7 @@ Sub WOR_default
 	
 ' - WOR za tip korisnika
 
-	If s_appmod = "editor" or s_appmod = "admin" or s_appmod = "Super" 
+	If s_appmod = "UserPro" or s_appmod = "Editor" or s_appmod = "Admin" or s_appmod = "Super" 
 	Then
 		s_DefWOR = "naissus-GIS.wor"
 	Else
@@ -220,7 +220,7 @@ Sub WOR_default_kreiranje
 	
 	i_Start = 2
 
-	If s_appmod = "editor" or s_appmod = "admin" or s_appmod = "Super" 
+	If s_appmod = "UserPro" or s_appmod = "Editor" or s_appmod = "Admin" or s_appmod = "Super" 
 	Then
 		Call WOR_naissus_GIS
 	Else
@@ -568,15 +568,23 @@ Sub Kraj_Rada
 		Alter ButtonPad "NIVOS Geodetski" Destroy
 		Alter ButtonPad "NIKAS objekti" Destroy
 		Alter ButtonPad "NIKAS CCTV" Destroy
-				
-	' - EDITOR moduli
-		If s_appmod = "editor" 
-		or s_appmod = "admin" 
+	
+	' - UserPro moduli
+		If s_appmod = "UserPro"
+		or s_appmod = "Editor"
+		or s_appmod = "Admin" 
 		or s_appmod = "Super" 
 		then
 			Alter ButtonPad "Katastar, Izohipse, DTM" Destroy		
 			Alter ButtonPad "Mreze podloga" Destroy		
 			Alter ButtonPad "Planovi" Destroy
+		End If
+		
+	' - EDITOR moduli
+		If s_appmod = "Editor" 
+		or s_appmod = "Admin" 
+		or s_appmod = "Super" 
+		then
 			Alter ButtonPad "Registar ulica" Destroy
 		End If
 	
