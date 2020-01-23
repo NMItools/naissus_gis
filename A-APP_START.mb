@@ -168,7 +168,6 @@ SUB Main
 		Call Planovi
 		Call MrezePlanova
 		Call REGISTAR_ULICA
-		
 	End If
 
 ' - ADMIN moduli
