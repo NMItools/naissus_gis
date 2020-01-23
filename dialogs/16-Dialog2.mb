@@ -1,0 +1,111 @@
+Include "MAPBASIC.DEF"
+Include "ICONS.DEF"
+Include "MENU.DEF"
+include "..\Library\ERRORLib.def"
+include "..\nmiFunkcije.def"
+include "..\nmiDotNet.def"
+include "..\nmiWin.def"
+include "..\NAISSUS-GIS.def"
+
+Sub DLG_PRETRAGA_ULICA
+	
+	onerror goto Greska
+	
+	If MapWinSTATUS(0) = 0 
+	Then 
+		Exit Sub
+	End If
+
+	If WindowInfo( FrontWindow(), WIN_INFO_TYPE ) = WIN_MAPPER
+	Then
+		iMapWindowID = WindowID(FrontWindow())
+	Else
+		Note "Prozor sa mapom nije trenutno aktivan."
+		Exit Sub
+	End If
+
+	
+'	Exit Sub
+'	'	-------------------------
+'	Greska:
+'	Call ERRCreate(Err(), Error$(), "Sub DLG_PRETRAGA_ULICA")
+'	Call ERRShow()
+'	
+'End Sub	
+
+'***** DIALOG DESIGNER GENERATED CODE. DO NOT EDIT OR REMOVE THIS LINE OR BELOW THIS LINE! *****
+
+Dialog
+	Title "Pretraga ulica"
+	Width 313 Height 151
+	
+Control GroupBox
+	Id 4
+	Position 10, 42
+	Width 295 Height 83
+	Title "Rezultati pretrage"
+	
+Control EditText
+	Id 2
+	Position 10, 16
+	Width 227 Height 16
+	Into s_trazen_naziv
+	
+Control Button
+	Title "Pronaði!"
+	Id 3
+	Position 244, 16
+	Width 61 Height 16
+	Calling btn_Pronadji_Ulicu
+	
+Control ListBox
+	Id 5
+	Position 14, 53
+	Width 223 Height 59
+	Title From Variable arr_RezultatPretrage_naziv
+	
+Control Button
+	Title "Prikaži na mapi"
+	Id 6
+	Position 244, 67
+	Width 57 Height 28
+	Calling btn_Prikazi_Na_Mapi
+	
+Control StaticText
+	Id 1
+	Position 12, 6
+	Width 64 Height 8
+	Title "Unos naziva ulice:"
+	
+Control StaticText
+	Id 7
+	Position 14, 113
+	Width 166 Height 8
+	Title "* Broj ulica koje sadrže traženu reè u svom nazivu:"
+	
+Control CancelButton
+	Title "Cancel"
+	Id 9
+	Position 186, 129
+	Width 51 Height 14
+	
+Control OKButton
+	Title "OK"
+	Id 10
+	Position 254, 129
+	Width 51 Height 14
+	Calling btn_OK_Pretraga_Ulica
+	
+Control StaticText
+	Id 8
+	Position 184, 113
+	Width 9 Height 8
+	Title "0"
+	
+	Exit Sub
+	'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "Sub DLG_PRETRAGA_ULICA")
+	Call ERRShow()
+	
+End Sub	

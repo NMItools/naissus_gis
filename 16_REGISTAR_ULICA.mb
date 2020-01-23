@@ -15,7 +15,7 @@ Sub REGISTAR_ULICA
 	onerror goto Greska
 
 	Create Menu "Registar ulica" As
-		"Registar ulica" HelpMsg "Submenu Item" Calling ULICA_UNOS,
+		"Registar ulica" HelpMsg "Submenu Item" Calling DLG_REGISTAR_ULICA,
 		"Izaberi ulicu za unos..." HelpMsg "Submenu Item" Calling ULICA_IZBOR,
 		"Dodeli naziv ulice parceli" HelpMsg "Submenu Item" Calling ULICA_PARCELA,
 		"Ukloni naziv ulice parceli" HelpMsg "Submenu Item" Calling ULICA_UKLONI
@@ -27,7 +27,7 @@ Sub REGISTAR_ULICA
 	Create ButtonPad "Registar ulica" As
 			
 		PushButton
-			Calling ULICA_UNOS
+			Calling DLG_REGISTAR_ULICA
 			Icon MI_ICON_ADDTOLIBRARY
 			HelpMsg "Registar Ulica (Izmena, Unos, Brisanje)\nRegistar Ulica"
 		
@@ -72,19 +72,220 @@ Sub REGISTAR_ULICA
 	
 End Sub
 
+Sub arr_KO		
 
-Sub ULICA_UNOS
-
-	onerror goto Greska  
+	dim n as smallint
 	
-	Note "Unesi ulicu u bazu!"
+	OnError goto Greska
+	
+' - Spisak KO u niz
+	s_kom = "SELECT [MATICNI_BROJ], [NAZIV_LATIN2] FROM [GIS].[kn].[ADMJ_NASELJA_KO] ORDER BY [NAZIV_LATIN2]"
+	
+' - Izvrsavanje SQL StoredProc/query 
+	i_hstmt = Server_Execute(i_hdbc, s_kom) 
+		Server i_hstmt Bind Column 1 To i_MBKO, am_stat
+		Server i_hstmt Bind Column 2 To s_KO, am_stat
+		Server i_hstmt Fetch First
+
+' - Kreiraj niz od svih KO = arr_KO() 
+		n=1
+		While Not Server_EOT(i_hstmt)
+
+			ReDim arr_MBKO(n)
+			arr_MBKO(n) = i_MBKO
+
+			ReDim arr_KO(n)
+			arr_KO(n) = s_KO
+
+			Server i_hstmt Fetch Next
+			n=n+1
+		Wend
+		
+	Print "---------------------------------------------------"
+	Print "Pronadjeno je "+(n-1)+" Katastarskih Opstina"
+	
+	Server i_hstmt Close		
 	
 	Exit Sub
-	'	-------------------------
+'	-------------------------
 	Greska:
-	Call ERRCreate(Err(), Error$(), "ULICA_UNOS")
+	Call ERRCreate(Err(), Error$(), "arr_KO")
 	Call ERRShow()
+	
+End Sub
 
+Sub arr_NAZIV_ULICE(byVal s as integer)
+	
+	dim n as smallint
+	
+	OnError goto Greska
+	
+'	Print "arr_NAZIV_ULICE"
+'	print "s = " + s
+	
+	sn_KO = arr_KO(s)
+	sn_MBKO = arr_MBKO(s)
+	
+' - Spisak ULICA u odabranoj KO 
+	s_kom = "SELECT [ID_IME_UL], [NAZIV_LATIN2] FROM [GIS].[data].[kn_ulice_nazivi] WHERE MAT_BR_KO = " + sn_MBKO + " ORDER BY [NAZIV_LATIN2]"
+'	print s_kom
+
+' - Izvrsavanje SQL StoredProc/query 
+	i_hstmt = Server_Execute(i_hdbc, s_kom) 
+		Server i_hstmt Bind Column 1 To i_ID_IME_UL, am_stat
+		Server i_hstmt Bind Column 2 To s_NAZIV_LATIN2, am_stat
+		Server i_hstmt Fetch First
+
+' - Kreiraj niz od svih naziva lica u zadatoj KO
+		
+		n=1
+		While Not Server_EOT(i_hstmt)
+
+			ReDim arr_ID_UL(n)
+			arr_ID_UL(n) = i_ID_IME_UL
+
+			ReDim arr_NAZIV_ULICE(n)
+			arr_NAZIV_ULICE(n) = s_NAZIV_LATIN2
+
+			Server i_hstmt Fetch Next
+			n=n+1
+		Wend
+	
+	If n-1 = 0 
+		Then ReDim arr_NAZIV_ULICE(1)
+		arr_NAZIV_ULICE(1) = "Nema ulica za ovu KO!"
+	End If
+	
+	Print "---------------------------------------------------"
+	Print "Pronadjeno je "+(n-1)+" ulica u Katastarskoj Opstini " + arr_KO(s)
+	
+	Server i_hstmt Close	
+	
+	Exit Sub
+'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "arr_NAZIV_ULICE")
+	Call ERRShow()
+	
+End Sub
+
+Sub pop_arr_NAZIV_ULICE
+
+	OnError goto Greska
+	
+'	Print "pop_arr_NAZIV_ULICE"
+	
+	Do Case ReadControlValue(2)
+		
+	Case ReadControlValue(2) = 1
+
+		Alter Control 7 Hide
+		Alter Control 7 Disable
+
+	Case ReadControlValue(2) = 2
+		
+		Call arr_NAZIV_ULICE(ReadControlValue(4))
+		Alter Control 7 Show
+		Alter Control 7 Enable
+		Alter Control 7 Title from Variable arr_NAZIV_ULICE() 
+		Alter Control 7 Value 1
+
+	End Case
+	
+	sn_KO = arr_KO(ReadControlValue(4))
+	sn_MBKO = arr_MBKO(ReadControlValue(4))
+	
+'	print sn_KO + " / "+ sn_MBKO
+	
+	Exit Sub
+'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "pop_arr_NAZIV_ULICE")
+	Call ERRShow()
+	
+End Sub
+
+Sub btn_REGISTAR_ULICA_azuriraj
+	
+	OnError goto Greska
+	
+	Dim s_latin1, s_latin2, s_cir, s_kat_ops, metod as string
+	Dim i_id, i_mbko, i_return_val as integer
+	
+	If ReadControlValue(9) = ""
+	Then
+		Note "Prazno polje za naziv ulice!"
+		Exit Sub
+	End If
+	
+	Do Case ReadControlValue(2)
+	
+		' - UNOS NOVOG NAZIVA ULICE
+		
+		Case  ReadControlValue(2) = 1
+		
+			metod = "INSERT"
+			i_id = 0
+			s_latin1 = ReadControlValue(9)
+			s_latin2 = ReadControlValue(9)
+			s_cir = "-"
+			i_mbko = sn_MBKO
+			s_kat_ops = sn_KO
+	
+		' - AŽURIRANJE POSTOJEÆEG NAZIVA ULICE (BEZ AŽURIRANJA OPŠTINA!)
+
+		Case  ReadControlValue(2) = 2
+			
+			metod = "UPDATE"
+			i_id = arr_ID_UL(ReadControlValue(7))
+			s_latin1 = ReadControlValue(9)
+			s_latin2 = ReadControlValue(9)
+			s_cir = "-"
+			i_mbko = 0
+			s_kat_ops = "-"
+	
+	End Case
+	
+' - Priprema t-SQL komande	
+	s_kom = "DECLARE @return_value int;EXEC @return_value = [mbx].[sp_ulice_azuriranje] @metod = N'" + metod + "', @id_ul = " + i_id + ", @lat1 = N'" + s_latin1 + "', @lat2 = N'" + s_latin2 + "', @cir = N'" + s_cir + "', @br_ko = " + i_mbko + ", @ko = N'" + s_kat_ops + "';SELECT	'Return Value' = @return_value INTO MI_user.retval"
+'	print s_kom
+
+	' - Izvršavanje SQL StoredProc/query 
+'	Server i_hdbc Begin Transaction
+	i_hstmt = Server_Execute(i_hdbc, s_kom)
+	Server i_hstmt Close
+	i_hstmt = Server_Execute(i_hdbc, "SELECT * from MI_user.retval")
+		Server i_hstmt Bind Column 1 To i_return_val, am_stat
+		Server i_hstmt Fetch First
+	Server i_hstmt Close
+	
+	
+	If i_return_val = 0 
+	Then 
+'		Server i_hdbc Commit
+		i_hstmt = Server_Execute(i_hdbc, "DROP TABLE [MI_user].[retval]")
+		Server i_hstmt Close
+		Note "Ažuriranje uspešno."
+	Else
+'		Server i_hdbc Rollback
+		Note "Došlo je do greške - ažuriranje neuspešno!"
+		print "Neuspešna t-SQL komanda: "
+		print s_kom
+	End If
+	
+	If OtvorenTAB("kn_ulice_nazivi") = True
+	Then
+		Server Refresh kn_ulice_nazivi
+	End If		
+	
+
+	
+	Exit Sub
+'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "btn_REGISTAR_ULICA_azuriraj")
+	Call ERRShow()
+		
 End Sub
 
 Sub ULICA_IZBOR
@@ -109,7 +310,6 @@ Sub ULICA_IZBOR
 
 	
 End Sub
-
 
 Sub ULICA_PARCELA
 
@@ -179,7 +379,6 @@ Sub ULICA_PARCELA
 
 End Sub
 
-
 Sub ULICA_UKLONI
 
 	onerror goto Greska  
@@ -247,5 +446,119 @@ Sub ULICA_UKLONI
 	Greska:
 	Call ERRCreate(Err(), Error$(), "ULICA_UKLONI")
 	Call ERRShow()
+
+End Sub
+
+Sub btn_Pronadji_Ulicu
+
+	onerror goto Greska  
+	
+	dim n as smallint
+	dim br as string
+	
+'	print chr$(12)
+	print "-> Pretraga..."
+	
+	ReDim arr_RezultatPretrage_naziv(0)
+	
+	s_trazen_naziv = ReadControlValue(2)
+	
+	s_kom = "EXEC [mbx].[sp_ulice_pretraga_naziv] N'" + s_trazen_naziv + "'"
+	
+'	print s_kom
+	
+	' - Izvršavanje SQL StoredProc/query 
+	i_hstmt = Server_Execute(i_hdbc,s_kom) 
+		Server i_hstmt Bind Column 1 To s_naziv_ulice, am_stat
+		Server i_hstmt Bind Column 2 To i_naziv_id, am_stat
+		Server i_hstmt Fetch First
+
+' - Kreiraj niz od ID naziva ulice				= arr_RezultatPretrage_naziv()
+
+		n=1
+		While Not Server_EOT(i_hstmt)
+			ReDim arr_RezultatPretrage_naziv(n)
+			arr_RezultatPretrage_naziv(n) = s_naziv_ulice		
+
+			ReDim arr_RezultatPretrage_id(n)
+			arr_RezultatPretrage_id(n) = i_naziv_id
+			
+			Server i_hstmt Fetch Next
+			n=n+1
+		Wend
+	
+	br = str$(n-1)
+	
+	Alter Control 5 Title from Variable arr_RezultatPretrage_naziv 
+	Alter Control 8 Title br
+	Print "-> Broj ulica koje sadrže '" + s_trazen_naziv +"' u svom nazivu:" + br 
+	Alter Control 2 Active
+	Server i_hstmt Close
+	
+	Exit Sub
+	'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "btn_Pronadji_Ulicu")
+	Call ERRShow()
+	
+End Sub
+
+Sub btn_Prikazi_Na_Mapi
+	
+	onerror goto Greska 
+	
+	Dim i_sel_ulica_id as smallint
+	Dim s_Naziv as Alias
+	Dim s_NazivKor	As String
+	
+	If ReadControlValue(5) = 0
+	Then 
+	
+		Note "Izaberite ulicu!"
+		Dialog Preserve
+	
+	Else
+	
+		i_sel_ulica_id = arr_RezultatPretrage_id(ReadControlValue(5))
+'		Note i_sel_ulica_id
+
+		s_kom = "EXEC [mbx].[sp_ulice_pretraga_id] @id = " + i_sel_ulica_id + ""
+'		print s_kom
+		
+		i_hstmt = Server_Execute(i_hdbc,s_kom)
+		Server i_hstmt Close
+	
+		If OtvorenTAB("temp") Then
+			Server Refresh temp
+		Else
+			Server i_hdbc link Table "Select * From ""MI_USER"".""TEMP"" WHERE MI_PRINX = 1" Toolkit "ODBC" Into "temp" Autokey ON File s_FOLDER_RAD+"TEMP.TAB"
+		End If
+
+		Fetch First from temp
+		
+		If OtvorenTAB("pretraga") 
+		Then
+			Close table pretraga 
+		End If
+		
+		Select * from temp into pretraga
+
+		Add Map Window iMapWindowID Auto Layer pretraga
+'		Set Map Order LayerID(pretraga), 1
+	   	Set Map Window iMapWindowID Layer LayerID(pretraga) Label Auto On
+    	Set Map Window iMapWindowID Layer LayerID(pretraga) Label Font ("Tahoma",257,9,16711680,16777215)
+    	Set Map Window iMapWindowID Zoom Entire Layer pretraga
+		
+	End If
+	
+	Exit Sub
+	'	-------------------------
+	Greska:
+	Call ERRCreate(Err(), Error$(), "btn_Prikazi_Na_Mapi")
+	Call ERRShow()
+	
+End Sub
+
+Sub btn_OK_PRETRAGA_ULICA
 
 End Sub

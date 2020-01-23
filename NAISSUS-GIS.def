@@ -641,6 +641,32 @@
 '	16-REGISTAR ULICA
 		
 	Declare Sub REGISTAR_ULICA		
+	Declare Sub DLG_REGISTAR_ULICA
+	Declare Sub rbt_REGISTAR_ULICA
+	Declare Sub arr_KO
+	Declare Sub arr_NAZIV_ULICE(byVal s as integer)
+	Declare Sub pop_arr_NAZIV_ULICE
+
+		Global i_rbt_REGISTAR_ULICA_izbor as integer
+		Global rbt_REGISTAR_ULICA_izbor as smallint
+		Global s_stari_naziv_ul as string
+		Global s_novi_naziv_ul as string
+		
+		Global i_MBKO as integer
+		Global arr_MBKO() as integer
+		Global sn_MBKO as string
+
+		Global s_KO as string
+		Global arr_KO() as string
+		Global sn_KO as string
+		
+	 	Global i_ID_IME_UL as integer
+	 	Global s_NAZIV_LATIN2 as string
+		Global arr_ID_UL() as string
+		Global arr_NAZIV_ULICE() as string
+		
+	Declare Sub btn_REGISTAR_ULICA_azuriraj
+	
 	Declare Sub ULICA_UNOS
 	Declare Sub ULICA_IZBOR
 	Declare Sub ULICA_PARCELA
@@ -655,9 +681,28 @@
 		Global p_parcela_def As Pen
 		Global b_parcela As Brush
 		Global p_parcela As Pen
+		
+' 	Pretraga ulica		
 
-	
-	
+	Declare Sub DLG_PRETRAGA_ULICA
+	Declare Sub btn_Pronadji_Ulicu
+	Declare Sub btn_Prikazi_Na_Mapi
+	Declare Sub btn_OK_PRETRAGA_ULICA
+
+		Global s_trazen_naziv as string
+		Global arr_RezultatPretrage_naziv() as String
+		Global arr_RezultatPretrage_id() as smallint
+		Global s_naziv_ulice as String
+		Global i_naziv_id as Integer
+		
+		global s_rez_naziv as string
+		global f_minx as float
+		global f_miny as float
+		global f_maxx as float
+		global f_maxy as float
+		global geom_ulica as object
+
+ 	
 '	99-ADMIN.MB ===========================================================================
 	
 	Declare Sub GIS_admin
