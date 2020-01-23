@@ -17,7 +17,7 @@ SUB Main
 '*************************
 ' verzija MBX aplikacije '
 '*************************
-	s_verzija= "1.19.4b"
+	s_verzija= "1.19.5"
 	
 ' - setovanje aplikacionog i privremenog foldera
 	s_TEMP_Dir = pathtodirectory$(tempfilename$(""))
@@ -134,7 +134,7 @@ SUB Main
 	Set Format Number "9,999.9"
 
 ' - postavka prozora za informacije i poruke
-	Set Window Message position(0.6,13) width 11.5 height 6 units "cm" title "JKP ""Naissus"" GIS"
+	Set Window Message position(10,18) width 11.5 height 6 units "cm" title "JKP ""Naissus"" GIS"
 	Set Window Info position(28,15) width 7 height 6 units "cm"
 '	Set Window Legend position(10,10)
 
@@ -388,7 +388,7 @@ Sub SPLASH
 	Map From GIS 
 	Set Window FrontWindow() ScrollBars Off Autoscroll On
 	
-	tlen =5
+	tlen = 5
 	tend=timer()+tlen
 	
 	while timer()<tend
