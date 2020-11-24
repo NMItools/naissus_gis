@@ -8,8 +8,6 @@ include "nmiDotNet.def"
 include "NAISSUS-GIS.def"
 
 Declare Sub PrintMapWinSTATUS
-Declare Sub KoordinateTest
-
 
 Sub Pomocni
 	
@@ -302,39 +300,50 @@ Sub KoordinateTest
 
 	onerror goto Greska  
 	
-	Dim s_filespec_1, s_filespec_2, s_filedir As String
-
+	If MapWinSTATUS(0) <> 1 Then Exit Sub
+	End If	
+	
 ' - imena tabela za rad
-	s_filespec_1 = "KoordTest_WGS84"
-'   s_filespec_2 = "KoordTest___GK7"
+'	s_KoordTab = "KoordTest_WGS84"
+    s_KoordTab = "KoordTest___GK7"
 
-	Print "Kreiranje tabele za rad: KoordTest_WGS84"
-
-'	If OtvorenTAB(s_filespec_1)
-'	Then 
-'		Close Table s_filespec_1
-'	End
-
-	If FileExists(s_filespec_1) 
-		Then
-		Open Table s_filespec_1 Interactive	
+' - Radna tabela
+	If OtvorenTAB(s_KoordTab)
+	Then 
+'		Print "Tabela " & s_KoordTab & "aktivna za unos"
+'	    Commit Table s_KoordTab Interactive
+'		Print PathToDirectory$(s_KoordTab)
+		Exit Sub
 	Else
-		Create Table s_filespec_1 (WGS84_4326_Lon Float,WGS84_4326_Lat Float,WGS84_4326_Lon_DMS Char(16),WGS84_4326_Lat_DMS Char(16),ETRS89_4258_Lon Float,ETRS89_4258_Lat Float,GK7_31277_X Float,GK7_31277_Y Float,UTM34_WGS84_32634_X Float,UTM34_WGS84_32634_Y Float,UTM34_ETRS89_25834_x Float,UTM34_ETRS89_25834_y Float,ETRS_TM34_3046_X Float,ETRS_TM34_3046_Y Float,WM_3857_x Float,WM_3857_y Float,Geomreze_32805_x Float,Geomreze_32805_y Float) file s_filespec_1+".TAB" TYPE NATIVE Charset "WindowsLatin2"
-			Create Map For s_filespec_1 CoordSys Earth Projection 1, 104
-			Add Map Layer s_filespec_1
-			Set Map Layer 1 Editable On
+		Print "Kreiranje tabele '" & s_KoordTab & "' za rad sa koordinatama."
+
+		Create Table s_KoordTab (
+								 Tacka Integer
+								,WGS84_4326_Lon Float        '2
+								,WGS84_4326_Lat Float		 '3
+								,WGS84_4326_Lon_DMS Char(16) '4
+								,WGS84_4326_Lat_DMS Char(16) '5
+								,UTM34_WGS84_32634_X Float   '6
+								,UTM34_WGS84_32634_Y Float   '7
+								,GK7_31277_X Float           '8
+								,GK7_31277_Y Float           '9
+								,Geomreze_32805_x Float      '10
+								,Geomreze_32805_y Float      '11
+								,WM_3857_x Float             '12
+								,WM_3857_y Float             '13
+								,UTM34_ETRS89_25834_x Float  '14
+								,UTM34_ETRS89_25834_y Float  '15
+								,ETRS_TM34_3046_X Float      '16 
+								,ETRS_TM34_3046_Y Float      '17
+								,ETRS89_4258_Lon Float       '18
+								,ETRS89_4258_Lat Float       '19
+								) file s_FOLDER_RAD+s_KoordTab+".TAB" TYPE NATIVE Charset "WindowsLatin2"
+		
+'		Create Map For s_KoordTab CoordSys Earth Projection 1, 104
+		Create Map For s_KoordTab CoordSys Earth Projection 8, 9999, 10, 485.017844, 254.040967, 490.850757, -6.25099249, -3.40102363, 15.57471608, 3.12980309, 0, "m", 21, 0, 0.9999, 7500000, 0 Bounds (-747318.511274, -9999855.67907) (15747318.5113, 9999855.67907)
+		Add Map Layer s_KoordTab
+		Set Map Layer 1 Editable On
 	End If
-
-'	Commit Table KoordTest_WGS84 As s_filespec_1 TYPE NATIVE Charset "WindowsLatin2" CoordSys Earth Projection 1, 104 Interactive
-'   Commit Table KoordTest___GK7 As s_filespec_2 TYPE NATIVE Charset "WindowsLatin2" CoordSys Earth Projection 8, 9999, 10, 485.017844, 254.040967, 490.850757, -6.25099249, -3.40102363, 15.57471608, 3.12980309, 0, "m", 21, 0, 0.9999, 7500000, 0 Bounds (-747318.511274, -9999855.67907) (15747318.5113, 9999855.67907) Interactive
-
-	s_filedir = PathToDirectory$(s_filespec_1)
-
-	Print s_filedir+s_filespec_1
-'	Open Table s_filedir+s_filespec_1 Interactive
-'	Add Map Auto Layer KoordTest_WGS84
-
-' - Close Table KoordTest_WGS84 Interactive
 
 	Exit Sub
 '	-------------------------

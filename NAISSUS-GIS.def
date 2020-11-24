@@ -298,6 +298,8 @@
 	declare sub KCiKT
 	declare sub DubinaCevi
 
+		Global tck as smallint
+		
 '   06-NIVOS_KORISNICI.MB ===========================================================================
 	
 	Declare Sub NIVOS_KORISNICI
@@ -626,8 +628,10 @@
 	Declare Sub Dialog_MZ_u_KML_CANCEL
 	Declare Sub Dialog_MZ_u_KML_OK
 	Declare Sub Dialog_MZ_u_KML
+	Declare Sub KoordinateTest
 
 			Global s_ExpFolder as string
+			Global s_KoordTab as string
 			
 '	15-CCTV
 	

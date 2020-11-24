@@ -195,80 +195,101 @@ Sub Koordinate
 	
 	Dim x,y as float
 	Dim objTmp As Object
-	Dim CosmName as String
- 		
-' - Postavljanje WGS84	koordinatnog sistema kao poèetnog
-	Set CoordSys Earth Projection 1, 104 Bounds (21.579058000, 42.928281000) (22.602521000, 43.522997000)
-		
+'	Dim CosmName as String
+
+	Print CHR$(12)
+	Print "======================================================="
+	Print "    Koordinate taèaka                                  "
+' - Postavljanje poèetnog koordinatnog sistema
+	CRS = SetCRS()		
+	
+' - Kreiranje pomoænog sloja za unos koordinata	
+	Call KoordinateTest
+
+' - Broj veæ unetih taèaka u tabeli
+	tck = TableInfo(s_KoordTab, TAB_INFO_NROWS)
+	
 ' - Oèitavanje koordinata na mesto klika
 
 	x = CommandInfo(CMD_INFO_X)
 	y = CommandInfo(CMD_INFO_Y)	
 	
+' - Kreiranje taèke	
 	objTmp = CreatePoint (x,y)
-	
-' - unos u Cosmetic lejer
-	CosmName = CosmeticIme("c")
-	Insert Into CosmName (Obj) Values (objTmp)
+	tck = tck + 1
+
+' - unos taèke u Cosmetic sloj
+'	CosmName = CosmeticIme("c")
+'	Insert Into CosmName (Obj) Values (objTmp)
+
+' - unos taèke u tabelu
+	Insert Into s_KoordTab (Tacka, Obj) Values (tck, objTmp)
 	
 ' - Ispisivanje koordinata srpskih koordinatnih zona
 
 '	"Longitude / Latitude (WGS 84) - EPSG: 4326"	
-	Print "================================================================="
+	Set CoordSys Earth Projection 1, 104 Bounds (21.579058000, 42.928281000) (22.602521000, 43.522997000)
+	Print "-------------------------------------------------------"
 	Print CoordSysName$("CoordSys Earth Projection 1, 104 Bounds (21.579058000, 42.928281000) (22.602521000, 43.522997000)")
 	Print "x = " & CentroidX(objTmp) & " / " & DMS(CentroidX(objTmp))
 	Print "y = " & CentroidY(objTmp) & " / " & DMS(CentroidY(objTmp))
-
-'	"UTM Zone 34, Northern Hemisphere (WGS 84) - EPSG: 32634"	
+	Update s_KoordTab Set COL2 = CentroidX(objTmp) , COL3 = CentroidY(objTmp), COL4 = DMS(CentroidX(objTmp)), COL5 = DMS(CentroidY(objTmp)) Where RowID = tck
+	
+'	"UTM Zone 34, Northern Hemisphere (WGS 84) - EPSG: 32634"
 	Set CoordSys Earth Projection 8, 104, 7, 21, 0, 0.9996, 500000, 0
-	Print "------------------------------------"
+	Print "-------------------------------------------------------"
 	Print CoordSysName$("CoordSys Earth Projection 8, 104, 7, 21, 0, 0.9996, 500000, 0")
 	Print "x = " & CentroidX(objTmp)
 	Print "y = " & CentroidY(objTmp)
+	Update s_KoordTab Set COL6 = CentroidX(objTmp), COL7 = CentroidY(objTmp) Where RowID = tck
 
-'	"Web mercator (Google/Bing/OSM) - EPSG: 3857"	
-	Set CoordSys Earth Projection 10, 157, 7, 0
-	Print "------------------------------------"
-	Print CoordSysName$("CoordSys Earth Projection 10, 157, 7, 0")
-	Print "x = " & CentroidX(objTmp)
-	Print "y = " & CentroidY(objTmp)
-	
-'	"Web GK7 (geomreze.rgz.gov.rs) - EPSG: 32805"	
-'	Set CoordSys Earth Projection 8, 9999, 10, 578.8172, 165.104, 390.20938, -4.91963, 0.98852, 13.038, -7.80238, 0, 7, 21, 0, 0.9999, 7500000, 0
-'	Print "------------------------------------"
-'	Print CoordSysName$("CoordSys Earth Projection 8, 9999, 10, 578.8172, 165.104, 390.20938, -4.91963, 0.98852, 13.038, -7.80238, 0, 7, 21, 0, 0.9999, 7500000, 0")
-'	Print "x = " & CentroidX(objTmp)
-'	Print "y = " & CentroidY(objTmp)
-'	
 '	"Drzavni Koordinatni Sistem - Gauss Krüger 7. zona (JKP ''Naissus'' tr.) - EPSG: 31277"	
     CRS = SetCRS()
-	Print "------------------------------------"
+	Print "-------------------------------------------------------"
 	Print CoordSysName$(s_CRS)
 	Print "x = " & CentroidX(objTmp)
 	Print "y = " & CentroidY(objTmp)
+	Update s_KoordTab Set COL8 = CentroidX(objTmp), COL9 = CentroidY(objTmp) Where RowID = tck
+	
+'	"Web GK7 (geomreze.rgz.gov.rs) - EPSG: 32805"	
+	Set CoordSys Earth Projection 8, 9999, 10, 578.8172, 165.104, 390.20938, -4.91963, 0.98852, 13.038, -7.80238, 0, 7, 21, 0, 0.9999, 7500000, 0
+'	Print "-------------------------------------------------------"
+'	Print CoordSysName$("CoordSys Earth Projection 8, 9999, 10, 578.8172, 165.104, 390.20938, -4.91963, 0.98852, 13.038, -7.80238, 0, 7, 21, 0, 0.9999, 7500000, 0")
+'	Print "x = " & CentroidX(objTmp)
+'	Print "y = " & CentroidY(objTmp)
+	Update s_KoordTab Set COL10 = CentroidX(objTmp), COL11 = CentroidY(objTmp) Where RowID = tck
 
-
-'	"Longitude / Latitude (EUREF89) - EPSG: 4258"	
-'	Set CoordSys Earth Projection  1, 115
-'	Print "EPSG 4326 DMS Lon: "+CentroidX(objTmp)
-'	Print "EPSG 4326 DMS Lat: "+CentroidY(objTmp)
-'	Update s_filespec_1 Set ETRS89_4258_Lon = CentroidX(obj) DropIndex Auto
-'	Update s_filespec_1 Set ETRS89_4258_Lat = CentroidY(obj) DropIndex Auto
+'	"Web mercator (Google/Bing/OSM) - EPSG: 3857"	
+	Set CoordSys Earth Projection 10, 157, 7, 0
+'	Print "-------------------------------------------------------"
+'	Print CoordSysName$("CoordSys Earth Projection 10, 157, 7, 0")
+'	Print "x = " & CentroidX(objTmp)
+'	Print "y = " & CentroidY(objTmp)
+	Update s_KoordTab Set COL12 = CentroidX(objTmp), COL13 = CentroidY(objTmp) Where RowID = tck
 
 '	"ETRS-TM34 - EPSG: 25834"	
-'	Set CoordSys Earth Projection 2024, 115, 7, 21, 0, 0.9996, 500000, 0, 0, 0, 1500000, 8000000
+	Set CoordSys Earth Projection 2024, 115, 7, 21, 0, 0.9996, 500000, 0, 0, 0, 1500000, 8000000
+'	Print "-------------------------------------------------------"
 '	Print "EPSG 25834 Lon: "+CentroidX(objTmp)
 '	Print "EPSG 25834 Lat: "+CentroidY(objTmp)
-'	Update s_filespec_1 Set UTM34_ETRS89_25834_x = CentroidX(obj) DropIndex Auto
-'	Update s_filespec_1 Set UTM34_ETRS89_25834_y = CentroidY(obj) DropIndex Auto
-
+	Update s_KoordTab Set COL14 = CentroidX(objTmp), COL15 = CentroidY(objTmp) Where RowID = tck
+	
 '	"ETRS TM Zone 34, Northern Hemisphere (ETRS89) - EPSG: 3046"	
-'	Set CoordSys Earth Projection 8, 115, 7, 21, 0, 0.9996, 500000, 0
+	Set CoordSys Earth Projection 8, 115, 7, 21, 0, 0.9996, 500000, 0
+'	Print "-------------------------------------------------------	
 '	Print "EPSG 3046 Lon: "+CentroidX(objTmp)
 '	Print "EPSG 3046 Lat: "+CentroidY(objTmp)
-'	Update s_filespec_1 Set ETRS_TM34_3046_X = CentroidX(obj) DropIndex Auto
-'	Update s_filespec_1 Set ETRS_TM34_3046_Y = CentroidY(obj) DropIndex Auto
-   
+	Update s_KoordTab Set COL16 = CentroidX(objTmp), COL17 = CentroidY(objTmp) Where RowID = tck
+	
+'	"Longitude / Latitude (EUREF89) - EPSG: 4258"	
+	Set CoordSys Earth Projection  1, 115
+'	Print "-------------------------------------------------------	
+'	Print "EPSG 4326 DMS Lon: "+CentroidX(objTmp)
+'	Print "EPSG 4326 DMS Lat: "+CentroidY(objTmp)
+	Update s_KoordTab Set COL18 = CentroidX(objTmp), COL19 = CentroidY(objTmp) Where RowID = tck
+
+'	Izlazak iz programa uz setovanje default koordinatnog sistema
+	CRS = SetCRS()	
 	Exit Sub
 	
 	'	-------------------------
