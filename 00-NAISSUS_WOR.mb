@@ -315,6 +315,28 @@ SUB WOR_naissus_GIS
 	Open Table s_FOLDER_TAB+"UKINUTO_VODOMERI.TAB" Interactive
 	Open Table s_FOLDER_TAB+"UKINUTO_PRIKLJUCCI.TAB" Interactive
 	
+' = KATASTAR VODOVA
+
+	Open Table s_FOLDER_TAB+"L_PRIKLJUCAK_KM" Interactive
+	Open Table s_FOLDER_TAB+"L_PRIKLJUCAK_VM" Interactive
+	Open Table s_FOLDER_TAB+"L_VOD_KM" Interactive
+	Open Table s_FOLDER_TAB+"L_VOD_VM" Interactive
+	Open Table s_FOLDER_TAB+"L_VOD_VM_Napusten" Interactive
+	Open Table s_FOLDER_TAB+"T_HIDRANT_VM" Interactive
+	Open Table s_FOLDER_TAB+"T_OBJEKTI_VM" Interactive
+	Open Table s_FOLDER_TAB+"T_OKNO_KM" Interactive
+	Open Table s_FOLDER_TAB+"T_OKNO_VM" Interactive
+	Open Table s_FOLDER_TAB+"T_OSTALI_KM" Interactive
+	Open Table s_FOLDER_TAB+"T_OSTALI_VM" Interactive
+	Open Table s_FOLDER_TAB+"T_OTVORI_KM" Interactive
+	Open Table s_FOLDER_TAB+"T_PRELIVNA_BRANA_KM" Interactive
+	Open Table s_FOLDER_TAB+"T_PRIKLJUCAK_VM" Interactive
+	Open Table s_FOLDER_TAB+"T_SLIVNIK_KM" Interactive
+	Open Table s_FOLDER_TAB+"T_TACKA_KM" Interactive
+	Open Table s_FOLDER_TAB+"T_TACKA_VM" Interactive
+	Open Table s_FOLDER_TAB+"T_UREDJAJI_VM" Interactive
+	
+	
 ' = PODLOGE
 	
 	Print "- Ucitavanje karata..."
@@ -347,7 +369,9 @@ SUB WOR_naissus_GIS
 ' - GeoSrbija (WMS) ORTOFOTO
 
 	Open Table s_FOLDER_POD+"2010_of_GS\set_ORTOFOTO_2010_GS.TAB" As set_ORTOFOTO_2010_GS Interactive
+	Open Table s_FOLDER_POD+"2010_of_GS\40cm\set_ORTOFOTO_2010_40cm_GS.TAB" As set_ORTOFOTO_2010_40cm_GS Interactive
 	Open Table s_FOLDER_POD+"2013_of_GS\set_ORTOFOTO_2013_GS.TAB" As set_ORTOFOTO_2013_GS Interactive
+	Open Table s_FOLDER_POD+"2013_of_GS\40cm\set_ORTOFOTO_2013_40cm_GS.TAB" As set_ORTOFOTO_2013_40cm_GS Interactive	
 	Open Table s_FOLDER_POD+"2016_sat_GS_30cm\2016_sat_GS_30cm.TAB" As _2016_sat_GS_30cm Interactive
 	Open Table s_FOLDER_POD+"2016_sat_GS_40cm\2016_sat_GS_40cm.TAB" As _2016_sat_GS_40cm Interactive
 
@@ -418,10 +442,11 @@ shade 60 with CCTV values
   1 Line (2,75,57344) 
   default Line (1,2,0)   ' # color 1 # 
 shade 53 with NADLEZNOST values 
-  "" Line (1,2,16711680) ,
-  "JKP NAISSUS" Line (1,1,65280) ,
-  "Kucni savet" Line (1,2,16734240) ,
-  "U PRIJEMU" Line (4,2,16711935) 
+  "" Line (2,4,10157824) ,
+  "-" Line (1,2,14694400) ,
+  "INTERNA" Line (1,5,16711935) ,
+  "JKP NAISSUS" Line (1,2,14694400) ,
+  "U PRIJEMU" Line (3,2,16776960) 
   default Line (1,2,0)   ' # color 1 # 
 shade 52 with DN_mm ranges apply all use all Line (56,2,14694400) 
   0: 1 Line (15,2,14694400) ,
@@ -2114,10 +2139,11 @@ shade 60 with CCTV values
   1 Line (2,75,57344) 
   default Line (1,2,0)'   # color 1 # 
 shade 53 with NADLEZNOST values 
-  "" Line (1,2,16711680) ,
-  "JKP NAISSUS" Line (1,1,65280) ,
-  "Kucni savet" Line (1,2,16734240) ,
-  "U PRIJEMU" Line (4,2,16711935) 
+  "" Line (2,4,10157824) ,
+  "-" Line (1,2,14694400) ,
+  "INTERNA" Line (1,5,16711935) ,
+  "JKP NAISSUS" Line (1,2,14694400) ,
+  "U PRIJEMU" Line (3,2,16776960) 
   default Line (1,2,0)'   # color 1 # 
 shade 52 with DN_mm ranges apply all use all Line (56,2,14694400) 
   0: 1 Line (15,2,14694400) ,
