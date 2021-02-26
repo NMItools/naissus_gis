@@ -441,13 +441,6 @@ shade 60 with CCTV values
   0 Line (1,1,16711680) ,
   1 Line (2,75,57344) 
   default Line (1,2,0)   ' # color 1 # 
-shade 53 with NADLEZNOST values 
-  "" Line (2,4,10157824) ,
-  "-" Line (1,2,14694400) ,
-  "INTERNA" Line (1,5,16711935) ,
-  "JKP NAISSUS" Line (1,2,14694400) ,
-  "U PRIJEMU" Line (3,2,16776960) 
-  default Line (1,2,0)   ' # color 1 # 
 shade 52 with DN_mm ranges apply all use all Line (56,2,14694400) 
   0: 1 Line (15,2,14694400) ,
   1: 199 Line (18,2,14694400) ,
@@ -458,7 +451,14 @@ shade 52 with DN_mm ranges apply all use all Line (56,2,14694400)
   800: 999 Line (40,2,14694400) ,
   1000: 3200 Line (50,2,14694400) 
   default Line (20,2,10526880) 
-  ' # use 1 round 1 inflect off Line (0,0,0) at 0 by 0 color 1 # 
+  ' # use 1 round 1 inflect off Line (1,2,0) at 0 by 0 color 1 # 
+shade 53 with NADLEZNOST values 
+  "" Line (2,4,10157824) ,
+  "-" Line (1,2,14694400) ,
+  "INTERNA" Line (1,5,16711935) ,
+  "JKP NAISSUS" Line (1,2,14694400) ,
+  "U PRIJEMU" Line (3,2,16776960) 
+  default Line (1,2,0)  ' # color 1 # 
 shade 41 with VRSTA ignore "" values 
   "+CEV ZA HL" Brush (2,16752800,16777215) ,
   "Cevovodni šaht" Brush (1,14680064,16777215) Pen (1,2,8421504) ,
@@ -1836,22 +1836,23 @@ set legend
       auto display on ,
       auto display on ,
       auto display on ,
-      auto display on ,
-      auto display on ,
-      auto display on ,
       auto display on  
 set legend 
-  layer 63 
+  layer 62 
     display on 
     shades off 
     symbols off 
     lines on 
-    count on 
-    title auto Font ("Arial",0,9,0)
-    subtitle auto Font ("Arial",0,8,0)
-    ascending on 
-    ranges Font ("Arial",0,8,0)
+    count off 
+    title auto Font ("Tahoma",0,9,0)
+    subtitle auto Font ("Tahoma",0,8,0)
+    ascending off 
+    ranges Font ("Tahoma",0,8,0)
       auto display off ,
+      auto display on ,
+      auto display on ,
+      auto display on ,
+      auto display on ,
       auto display on ,
       auto display on ,
       auto display on ,
@@ -2138,13 +2139,6 @@ shade 60 with CCTV values
   0 Line (1,1,16711680) ,
   1 Line (2,75,57344) 
   default Line (1,2,0)'   # color 1 # 
-shade 53 with NADLEZNOST values 
-  "" Line (2,4,10157824) ,
-  "-" Line (1,2,14694400) ,
-  "INTERNA" Line (1,5,16711935) ,
-  "JKP NAISSUS" Line (1,2,14694400) ,
-  "U PRIJEMU" Line (3,2,16776960) 
-  default Line (1,2,0)'   # color 1 # 
 shade 52 with DN_mm ranges apply all use all Line (56,2,14694400) 
   0: 1 Line (15,2,14694400) ,
   1: 199 Line (18,2,14694400) ,
@@ -2155,7 +2149,14 @@ shade 52 with DN_mm ranges apply all use all Line (56,2,14694400)
   800: 999 Line (40,2,14694400) ,
   1000: 3200 Line (50,2,14694400) 
   default Line (20,2,10526880) 
-  ' # use 1 round 1 inflect off Line (0,0,0) at 0 by 0 color 1 # 
+  ' # use 1 round 1 inflect off Line (1,2,0) at 0 by 0 color 1 # 
+shade 53 with NADLEZNOST values 
+  "" Line (2,4,10157824) ,
+  "-" Line (1,2,14694400) ,
+  "INTERNA" Line (1,5,16711935) ,
+  "JKP NAISSUS" Line (1,2,14694400) ,
+  "U PRIJEMU" Line (3,2,16776960) 
+  default Line (1,2,0)  ' # color 1 # 
 shade 41 with VRSTA ignore "" values 
   "+CEV ZA HL" Brush (2,16752800,16777215) ,
   "Cevovodni šaht" Brush (1,14680064,16777215) Pen (1,2,8421504) ,
@@ -3271,22 +3272,23 @@ set legend
       auto display on ,
       auto display on ,
       auto display on ,
-      auto display on ,
-      auto display on ,
-      auto display on ,
       auto display on  
 set legend 
-  layer 64 
+  layer 63 
     display on 
     shades off 
     symbols off 
     lines on 
-    count on 
-    title auto Font ("Arial",0,9,0)
-    subtitle auto Font ("Arial",0,8,0)
-    ascending on 
-    ranges Font ("Arial",0,8,0)
+    count off 
+    title auto Font ("Tahoma",0,9,0)
+    subtitle auto Font ("Tahoma",0,8,0)
+    ascending off 
+    ranges Font ("Tahoma",0,8,0)
       auto display off ,
+      auto display on ,
+      auto display on ,
+      auto display on ,
+      auto display on ,
       auto display on ,
       auto display on ,
       auto display on ,
