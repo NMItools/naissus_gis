@@ -247,7 +247,7 @@ Sub arrKnjige2(byVal s as string)
 	sn_ZONA = arr_Zone(s)
 
 ' - Spisak svih knjiga u Mernoj Zoni 's' u niz
-	s_kom = "SELECT DISTINCT Knjiga FROM [data].[Kupci-potrosaci_vode] WHERE (Zona = "+sn_ZONA+") ORDER BY Knjiga"
+	s_kom = "SELECT DISTINCT Knjiga FROM [temp].[Kupci-potrosaci_vode] WHERE (Zona = "+sn_ZONA+") ORDER BY Knjiga"
 	
 ' - Izvršavanje SQL StoredProc/query 
 	i_hstmt = Server_Execute(i_hdbc,s_kom) 
@@ -290,7 +290,7 @@ Sub arrRedniBrojevi2(byVal s as string)
 	sn_KNJIGA = arr_Knjige(s)
 	
 ' - Spisak svih rednih brojeva u Knjizi 's' u Zoni 's' u niz
-	s_kom = "SELECT RedBroj FROM [data].[Kupci-potrosaci_vode] WHERE (Zona = "+sn_ZONA+") and (Knjiga = "+sn_KNJIGA+") ORDER BY RedBroj"
+	s_kom = "SELECT RedBroj FROM [temp].[Kupci-potrosaci_vode] WHERE (Zona = "+sn_ZONA+") and (Knjiga = "+sn_KNJIGA+") ORDER BY RedBroj"
 	
 ' - Izvršavanje SQL StoredProc/query 
 	i_hstmt = Server_Execute(i_hdbc,s_kom) 
@@ -364,6 +364,7 @@ SUB Map_ReonKnjigaRbr
 	Mod_ReonKnjigaRbr = 2
 	
 	iMapWindowID = WindowID(FrontWindow())
+	smbl_Marker = MakeSymbol(48, 16776960, 48)
 
 ' - Odredjivanje koordinata gde je kliknuo korisnik.
 
@@ -494,8 +495,8 @@ Sub InfoVodomer
 	Run Command s_kom
 	
 	Fetch Rec RID From s_ImeTabele
-	as_RB = as_ImeTabele+".col18"
-	as_MiPrinx = as_ImeTabele+".col20"
+	as_RB = as_ImeTabele+".col15"
+	as_MiPrinx = as_ImeTabele+".col16"
 	MIPrinx = as_MiPrinx
 	as_pos = as_ImeTabele+".obj"
 	

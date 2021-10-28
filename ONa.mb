@@ -1,9 +1,12 @@
 Open Table "D:\GIS\SQL\VODOMERI.TAB" Interactive
-Add Map Auto Layer VODOMERI
+'Map From VODOMERI
 Server Refresh VODOMERI
 Commit Table VODOMERI As "D:\GIS\ONa\vodomersko_mesto_ONA.TAB" TYPE NATIVE Charset "WindowsLatin2" CoordSys Earth Projection 8, 9999, 10, 485.017844, 254.040967, 490.850757, -6.25099249, -3.40102363, 15.57471608, 3.12980309, 0, "m", 21, 0, 0.9999, 7500000, 0 Bounds (-747318.511274, -9999855.67907) (15747318.5113, 9999855.67907) Interactive
+
 Open Table "D:\GIS\ONa\vodomersko_mesto_ONA.TAB" Interactive
 Alter Table "vodomersko_mesto_ONA" ( drop KUCNI_BROJ,MESTO,KATEGORIJA,STATUS,MARKA,SERIJSKI_BROJ,PRECNIK,DATUM_BAZDARENJA,INKASO_REON,INKASO_KNJIGA,REDNI_BROJ,KOMENTAR,IZVOR_INFORMACIJE,Broj_RN,DATUM_UNOSA,UNEO_PODATKE,MERNA_ZONA,CVOR,stari_precnik,SISTEMATSKO,FAKTURISANJE,GPS_date order SIFRA,GL_MERNO_MESTO,NAZIV,ULICA,MI_PRINX) Interactive
-Add Map Auto Layer vodomersko_mesto_ONA
-Browse * from vodomersko_mesto_ONA
-Browse * from VODOMERI
+'Add Map Auto Layer vodomersko_mesto_ONA
+
+Note "Gotovo!"
+
+
