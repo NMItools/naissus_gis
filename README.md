@@ -16,17 +16,3 @@ it also contained the first tools that were adapted to some of the workflows of 
 ## User experience
 
 https://www.youtube.com/embed/pbTFtKpbuv4
-
-Loading SHP into a PostgreSQL:
-
-![Screenshot 2021-07-23 10 30 58](https://user-images.githubusercontent.com/5813553/143242661-6c7ab662-4775-467b-8072-112d4e5df46b.png)
-
-Calculating routes:
-
-![Screenshot 2021-08-03 11 59 12](https://user-images.githubusercontent.com/5813553/143242641-b206c3e0-d3ad-4f07-9c89-e2e209188c0c.png)
-
-A final calculated BUS route displayed over Google Maps:
-
-![Screenshot 2021-05-10 14 45 48](https://user-images.githubusercontent.com/5813553/143242743-97bdb5f0-ea90-4b7b-bc44-700b7a20d6ce.png)
-
-
