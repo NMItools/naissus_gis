@@ -14,7 +14,8 @@ In addition to the fact that the user application is designed to facilitate user
 it also contained the first tools that were adapted to some of the workflows of the various services in JKP "Naissus" like construction/design, approvals, consumption analysis, water meters, etc.
 
 ## User experience
-
+- Menus and basic demonstration:
 https://www.youtube.com/watch?v=pbTFtKpbuv4
 
-https://www.youtube.com/watch?v=pbTFtKpbuv4
+- Tool for browsing CCTV sewer inspection database:
+https://www.youtube.com/watch?v=eueIdF7gjAw
