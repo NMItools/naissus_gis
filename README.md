@@ -22,7 +22,7 @@ it also contained the first tools that were adapted to some of the workflows of 
 - Menus and basic demonstration:
 https://www.youtube.com/watch?v=pbTFtKpbuv4
 
-- User login. loading default workspace and street search
+- User login, loading default workspace and street search
 https://youtu.be/QX6p5p8hDUY
 
 - Tool for browsing CCTV sewer inspection database:
