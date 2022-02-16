@@ -18,8 +18,12 @@ it also contained the first tools that were adapted to some of the workflows of 
 ![Main workspace](https://github.com/NMItools/naissus_gis/blob/master/extras/Screenshot%202022-02-16%2013.15.48.png?raw=true)
 
 ## User experience
+
 - Menus and basic demonstration:
 https://www.youtube.com/watch?v=pbTFtKpbuv4
+
+- User login. loading default workspace and street search
+https://youtu.be/QX6p5p8hDUY
 
 - Tool for browsing CCTV sewer inspection database:
 https://www.youtube.com/watch?v=eueIdF7gjAw
