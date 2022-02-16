@@ -13,6 +13,10 @@ A very common situation with out-of-the-box and commercial desktop GIS software 
 In addition to the fact that the user application is designed to facilitate user authorization and manipulation of the tables (GIS data layers) stored in the _MSSQL server_, 
 it also contained the first tools that were adapted to some of the workflows of the various services in JKP "Naissus" like construction/design, approvals, consumption analysis, water meters, etc.
 
+## Screenshots
+
+![Main workspace](https://github.com/NMItools/naissus_gis/blob/master/extras/Screenshot%202022-02-16%2013.15.48.png?raw=true)
+
 ## User experience
 - Menus and basic demonstration:
 https://www.youtube.com/watch?v=pbTFtKpbuv4
